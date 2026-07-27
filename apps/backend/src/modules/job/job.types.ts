@@ -28,6 +28,12 @@ export interface JobResponseDto {
   expectedDeliveryDate: Date | null;
   priority: Priority;
   status: JobStatus;
+  assignedOperator: string | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
+  qualityCheckedAt: Date | null;
+  qualityCheckedBy: string | null;
+  deliveredAt: Date | null;
   notes: string | null;
   createdBy: string | null;
   items: JobItemResponseDto[];
