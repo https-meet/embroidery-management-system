@@ -26,6 +26,12 @@ import {
   ProductionQueuePage,
   ProductionWorkspacePage,
 } from '@/features/production';
+import {
+  InvoicesListPage,
+  CreateInvoicePage,
+  InvoiceDetailPage,
+  EditInvoicePage,
+} from '@/features/invoices';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -74,16 +80,13 @@ export const AppRoutes: React.FC = () => {
             <Route path={ROUTES.PRODUCTION.LIST} element={<ProductionQueuePage />} />
             <Route path="/production/:id" element={<ProductionWorkspacePage />} />
 
+            {/* Invoices Module */}
+            <Route path={ROUTES.INVOICES.LIST} element={<InvoicesListPage />} />
+            <Route path={ROUTES.INVOICES.CREATE} element={<CreateInvoicePage />} />
+            <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
+            <Route path="/invoices/:id/edit" element={<EditInvoicePage />} />
+
             {/* Module Placeholders for subsequent phases (supporting subroutes) */}
-            <Route
-              path={`${ROUTES.INVOICES.LIST}/*`}
-              element={
-                <PlaceholderPage
-                  title="Invoices"
-                  description="Generate, view, and issue official customer invoices."
-                />
-              }
-            />
             <Route
               path={`${ROUTES.PAYMENTS.LIST}/*`}
               element={
@@ -139,8 +142,6 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
 
 function getModulePhase(title: string): number {
   switch (title) {
-    case 'Invoices':
-      return 9;
     case 'Payments':
       return 10;
     case 'Reports':
