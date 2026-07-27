@@ -21,6 +21,28 @@ enum CustomerType {
   COMPANY
 }
 
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum JobStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  DELIVERED
+  CANCELLED
+}
+
+enum JobItemProductionStatus {
+  DRAFT
+  PENDING_PRODUCTION
+  IN_PRODUCTION
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
@@ -52,6 +74,7 @@ model Customer {
   createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz
   updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt       DateTime?    @map("deleted_at") @db.Timestamptz
+  jobs            Job[]
 
   @@index([customerCode])
   @@index([name])
@@ -62,27 +85,75 @@ model Customer {
 }
 
 model Design {
-  id             String    @id @default(uuid()) @db.Uuid
-  designCode     String    @unique @map("design_code")
-  name           String
-  description    String?
-  category       String?
-  previewUrl     String?   @map("preview_url")
-  primaryFileUrl String?   @map("primary_file_url")
-  primaryFileType String?  @map("primary_file_type")
-  stitchCount    Int?      @map("stitch_count")
-  widthMm        Float?    @map("width_mm")
-  heightMm       Float?    @map("height_mm")
-  colorCount     Int?      @map("color_count")
-  notes          String?
-  isActive       Boolean   @default(true) @map("is_active")
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
+  id              String    @id @default(uuid()) @db.Uuid
+  designCode      String    @unique @map("design_code")
+  name            String
+  description     String?
+  category        String?
+  previewUrl      String?   @map("preview_url")
+  primaryFileUrl  String?   @map("primary_file_url")
+  primaryFileType String?   @map("primary_file_type")
+  stitchCount     Int?      @map("stitch_count")
+  widthMm         Float?    @map("width_mm")
+  heightMm        Float?    @map("height_mm")
+  colorCount      Int?      @map("color_count")
+  notes           String?
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
+  jobItems        JobItem[]
 
   @@index([designCode])
   @@index([name])
   @@index([category])
   @@index([deletedAt])
   @@map("designs")
+}
+
+model Job {
+  id                   String    @id @default(uuid()) @db.Uuid
+  jobNo                String    @unique @map("job_no")
+  customerId           String    @map("customer_id") @db.Uuid
+  customer             Customer  @relation(fields: [customerId], references: [id])
+  jobDate              DateTime  @default(now()) @map("job_date") @db.Timestamptz
+  expectedDeliveryDate DateTime? @map("expected_delivery_date") @db.Timestamptz
+  priority             Priority  @default(NORMAL)
+  status               JobStatus @default(DRAFT)
+  notes                String?
+  createdBy            String?   @map("created_by")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz
+  items                JobItem[]
+
+  @@index([jobNo])
+  @@index([customerId])
+  @@index([status])
+  @@index([priority])
+  @@index([deletedAt])
+  @@map("jobs")
+}
+
+model JobItem {
+  id               String                  @id @default(uuid()) @db.Uuid
+  jobId            String                  @map("job_id") @db.Uuid
+  job              Job                     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  designId         String?                 @map("design_id") @db.Uuid
+  design           Design?                 @relation(fields: [designId], references: [id])
+  position         String
+  quantity         Int
+  rate             Float
+  lineTotal        Float                   @map("line_total")
+  threadColor      String?                 @map("thread_color")
+  dimensions       String?
+  remarks          String?
+  productionStatus JobItemProductionStatus @default(DRAFT) @map("production_status")
+  createdAt        DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime                @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([jobId])
+  @@index([designId])
+  @@index([productionStatus])
+  @@map("job_items")
 }
