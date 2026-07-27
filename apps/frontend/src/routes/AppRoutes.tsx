@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { AppLayout } from '@/layouts/AppLayout';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
+import { DashboardPage } from '@/features/dashboard';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -26,16 +27,10 @@ export const AppRoutes: React.FC = () => {
           <Route element={<AppLayout />}>
             <Route path="/" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
             
+            {/* Dashboard Module */}
+            <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+
             {/* Module Placeholders for subsequent phases */}
-            <Route
-              path={ROUTES.DASHBOARD}
-              element={
-                <PlaceholderPage
-                  title="Dashboard"
-                  description="Operational overview of today's workload and business health."
-                />
-              }
-            />
             <Route
               path={ROUTES.CUSTOMERS.LIST}
               element={
@@ -136,8 +131,6 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
 
 function getModulePhase(title: string): number {
   switch (title) {
-    case 'Dashboard':
-      return 4;
     case 'Customers':
       return 5;
     case 'Designs':
