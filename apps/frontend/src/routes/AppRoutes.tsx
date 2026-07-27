@@ -4,6 +4,12 @@ import { AuthLayout } from '@/layouts/AuthLayout';
 import { AppLayout } from '@/layouts/AppLayout';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { DashboardPage } from '@/features/dashboard';
+import {
+  CustomersListPage,
+  CreateCustomerPage,
+  CustomerDetailPage,
+  EditCustomerPage,
+} from '@/features/customers';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -30,18 +36,15 @@ export const AppRoutes: React.FC = () => {
             {/* Dashboard Module */}
             <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
 
-            {/* Module Placeholders for subsequent phases */}
+            {/* Customers Module */}
+            <Route path={ROUTES.CUSTOMERS.LIST} element={<CustomersListPage />} />
+            <Route path={ROUTES.CUSTOMERS.CREATE} element={<CreateCustomerPage />} />
+            <Route path="/customers/:id" element={<CustomerDetailPage />} />
+            <Route path="/customers/:id/edit" element={<EditCustomerPage />} />
+
+            {/* Module Placeholders for subsequent phases (supporting subroutes) */}
             <Route
-              path={ROUTES.CUSTOMERS.LIST}
-              element={
-                <PlaceholderPage
-                  title="Customers"
-                  description="Manage customer profiles, history, and workspace."
-                />
-              }
-            />
-            <Route
-              path={ROUTES.DESIGNS.LIST}
+              path={`${ROUTES.DESIGNS.LIST}/*`}
               element={
                 <PlaceholderPage
                   title="Designs"
@@ -50,7 +53,7 @@ export const AppRoutes: React.FC = () => {
               }
             />
             <Route
-              path={ROUTES.JOBS.LIST}
+              path={`${ROUTES.JOBS.LIST}/*`}
               element={
                 <PlaceholderPage
                   title="Jobs"
@@ -59,7 +62,7 @@ export const AppRoutes: React.FC = () => {
               }
             />
             <Route
-              path={ROUTES.PRODUCTION.LIST}
+              path={`${ROUTES.PRODUCTION.LIST}/*`}
               element={
                 <PlaceholderPage
                   title="Production"
@@ -68,7 +71,7 @@ export const AppRoutes: React.FC = () => {
               }
             />
             <Route
-              path={ROUTES.INVOICES.LIST}
+              path={`${ROUTES.INVOICES.LIST}/*`}
               element={
                 <PlaceholderPage
                   title="Invoices"
@@ -77,7 +80,7 @@ export const AppRoutes: React.FC = () => {
               }
             />
             <Route
-              path={ROUTES.PAYMENTS.LIST}
+              path={`${ROUTES.PAYMENTS.LIST}/*`}
               element={
                 <PlaceholderPage
                   title="Payments"
@@ -86,7 +89,7 @@ export const AppRoutes: React.FC = () => {
               }
             />
             <Route
-              path={ROUTES.REPORTS.ROOT}
+              path={`${ROUTES.REPORTS.ROOT}/*`}
               element={
                 <PlaceholderPage
                   title="Reports"
@@ -95,7 +98,7 @@ export const AppRoutes: React.FC = () => {
               }
             />
             <Route
-              path={ROUTES.SETTINGS}
+              path={`${ROUTES.SETTINGS}/*`}
               element={
                 <PlaceholderPage
                   title="Settings"
@@ -131,8 +134,6 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
 
 function getModulePhase(title: string): number {
   switch (title) {
-    case 'Customers':
-      return 5;
     case 'Designs':
       return 6;
     case 'Jobs':
