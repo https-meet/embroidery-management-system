@@ -37,6 +37,7 @@ import {
   CreatePaymentPage,
   PaymentDetailPage,
 } from '@/features/payments';
+import { ReportsPage } from '@/features/reports';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -96,16 +97,10 @@ export const AppRoutes: React.FC = () => {
             <Route path={ROUTES.PAYMENTS.CREATE} element={<CreatePaymentPage />} />
             <Route path="/payments/:id" element={<PaymentDetailPage />} />
 
+            {/* Reports Module */}
+            <Route path={`${ROUTES.REPORTS.ROOT}/*`} element={<ReportsPage />} />
+
             {/* Module Placeholders for subsequent phases (supporting subroutes) */}
-            <Route
-              path={`${ROUTES.REPORTS.ROOT}/*`}
-              element={
-                <PlaceholderPage
-                  title="Reports"
-                  description="Operational and financial insights and aggregated metrics."
-                />
-              }
-            />
             <Route
               path={`${ROUTES.SETTINGS}/*`}
               element={
@@ -143,8 +138,6 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
 
 function getModulePhase(title: string): number {
   switch (title) {
-    case 'Reports':
-      return 11;
     case 'Settings':
       return 12;
     default:
