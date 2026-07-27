@@ -120,6 +120,23 @@ export class AuthService {
     };
   }
 
+  public async getUserProfile(userId: string): Promise<UserResponseDto> {
+    const user = await this.repo.findById(userId);
+    if (!user || !user.isActive) {
+      throw new UnauthorizedError('UNAUTHORIZED', 'User account is inactive or not found.');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
   public async logout(_dto?: RefreshTokenDto): Promise<void> {
     return Promise.resolve();
   }

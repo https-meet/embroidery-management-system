@@ -50,6 +50,29 @@ export class AuthController {
     }
   };
 
+  public me = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Authentication required.',
+          },
+        });
+        return;
+      }
+
+      const user = await this.service.getUserProfile(req.user.userId);
+      res.status(200).json({
+        success: true,
+        data: { user },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       await this.service.logout();
