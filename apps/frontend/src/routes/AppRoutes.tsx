@@ -32,6 +32,11 @@ import {
   InvoiceDetailPage,
   EditInvoicePage,
 } from '@/features/invoices';
+import {
+  PaymentsListPage,
+  CreatePaymentPage,
+  PaymentDetailPage,
+} from '@/features/payments';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -86,16 +91,12 @@ export const AppRoutes: React.FC = () => {
             <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
             <Route path="/invoices/:id/edit" element={<EditInvoicePage />} />
 
+            {/* Payments Module */}
+            <Route path={ROUTES.PAYMENTS.LIST} element={<PaymentsListPage />} />
+            <Route path={ROUTES.PAYMENTS.CREATE} element={<CreatePaymentPage />} />
+            <Route path="/payments/:id" element={<PaymentDetailPage />} />
+
             {/* Module Placeholders for subsequent phases (supporting subroutes) */}
-            <Route
-              path={`${ROUTES.PAYMENTS.LIST}/*`}
-              element={
-                <PlaceholderPage
-                  title="Payments"
-                  description="Record customer payments and manage invoice allocations."
-                />
-              }
-            />
             <Route
               path={`${ROUTES.REPORTS.ROOT}/*`}
               element={
@@ -142,8 +143,6 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
 
 function getModulePhase(title: string): number {
   switch (title) {
-    case 'Payments':
-      return 10;
     case 'Reports':
       return 11;
     case 'Settings':
