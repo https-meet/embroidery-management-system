@@ -1,0 +1,11 @@
+// Embroidery Business Management System (EBMS)
+// Prisma Schema — Baseline Database Design (Developer Kit v1.0)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

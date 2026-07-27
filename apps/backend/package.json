@@ -10,15 +10,22 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "@ebms/config": "workspace:*",
     "@types/express": "^5.0.6",
     "@types/node": "^26.1.1",
+    "prisma": "^6.3.1",
     "tsx": "^4.23.1"
-  },
-  "dependencies": {
-    "express": "^5.2.1"
   }
 }
