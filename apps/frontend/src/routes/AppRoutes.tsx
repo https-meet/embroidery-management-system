@@ -22,6 +22,10 @@ import {
   JobDetailPage,
   EditJobPage,
 } from '@/features/jobs';
+import {
+  ProductionQueuePage,
+  ProductionWorkspacePage,
+} from '@/features/production';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -66,16 +70,11 @@ export const AppRoutes: React.FC = () => {
             <Route path="/jobs/:id" element={<JobDetailPage />} />
             <Route path="/jobs/:id/edit" element={<EditJobPage />} />
 
+            {/* Production Module */}
+            <Route path={ROUTES.PRODUCTION.LIST} element={<ProductionQueuePage />} />
+            <Route path="/production/:id" element={<ProductionWorkspacePage />} />
+
             {/* Module Placeholders for subsequent phases (supporting subroutes) */}
-            <Route
-              path={`${ROUTES.PRODUCTION.LIST}/*`}
-              element={
-                <PlaceholderPage
-                  title="Production"
-                  description="Track and update production workflow state transitions."
-                />
-              }
-            />
             <Route
               path={`${ROUTES.INVOICES.LIST}/*`}
               element={
@@ -140,8 +139,6 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
 
 function getModulePhase(title: string): number {
   switch (title) {
-    case 'Production':
-      return 8;
     case 'Invoices':
       return 9;
     case 'Payments':

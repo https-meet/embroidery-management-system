@@ -10,6 +10,7 @@ export type {
   JobDto,
   JobStatus,
   JobPriority,
+  JobItemProductionStatus,
   CreateJobDto,
   UpdateJobDto,
   JobQueryParams,
