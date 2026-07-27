@@ -43,6 +43,32 @@ enum JobItemProductionStatus {
   CANCELLED
 }
 
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  BANK_TRANSFER
+  CHEQUE
+}
+
+enum PaymentStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
@@ -75,6 +101,8 @@ model Customer {
   updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt       DateTime?    @map("deleted_at") @db.Timestamptz
   jobs            Job[]
+  invoices        Invoice[]
+  payments        Payment[]
 
   @@index([customerCode])
   @@index([name])
@@ -112,26 +140,27 @@ model Design {
 }
 
 model Job {
-  id                   String    @id @default(uuid()) @db.Uuid
-  jobNo                String    @unique @map("job_no")
-  customerId           String    @map("customer_id") @db.Uuid
-  customer             Customer  @relation(fields: [customerId], references: [id])
-  jobDate              DateTime  @default(now()) @map("job_date") @db.Timestamptz
-  expectedDeliveryDate DateTime? @map("expected_delivery_date") @db.Timestamptz
-  priority             Priority  @default(NORMAL)
-  status               JobStatus @default(DRAFT)
-  assignedOperator     String?   @map("assigned_operator")
-  startedAt            DateTime? @map("started_at") @db.Timestamptz
-  completedAt          DateTime? @map("completed_at") @db.Timestamptz
-  qualityCheckedAt     DateTime? @map("quality_checked_at") @db.Timestamptz
-  qualityCheckedBy     String?   @map("quality_checked_by")
-  deliveredAt          DateTime? @map("delivered_at") @db.Timestamptz
+  id                   String        @id @default(uuid()) @db.Uuid
+  jobNo                String        @unique @map("job_no")
+  customerId           String        @map("customer_id") @db.Uuid
+  customer             Customer      @relation(fields: [customerId], references: [id])
+  jobDate              DateTime      @default(now()) @map("job_date") @db.Timestamptz
+  expectedDeliveryDate DateTime?     @map("expected_delivery_date") @db.Timestamptz
+  priority             Priority      @default(NORMAL)
+  status               JobStatus     @default(DRAFT)
+  assignedOperator     String?       @map("assigned_operator")
+  startedAt            DateTime?     @map("started_at") @db.Timestamptz
+  completedAt          DateTime?     @map("completed_at") @db.Timestamptz
+  qualityCheckedAt     DateTime?     @map("quality_checked_at") @db.Timestamptz
+  qualityCheckedBy     String?       @map("quality_checked_by")
+  deliveredAt          DateTime?     @map("delivered_at") @db.Timestamptz
   notes                String?
-  createdBy            String?   @map("created_by")
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz
+  createdBy            String?       @map("created_by")
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt            DateTime?     @map("deleted_at") @db.Timestamptz
   items                JobItem[]
+  invoiceItems         InvoiceItem[]
 
   @@index([jobNo])
   @@index([customerId])
@@ -158,9 +187,94 @@ model JobItem {
   productionStatus JobItemProductionStatus @default(DRAFT) @map("production_status")
   createdAt        DateTime                @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime                @updatedAt @map("updated_at") @db.Timestamptz
+  invoiceItems     InvoiceItem[]
 
   @@index([jobId])
   @@index([designId])
   @@index([productionStatus])
   @@map("job_items")
+}
+
+model Invoice {
+  id                  String              @id @default(uuid()) @db.Uuid
+  invoiceNo           String              @unique @map("invoice_no")
+  customerId          String              @map("customer_id") @db.Uuid
+  customer            Customer            @relation(fields: [customerId], references: [id])
+  invoiceDate         DateTime            @default(now()) @map("invoice_date") @db.Timestamptz
+  dueDate             DateTime?           @map("due_date") @db.Timestamptz
+  status              InvoiceStatus       @default(DRAFT)
+  discountType        DiscountType?       @map("discount_type")
+  discountValue       Float?              @map("discount_value")
+  discountAmount      Float               @default(0.0) @map("discount_amount")
+  subtotal            Float               @default(0.0)
+  grandTotal          Float               @default(0.0) @map("grand_total")
+  totalPaid           Float               @default(0.0) @map("total_paid")
+  outstandingBalance  Float               @default(0.0) @map("outstanding_balance")
+  notes               String?
+  createdAt           DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+  items               InvoiceItem[]
+  allocations         PaymentAllocation[]
+
+  @@index([invoiceNo])
+  @@index([customerId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id                String   @id @default(uuid()) @db.Uuid
+  invoiceId         String   @map("invoice_id") @db.Uuid
+  invoice           Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  sourceJobId       String?  @map("source_job_id") @db.Uuid
+  sourceJob         Job?     @relation(fields: [sourceJobId], references: [id])
+  sourceJobItemRef  String?  @map("source_job_item_ref") @db.Uuid
+  sourceJobItem     JobItem? @relation(fields: [sourceJobItemRef], references: [id])
+  description       String
+  quantity          Int
+  rate              Float
+  amount            Float
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([invoiceId])
+  @@index([sourceJobId])
+  @@index([sourceJobItemRef])
+  @@map("invoice_items")
+}
+
+model Payment {
+  id            String              @id @default(uuid()) @db.Uuid
+  paymentNo     String              @unique @map("payment_no")
+  customerId    String              @map("customer_id") @db.Uuid
+  customer      Customer            @relation(fields: [customerId], references: [id])
+  paymentDate   DateTime            @default(now()) @map("payment_date") @db.Timestamptz
+  paymentMethod PaymentMethod       @map("payment_method")
+  referenceNo   String?             @map("reference_no")
+  amount        Float
+  status        PaymentStatus       @default(DRAFT)
+  notes         String?
+  createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+  allocations   PaymentAllocation[]
+
+  @@index([paymentNo])
+  @@index([customerId])
+  @@index([status])
+  @@map("payments")
+}
+
+model PaymentAllocation {
+  id              String   @id @default(uuid()) @db.Uuid
+  paymentId       String   @map("payment_id") @db.Uuid
+  payment         Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoiceId       String   @map("invoice_id") @db.Uuid
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id])
+  allocatedAmount Float    @map("allocated_amount")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([paymentId])
+  @@index([invoiceId])
+  @@map("payment_allocations")
 }
