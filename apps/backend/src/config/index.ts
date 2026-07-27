@@ -1,11 +1,52 @@
-/**
- * Application configuration.
- * Environment variable binding happens here.
- * All other modules import from this file — never from process.env directly.
- *
- * Full env validation (zod/dotenv) will be added in a later task.
- */
-export const config = {
-  port: parseInt(process.env['PORT'] ?? '3000', 10),
-  nodeEnv: (process.env['NODE_ENV'] ?? 'development') as 'development' | 'production' | 'test',
-} as const;
+import dotenv from 'dotenv';
+import path from 'path';
+import { envSchema, type Env } from './env.schema';
+
+// Load .env file
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+function validateEnv(): Env {
+  const result = envSchema.safeParse(process.env);
+
+  if (!result.success) {
+    console.error('❌ Invalid environment variables:');
+    console.error(JSON.stringify(result.error.format(), null, 2));
+    throw new Error('Invalid environment configuration');
+  }
+
+  return result.data;
+}
+
+const rawEnv = validateEnv();
+
+export interface AppConfig {
+  port: number;
+  nodeEnv: 'development' | 'production' | 'test';
+  databaseUrl: string;
+  jwt: {
+    accessSecret: string;
+    refreshSecret: string;
+    accessExpiresIn: string;
+    refreshExpiresIn: string;
+  };
+  corsOrigin: string;
+  security: {
+    bcryptSaltRounds: number;
+  };
+}
+
+export const config: AppConfig = {
+  port: rawEnv.PORT,
+  nodeEnv: rawEnv.NODE_ENV,
+  databaseUrl: rawEnv.DATABASE_URL,
+  jwt: {
+    accessSecret: rawEnv.JWT_ACCESS_SECRET,
+    refreshSecret: rawEnv.JWT_REFRESH_SECRET,
+    accessExpiresIn: rawEnv.JWT_ACCESS_EXPIRES_IN,
+    refreshExpiresIn: rawEnv.JWT_REFRESH_EXPIRES_IN,
+  },
+  corsOrigin: rawEnv.CORS_ORIGIN,
+  security: {
+    bcryptSaltRounds: rawEnv.BCRYPT_SALT_ROUNDS,
+  },
+};

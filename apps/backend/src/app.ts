@@ -1,4 +1,6 @@
+import cors from 'cors';
 import express from 'express';
+import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 import { requestLogger } from './middleware/requestLogger';
@@ -11,6 +13,14 @@ import router from './routes';
  */
 export function createApp(): express.Application {
   const app = express();
+
+  // ── CORS ──────────────────────────────────────────────────────────────────
+  app.use(
+    cors({
+      origin: config.corsOrigin,
+      credentials: true,
+    }),
+  );
 
   // ── Body parsing ──────────────────────────────────────────────────────────
   app.use(express.json());
