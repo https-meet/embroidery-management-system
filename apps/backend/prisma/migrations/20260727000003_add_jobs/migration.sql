@@ -16,6 +16,12 @@ CREATE TABLE "jobs" (
     "expected_delivery_date" TIMESTAMPTZ,
     "priority" "Priority" NOT NULL DEFAULT 'NORMAL',
     "status" "JobStatus" NOT NULL DEFAULT 'DRAFT',
+    "assigned_operator" TEXT,
+    "started_at" TIMESTAMPTZ,
+    "completed_at" TIMESTAMPTZ,
+    "quality_checked_at" TIMESTAMPTZ,
+    "quality_checked_by" TEXT,
+    "delivered_at" TIMESTAMPTZ,
     "notes" TEXT,
     "created_by" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -58,6 +64,9 @@ CREATE INDEX "jobs_status_idx" ON "jobs"("status");
 
 -- CreateIndex
 CREATE INDEX "jobs_priority_idx" ON "jobs"("priority");
+
+-- CreateIndex
+CREATE INDEX "jobs_assigned_operator_idx" ON "jobs"("assigned_operator");
 
 -- CreateIndex
 CREATE INDEX "jobs_deleted_at_idx" ON "jobs"("deleted_at");

@@ -120,6 +120,12 @@ model Job {
   expectedDeliveryDate DateTime? @map("expected_delivery_date") @db.Timestamptz
   priority             Priority  @default(NORMAL)
   status               JobStatus @default(DRAFT)
+  assignedOperator     String?   @map("assigned_operator")
+  startedAt            DateTime? @map("started_at") @db.Timestamptz
+  completedAt          DateTime? @map("completed_at") @db.Timestamptz
+  qualityCheckedAt     DateTime? @map("quality_checked_at") @db.Timestamptz
+  qualityCheckedBy     String?   @map("quality_checked_by")
+  deliveredAt          DateTime? @map("delivered_at") @db.Timestamptz
   notes                String?
   createdBy            String?   @map("created_by")
   createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
@@ -131,6 +137,7 @@ model Job {
   @@index([customerId])
   @@index([status])
   @@index([priority])
+  @@index([assignedOperator])
   @@index([deletedAt])
   @@map("jobs")
 }
