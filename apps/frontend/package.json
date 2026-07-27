@@ -2,5 +2,14 @@
   "name": "@ebms/frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "EBMS Frontend — React / Vite / TypeScript"
+  "description": "EBMS Frontend — React / Vite / TypeScript",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "devDependencies": {
+    "@ebms/config": "workspace:*"
+  }
 }
