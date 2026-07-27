@@ -1,4 +1,9 @@
-import { ConflictError, ForbiddenError, UnauthorizedError } from '../../utils/errors';
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  UnauthorizedError,
+} from '../../utils/errors';
 import { authRepository, type AuthRepository } from './auth.repository';
 import type {
   AuthTokensDto,
@@ -21,6 +26,11 @@ export class AuthService {
         'EMAIL_ALREADY_EXISTS',
         'A user with this email address already exists.',
       );
+    }
+
+    const validation = passwordService.validate(dto.password);
+    if (!validation.isValid) {
+      throw new BadRequestError('PASSWORD_POLICY_VIOLATION', validation.errors.join(' '));
     }
 
     const passwordHash = await passwordService.hash(dto.password);
