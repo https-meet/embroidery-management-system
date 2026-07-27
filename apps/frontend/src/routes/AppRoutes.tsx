@@ -10,6 +10,12 @@ import {
   CustomerDetailPage,
   EditCustomerPage,
 } from '@/features/customers';
+import {
+  DesignsListPage,
+  CreateDesignPage,
+  DesignDetailPage,
+  EditDesignPage,
+} from '@/features/designs';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -42,16 +48,13 @@ export const AppRoutes: React.FC = () => {
             <Route path="/customers/:id" element={<CustomerDetailPage />} />
             <Route path="/customers/:id/edit" element={<EditCustomerPage />} />
 
+            {/* Designs Module */}
+            <Route path={ROUTES.DESIGNS.LIST} element={<DesignsListPage />} />
+            <Route path={ROUTES.DESIGNS.CREATE} element={<CreateDesignPage />} />
+            <Route path="/designs/:id" element={<DesignDetailPage />} />
+            <Route path="/designs/:id/edit" element={<EditDesignPage />} />
+
             {/* Module Placeholders for subsequent phases (supporting subroutes) */}
-            <Route
-              path={`${ROUTES.DESIGNS.LIST}/*`}
-              element={
-                <PlaceholderPage
-                  title="Designs"
-                  description="Manage reusable embroidery design library and files."
-                />
-              }
-            />
             <Route
               path={`${ROUTES.JOBS.LIST}/*`}
               element={
@@ -134,8 +137,6 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
 
 function getModulePhase(title: string): number {
   switch (title) {
-    case 'Designs':
-      return 6;
     case 'Jobs':
       return 7;
     case 'Production':
