@@ -16,6 +16,12 @@ import {
   DesignDetailPage,
   EditDesignPage,
 } from '@/features/designs';
+import {
+  JobsListPage,
+  CreateJobPage,
+  JobDetailPage,
+  EditJobPage,
+} from '@/features/jobs';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -54,16 +60,13 @@ export const AppRoutes: React.FC = () => {
             <Route path="/designs/:id" element={<DesignDetailPage />} />
             <Route path="/designs/:id/edit" element={<EditDesignPage />} />
 
+            {/* Jobs Module */}
+            <Route path={ROUTES.JOBS.LIST} element={<JobsListPage />} />
+            <Route path={ROUTES.JOBS.CREATE} element={<CreateJobPage />} />
+            <Route path="/jobs/:id" element={<JobDetailPage />} />
+            <Route path="/jobs/:id/edit" element={<EditJobPage />} />
+
             {/* Module Placeholders for subsequent phases (supporting subroutes) */}
-            <Route
-              path={`${ROUTES.JOBS.LIST}/*`}
-              element={
-                <PlaceholderPage
-                  title="Jobs"
-                  description="Manage embroidery orders and job lifecycle."
-                />
-              }
-            />
             <Route
               path={`${ROUTES.PRODUCTION.LIST}/*`}
               element={
@@ -137,8 +140,6 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
 
 function getModulePhase(title: string): number {
   switch (title) {
-    case 'Jobs':
-      return 7;
     case 'Production':
       return 8;
     case 'Invoices':
