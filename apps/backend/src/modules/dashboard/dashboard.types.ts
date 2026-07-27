@@ -1,0 +1,31 @@
+export interface DashboardSummaryResponseDto {
+  totalCustomers: number;
+  activeJobs: number;
+  pendingInvoices: number;
+  outstandingBalance: number;
+  jobsDueToday: number;
+  totalRevenueThisMonth: number;
+}
+
+export interface WorkQueueItemDto {
+  id: string;
+  jobNo: string;
+  customerName: string;
+  status: string;
+  dueDate: Date | null;
+  priority: string;
+}
+
+export interface PaymentFollowUpItemDto {
+  id: string;
+  invoiceNo: string;
+  customerName: string;
+  outstandingBalance: number;
+  dueDate: Date | null;
+}
+
+export interface DashboardDataDto {
+  summary: DashboardSummaryResponseDto;
+  workQueue: WorkQueueItemDto[];
+  paymentFollowUp: PaymentFollowUpItemDto[];
+}
