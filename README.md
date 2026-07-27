@@ -4,6 +4,33 @@ EBMS is a full-stack business management application for embroidery businesses. 
 
 The project is built as a TypeScript pnpm workspace with a React frontend, an Express API, Prisma ORM, and PostgreSQL. It is organized around business features rather than generic technical layers, making the system easier to understand, extend, and maintain.
 
+## Highlights
+
+- Full-stack TypeScript application with React, Express, Prisma, and PostgreSQL
+- Feature-based frontend and modular backend organization
+- JWT authentication with role-based authorization
+- End-to-end embroidery workflow from customer intake to payment reporting
+- Production-ready workspace scripts for build, type checking, linting, testing, and formatting
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Key Features](#key-features)
+- [Business Workflow](#business-workflow)
+- [Architecture Overview](#architecture-overview)
+- [Tech Stack](#tech-stack)
+- [Repository Structure](#repository-structure)
+- [Installation](#installation)
+- [Environment Variables](#environment-variables)
+- [Running the Application](#running-the-application)
+- [Build and Quality Checks](#build-and-quality-checks)
+- [Screenshots](#screenshots)
+- [API Overview](#api-overview)
+- [Documentation Links](#documentation-links)
+- [Future Roadmap](#future-roadmap)
+- [License](#license)
+- [Author](#author)
+
 ## Project Overview
 
 Embroidery businesses often manage work across notebooks, phone calls, WhatsApp messages, design files, and memory. EBMS centralizes that information into one operational system.
@@ -116,18 +143,19 @@ The workflow keeps customer, production, and financial information connected so 
 
 EBMS uses a modular full-stack architecture.
 
-```text
-Frontend: React + Vite + TypeScript
-  -> React Router routes
-  -> Feature modules
-  -> TanStack Query hooks
-  -> Axios API client
-  -> Express REST API
-  -> Module routers and controllers
-  -> Services
-  -> Repositories
-  -> Prisma ORM
-  -> PostgreSQL
+```mermaid
+flowchart LR
+  Browser["Browser / React UI"] --> Routes["React Router Routes"]
+  Routes --> Features["Frontend Feature Modules"]
+  Features --> Query["TanStack Query Hooks"]
+  Query --> Axios["Axios API Client"]
+  Axios --> API["Express REST API /api/v1"]
+  API --> Middleware["Auth, RBAC, Zod Validation"]
+  Middleware --> Controllers["Module Controllers"]
+  Controllers --> Services["Business Services"]
+  Services --> Repositories["Repositories"]
+  Repositories --> Prisma["Prisma ORM"]
+  Prisma --> Database[("PostgreSQL")]
 ```
 
 ### Frontend Architecture
@@ -279,9 +307,17 @@ Apply database migrations:
 pnpm db:migrate
 ```
 
+Seed local development data:
+
+```bash
+pnpm db:seed
+```
+
 ## Environment Variables
 
-The backend reads environment variables from `.env` in the backend package working directory. Use the root `.env.example` as the source template.
+The root [.env.example](.env.example) file is the single source of truth for environment configuration.
+
+The backend reads environment variables from `.env` in the backend package working directory.
 
 Create:
 
@@ -529,7 +565,7 @@ The completed v1 application focuses on the core business workflow. Future impro
 
 ## License
 
-This project is released under the MIT License.
+This project is released under the [MIT License](LICENSE).
 
 ## Author
 
