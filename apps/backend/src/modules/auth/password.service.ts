@@ -33,10 +33,7 @@ export class PasswordService {
    * - At least one number (0-9)
    * - At least one special character (!@#$%^&*...)
    */
-  public validate(
-    password: string,
-    options?: PasswordPolicyOptions,
-  ): PasswordValidationResult {
+  public validate(password: string, options?: PasswordPolicyOptions): PasswordValidationResult {
     const opts = { ...this.defaultOptions, ...options };
     const errors: string[] = [];
 
