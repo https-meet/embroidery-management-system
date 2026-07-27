@@ -16,6 +16,11 @@ enum Role {
   OPERATOR
 }
 
+enum CustomerType {
+  INDIVIDUAL
+  COMPANY
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
@@ -30,4 +35,28 @@ model User {
   @@index([role])
   @@index([isActive])
   @@map("users")
+}
+
+model Customer {
+  id              String       @id @default(uuid()) @db.Uuid
+  customerCode    String       @unique @map("customer_code")
+  customerType    CustomerType @default(INDIVIDUAL) @map("customer_type")
+  name            String
+  contactPerson   String?      @map("contact_person")
+  mobile          String?
+  alternateMobile String?      @map("alternate_mobile")
+  email           String?
+  address         String?
+  notes           String?
+  isActive        Boolean      @default(true) @map("is_active")
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?    @map("deleted_at") @db.Timestamptz
+
+  @@index([customerCode])
+  @@index([name])
+  @@index([mobile])
+  @@index([email])
+  @@index([deletedAt])
+  @@map("customers")
 }
