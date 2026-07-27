@@ -59,10 +59,7 @@ export function requireRole(...allowedRoles: Role[]) {
 
     if (allowedRoles.length > 0 && !allowedRoles.includes(req.user.role)) {
       next(
-        new ForbiddenError(
-          'INSUFFICIENT_PERMISSIONS',
-          'Insufficient permissions for this action.',
-        ),
+        new ForbiddenError('INSUFFICIENT_PERMISSIONS', 'Insufficient permissions for this action.'),
       );
       return;
     }
