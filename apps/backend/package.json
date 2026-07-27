@@ -4,12 +4,21 @@
   "private": true,
   "description": "EBMS Backend — Node.js / Express / TypeScript / Prisma",
   "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "devDependencies": {
-    "@ebms/config": "workspace:*"
+    "@ebms/config": "workspace:*",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
   }
 }

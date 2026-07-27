@@ -1,0 +1,22 @@
+# modules/
+#
+# Each business module lives in its own subdirectory:
+#
+#   modules/
+#   ├── auth/           Phase 1 — Authentication & Authorization
+#   ├── customers/      Phase 2 — Customer Management
+#   ├── designs/        Phase 3 — Design Management
+#   ├── jobs/           Phase 4 — Job Management
+#   ├── invoices/       Phase 5 — Invoice Management
+#   └── payments/       Phase 6 — Payment Management
+#
+# Each module follows the vertical slice structure defined in 09_CODING_STANDARDS.md:
+#
+#   <module>/
+#   ├── <module>.router.ts
+#   ├── <module>.controller.ts
+#   ├── <module>.service.ts
+#   ├── <module>.repository.ts
+#   ├── <module>.schema.ts       (Zod validation)
+#   ├── <module>.types.ts
+#   └── <module>.test.ts
