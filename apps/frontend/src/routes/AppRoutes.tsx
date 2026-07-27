@@ -1,49 +1,98 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { AppLayout } from '@/layouts/AppLayout';
-import { LoginPage } from '@/features/auth/pages/LoginPage';
-import { DashboardPage } from '@/features/dashboard';
-import {
-  CustomersListPage,
-  CreateCustomerPage,
-  CustomerDetailPage,
-  EditCustomerPage,
-} from '@/features/customers';
-import {
-  DesignsListPage,
-  CreateDesignPage,
-  DesignDetailPage,
-  EditDesignPage,
-} from '@/features/designs';
-import {
-  JobsListPage,
-  CreateJobPage,
-  JobDetailPage,
-  EditJobPage,
-} from '@/features/jobs';
-import {
-  ProductionQueuePage,
-  ProductionWorkspacePage,
-} from '@/features/production';
-import {
-  InvoicesListPage,
-  CreateInvoicePage,
-  InvoiceDetailPage,
-  EditInvoicePage,
-} from '@/features/invoices';
-import {
-  PaymentsListPage,
-  CreatePaymentPage,
-  PaymentDetailPage,
-} from '@/features/payments';
-import { ReportsPage } from '@/features/reports';
-import { SettingsPage } from '@/features/settings';
-import { NotFoundPage } from '@/shared/pages/NotFoundPage';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ROUTES } from '@/shared/constants/routes';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
+
+// Route-level lazy loading for page components
+const LoginPage = lazy(() =>
+  import('@/features/auth/pages/LoginPage').then((m) => ({ default: m.LoginPage }))
+);
+const DashboardPage = lazy(() =>
+  import('@/features/dashboard').then((m) => ({ default: m.DashboardPage }))
+);
+
+const CustomersListPage = lazy(() =>
+  import('@/features/customers').then((m) => ({ default: m.CustomersListPage }))
+);
+const CreateCustomerPage = lazy(() =>
+  import('@/features/customers').then((m) => ({ default: m.CreateCustomerPage }))
+);
+const CustomerDetailPage = lazy(() =>
+  import('@/features/customers').then((m) => ({ default: m.CustomerDetailPage }))
+);
+const EditCustomerPage = lazy(() =>
+  import('@/features/customers').then((m) => ({ default: m.EditCustomerPage }))
+);
+
+const DesignsListPage = lazy(() =>
+  import('@/features/designs').then((m) => ({ default: m.DesignsListPage }))
+);
+const CreateDesignPage = lazy(() =>
+  import('@/features/designs').then((m) => ({ default: m.CreateDesignPage }))
+);
+const DesignDetailPage = lazy(() =>
+  import('@/features/designs').then((m) => ({ default: m.DesignDetailPage }))
+);
+const EditDesignPage = lazy(() =>
+  import('@/features/designs').then((m) => ({ default: m.EditDesignPage }))
+);
+
+const JobsListPage = lazy(() =>
+  import('@/features/jobs').then((m) => ({ default: m.JobsListPage }))
+);
+const CreateJobPage = lazy(() =>
+  import('@/features/jobs').then((m) => ({ default: m.CreateJobPage }))
+);
+const JobDetailPage = lazy(() =>
+  import('@/features/jobs').then((m) => ({ default: m.JobDetailPage }))
+);
+const EditJobPage = lazy(() =>
+  import('@/features/jobs').then((m) => ({ default: m.EditJobPage }))
+);
+
+const ProductionQueuePage = lazy(() =>
+  import('@/features/production').then((m) => ({ default: m.ProductionQueuePage }))
+);
+const ProductionWorkspacePage = lazy(() =>
+  import('@/features/production').then((m) => ({ default: m.ProductionWorkspacePage }))
+);
+
+const InvoicesListPage = lazy(() =>
+  import('@/features/invoices').then((m) => ({ default: m.InvoicesListPage }))
+);
+const CreateInvoicePage = lazy(() =>
+  import('@/features/invoices').then((m) => ({ default: m.CreateInvoicePage }))
+);
+const InvoiceDetailPage = lazy(() =>
+  import('@/features/invoices').then((m) => ({ default: m.InvoiceDetailPage }))
+);
+const EditInvoicePage = lazy(() =>
+  import('@/features/invoices').then((m) => ({ default: m.EditInvoicePage }))
+);
+
+const PaymentsListPage = lazy(() =>
+  import('@/features/payments').then((m) => ({ default: m.PaymentsListPage }))
+);
+const CreatePaymentPage = lazy(() =>
+  import('@/features/payments').then((m) => ({ default: m.CreatePaymentPage }))
+);
+const PaymentDetailPage = lazy(() =>
+  import('@/features/payments').then((m) => ({ default: m.PaymentDetailPage }))
+);
+
+const ReportsPage = lazy(() =>
+  import('@/features/reports').then((m) => ({ default: m.ReportsPage }))
+);
+const SettingsPage = lazy(() =>
+  import('@/features/settings').then((m) => ({ default: m.SettingsPage }))
+);
+const NotFoundPage = lazy(() =>
+  import('@/shared/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
+);
 
 export const AppRoutes: React.FC = () => {
   return (

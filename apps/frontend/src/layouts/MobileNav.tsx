@@ -37,12 +37,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
             </div>
             <span className="font-bold text-foreground">EBMS</span>
           </Link>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close mobile menu">
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <nav aria-label="Mobile menu" className="mt-4 flex-1 space-y-1 overflow-y-auto">
+        <nav id="mobile-navigation" aria-label="Mobile menu" className="mt-4 flex-1 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =

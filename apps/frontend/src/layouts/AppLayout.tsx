@@ -46,6 +46,7 @@ export const AppLayout: React.FC = () => {
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={toggleSidebar}
           onOpenMobileNav={() => setIsMobileNavOpen(true)}
+          isMobileNavOpen={isMobileNavOpen}
         />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">

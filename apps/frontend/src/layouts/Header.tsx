@@ -7,12 +7,14 @@ export interface HeaderProps {
   isSidebarCollapsed: boolean;
   onToggleSidebar: () => void;
   onOpenMobileNav: () => void;
+  isMobileNavOpen?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   isSidebarCollapsed,
   onToggleSidebar,
   onOpenMobileNav,
+  isMobileNavOpen = false,
 }) => {
   const { user, logout } = useAuth();
 
@@ -26,6 +28,8 @@ export const Header: React.FC<HeaderProps> = ({
           className="lg:hidden"
           onClick={onOpenMobileNav}
           aria-label="Open mobile menu"
+          aria-expanded={isMobileNavOpen}
+          aria-controls="mobile-navigation"
         >
           <Menu className="h-5 w-5" />
         </Button>
