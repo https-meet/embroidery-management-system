@@ -1,0 +1,6 @@
+{
+  "name": "@ebms/backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EBMS Backend — Node.js / Express / TypeScript / Prisma"
+}

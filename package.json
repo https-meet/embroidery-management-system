@@ -1,20 +1,18 @@
 {
-  "name": "embroidery-management-system",
+  "name": "ebms",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "Embroidery Business Management System",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:backend": "pnpm --filter @ebms/backend dev",
+    "dev:frontend": "pnpm --filter @ebms/frontend dev",
+    "build": "pnpm --filter @ebms/backend build && pnpm --filter @ebms/frontend build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.17.0",
-      "onFail": "download"
-    }
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
   },
-  "type": "module"
+  "packageManager": "pnpm@9.15.9"
 }

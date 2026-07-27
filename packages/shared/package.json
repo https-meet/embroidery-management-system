@@ -1,0 +1,6 @@
+{
+  "name": "@ebms/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EBMS Shared — TypeScript types, DTOs, and constants. No business logic."
+}

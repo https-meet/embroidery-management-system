@@ -1,0 +1,6 @@
+{
+  "name": "@ebms/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EBMS Config — Shared ESLint, Prettier, and TypeScript base configurations."
+}
