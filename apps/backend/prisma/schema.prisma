@@ -60,3 +60,29 @@ model Customer {
   @@index([deletedAt])
   @@map("customers")
 }
+
+model Design {
+  id             String    @id @default(uuid()) @db.Uuid
+  designCode     String    @unique @map("design_code")
+  name           String
+  description    String?
+  category       String?
+  previewUrl     String?   @map("preview_url")
+  primaryFileUrl String?   @map("primary_file_url")
+  primaryFileType String?  @map("primary_file_type")
+  stitchCount    Int?      @map("stitch_count")
+  widthMm        Float?    @map("width_mm")
+  heightMm       Float?    @map("height_mm")
+  colorCount     Int?      @map("color_count")
+  notes          String?
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
+
+  @@index([designCode])
+  @@index([name])
+  @@index([category])
+  @@index([deletedAt])
+  @@map("designs")
+}
