@@ -38,8 +38,8 @@ import {
   PaymentDetailPage,
 } from '@/features/payments';
 import { ReportsPage } from '@/features/reports';
+import { SettingsPage } from '@/features/settings';
 import { NotFoundPage } from '@/shared/pages/NotFoundPage';
-import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ROUTES } from '@/shared/constants/routes';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -100,16 +100,8 @@ export const AppRoutes: React.FC = () => {
             {/* Reports Module */}
             <Route path={`${ROUTES.REPORTS.ROOT}/*`} element={<ReportsPage />} />
 
-            {/* Module Placeholders for subsequent phases (supporting subroutes) */}
-            <Route
-              path={`${ROUTES.SETTINGS}/*`}
-              element={
-                <PlaceholderPage
-                  title="Settings"
-                  description="Manage system and business parameters."
-                />
-              }
-            />
+            {/* Settings Module */}
+            <Route path={`${ROUTES.SETTINGS}/*`} element={<SettingsPage />} />
 
             {/* Global Not Found */}
             <Route path="*" element={<NotFoundPage />} />
@@ -119,28 +111,3 @@ export const AppRoutes: React.FC = () => {
     </Suspense>
   );
 };
-
-const PlaceholderPage: React.FC<{ title: string; description: string }> = ({
-  title,
-  description,
-}) => {
-  return (
-    <div className="space-y-6">
-      <PageHeader title={title} description={description} />
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-        <p className="text-sm font-medium">
-          {title} module implementation is scheduled for Phase {getModulePhase(title)}.
-        </p>
-      </div>
-    </div>
-  );
-};
-
-function getModulePhase(title: string): number {
-  switch (title) {
-    case 'Settings':
-      return 12;
-    default:
-      return 0;
-  }
-}
