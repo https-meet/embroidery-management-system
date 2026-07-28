@@ -186,10 +186,14 @@ export class ProductionService {
   public async getProductionQueue(
     filter: ProductionQueryFilter,
   ): Promise<PaginatedProductionQueueResponseDto> {
-    const page = filter.page ?? 1;
-    const limit = filter.limit ?? 20;
+    const page = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limit = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
 
-    const { jobs, total } = await this.repo.findProductionQueue(filter);
+    const { jobs, total } = await this.repo.findProductionQueue({
+      ...filter,
+      page,
+      limit,
+    });
     const totalPages = Math.ceil(total / limit) || 1;
 
     return {

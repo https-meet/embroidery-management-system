@@ -66,10 +66,14 @@ export class CustomerService {
   }
 
   public async listCustomers(filter: CustomerQueryFilter): Promise<PaginatedCustomersResponseDto> {
-    const page = filter.page ?? 1;
-    const limit = filter.limit ?? 20;
+    const page = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limit = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
 
-    const { customers, total } = await this.repo.findMany(filter);
+    const { customers, total } = await this.repo.findMany({
+      ...filter,
+      page,
+      limit,
+    });
     const totalPages = Math.ceil(total / limit) || 1;
 
     return {
