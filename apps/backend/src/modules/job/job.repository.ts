@@ -128,8 +128,8 @@ export class JobRepository {
     const customerId = filter.customerId;
     const status = filter.status;
     const priority = filter.priority;
-    const page = typeof filter.page === 'string' ? parseInt(filter.page, 10) || 1 : (filter.page ?? 1);
-    const limit = typeof filter.limit === 'string' ? parseInt(filter.limit, 10) || 20 : (filter.limit ?? 20);
+    const pageNum = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limitNum = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
     const sortBy = filter.sortBy || 'createdAt';
     const sortOrder = filter.sortOrder || 'desc';
 
@@ -151,8 +151,8 @@ export class JobRepository {
     const [jobs, total] = await Promise.all([
       prisma.job.findMany({
         where,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
         orderBy: { [sortBy]: sortOrder },
         include: {
           customer: true,

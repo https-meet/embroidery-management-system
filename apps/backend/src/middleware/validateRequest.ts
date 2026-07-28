@@ -27,7 +27,8 @@ export function validateRequest(
     }
 
     if (target === 'query') {
-      req.query = result.data as Record<string, unknown>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      req.query = result.data as Record<string, any>;
     } else if (target === 'params') {
       req.params = result.data as Record<string, string>;
     } else {

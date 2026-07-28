@@ -129,15 +129,13 @@ export class ProductionRepository {
   public async findProductionQueue(
     filter: ProductionQueryFilter,
   ): Promise<{ jobs: FullJob[]; total: number }> {
-    const {
-      search,
-      assignedOperator,
-      status,
-      page = 1,
-      limit = 20,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-    } = filter;
+    const search = filter.search;
+    const assignedOperator = filter.assignedOperator;
+    const status = filter.status;
+    const pageNum = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limitNum = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
+    const sortBy = filter.sortBy || 'createdAt';
+    const sortOrder = filter.sortOrder || 'desc';
 
     const where: Prisma.JobWhereInput = {
       deletedAt: null,
@@ -155,8 +153,8 @@ export class ProductionRepository {
     const [jobs, total] = await Promise.all([
       prisma.job.findMany({
         where,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
         orderBy: { [sortBy]: sortOrder },
         include: {
           customer: true,

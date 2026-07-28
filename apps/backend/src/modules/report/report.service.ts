@@ -23,8 +23,8 @@ export class ReportService {
     items: CustomerReportItemDto[];
     total: number;
   }> {
-    const page = filter.page ?? 1;
-    const limit = filter.limit ?? 20;
+    const pageNum = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limitNum = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
 
     const where: Prisma.CustomerWhereInput = {
       deletedAt: null,
@@ -39,8 +39,8 @@ export class ReportService {
     const [customers, total] = await Promise.all([
       prisma.customer.findMany({
         where,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
         include: {
           jobs: { where: { deletedAt: null } },
           invoices: true,
@@ -75,8 +75,8 @@ export class ReportService {
     items: JobReportItemDto[];
     total: number;
   }> {
-    const page = filter.page ?? 1;
-    const limit = filter.limit ?? 20;
+    const pageNum = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limitNum = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
     const dateRange = this.getDateRangeWhere(filter);
 
     const where: Prisma.JobWhereInput = {
@@ -93,8 +93,8 @@ export class ReportService {
     const [jobs, total] = await Promise.all([
       prisma.job.findMany({
         where,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
         orderBy: { createdAt: 'desc' },
         include: {
           customer: true,
@@ -121,8 +121,8 @@ export class ReportService {
     items: ProductionReportItemDto[];
     total: number;
   }> {
-    const page = filter.page ?? 1;
-    const limit = filter.limit ?? 20;
+    const pageNum = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limitNum = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
     const dateRange = this.getDateRangeWhere(filter);
 
     const where: Prisma.JobWhereInput = {
@@ -139,8 +139,8 @@ export class ReportService {
     const [jobs, total] = await Promise.all([
       prisma.job.findMany({
         where,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
         orderBy: { createdAt: 'desc' },
         include: {
           customer: true,
@@ -168,8 +168,8 @@ export class ReportService {
     items: InvoiceReportItemDto[];
     total: number;
   }> {
-    const page = filter.page ?? 1;
-    const limit = filter.limit ?? 20;
+    const pageNum = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limitNum = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
     const dateRange = this.getDateRangeWhere(filter);
 
     const where: Prisma.InvoiceWhereInput = {
@@ -185,8 +185,8 @@ export class ReportService {
     const [invoices, total] = await Promise.all([
       prisma.invoice.findMany({
         where,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),
@@ -212,8 +212,8 @@ export class ReportService {
     items: PaymentReportItemDto[];
     total: number;
   }> {
-    const page = filter.page ?? 1;
-    const limit = filter.limit ?? 20;
+    const pageNum = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limitNum = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
     const dateRange = this.getDateRangeWhere(filter);
 
     const where: Prisma.PaymentWhereInput = {
@@ -230,8 +230,8 @@ export class ReportService {
     const [payments, total] = await Promise.all([
       prisma.payment.findMany({
         where,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),

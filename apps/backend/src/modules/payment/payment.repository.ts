@@ -79,16 +79,14 @@ export class PaymentRepository {
   public async findMany(
     filter: PaymentQueryFilter,
   ): Promise<{ payments: FullPayment[]; total: number }> {
-    const {
-      search,
-      customerId,
-      status,
-      paymentMethod,
-      page = 1,
-      limit = 20,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-    } = filter;
+    const search = filter.search;
+    const customerId = filter.customerId;
+    const status = filter.status;
+    const paymentMethod = filter.paymentMethod;
+    const pageNum = Number(filter.page) > 0 ? Number(filter.page) : 1;
+    const limitNum = Number(filter.limit) > 0 ? Number(filter.limit) : 20;
+    const sortBy = filter.sortBy || 'createdAt';
+    const sortOrder = filter.sortOrder || 'desc';
 
     const where: Prisma.PaymentWhereInput = {
       ...(customerId && { customerId }),
@@ -106,8 +104,8 @@ export class PaymentRepository {
     const [payments, total] = await Promise.all([
       prisma.payment.findMany({
         where,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (pageNum - 1) * limitNum,
+        take: limitNum,
         orderBy: { [sortBy]: sortOrder },
         include: {
           customer: true,
