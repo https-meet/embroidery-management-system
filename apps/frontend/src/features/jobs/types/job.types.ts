@@ -2,7 +2,14 @@ import type { PaginationParams } from '@/shared/types/api.types';
 import type { CustomerDto } from '@/features/customers';
 import type { DesignDto } from '@/features/designs';
 
-export type JobStatus = 'DRAFT' | 'PENDING_PRODUCTION' | 'IN_PRODUCTION' | 'COMPLETED' | 'CANCELLED';
+export type JobStatus =
+  | 'DRAFT'
+  | 'PENDING_PRODUCTION'
+  | 'IN_PRODUCTION'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'DELIVERED'
+  | 'CANCELLED';
 export type JobPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
 export type JobItemProductionStatus = 'PENDING' | 'IN_PRODUCTION' | 'COMPLETED' | 'CANCELLED';
 

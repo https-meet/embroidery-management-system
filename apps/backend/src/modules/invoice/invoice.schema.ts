@@ -24,11 +24,11 @@ export const createInvoiceItemSchema = z.object({
   sourceJobId: optionalUuid,
   sourceJobItemRef: optionalUuid,
   description: z.string().min(1, 'Item description is required.').max(200),
-  quantity: z
+  quantity: z.coerce
     .number()
     .int('Quantity must be an integer.')
     .positive('Quantity must be greater than 0.'),
-  rate: z.number().nonnegative('Rate cannot be negative.'),
+  rate: z.coerce.number().nonnegative('Rate cannot be negative.'),
 });
 
 export const createInvoiceSchema = z
@@ -36,8 +36,11 @@ export const createInvoiceSchema = z
     customerId: z.string().uuid('Invalid customer ID format.'),
     invoiceDate: optionalDateString,
     dueDate: optionalDateString,
-    discountType: z.nativeEnum(DiscountType).optional().nullable(),
-    discountValue: z.number().nonnegative().optional().nullable(),
+    discountType: z
+      .union([z.nativeEnum(DiscountType), z.literal('').transform(() => undefined)])
+      .optional()
+      .nullable(),
+    discountValue: z.coerce.number().nonnegative().optional().nullable(),
     notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
     items: z.array(createInvoiceItemSchema).optional(),
     jobIds: z.array(z.string().uuid()).optional(),
@@ -52,8 +55,11 @@ export const createInvoiceSchema = z
 
 export const updateInvoiceSchema = z.object({
   dueDate: optionalDateString,
-  discountType: z.nativeEnum(DiscountType).optional().nullable(),
-  discountValue: z.number().nonnegative().optional().nullable(),
+  discountType: z
+    .union([z.nativeEnum(DiscountType), z.literal('').transform(() => undefined)])
+    .optional()
+    .nullable(),
+  discountValue: z.coerce.number().nonnegative().optional().nullable(),
   notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
   status: z.nativeEnum(InvoiceStatus).optional(),
 });

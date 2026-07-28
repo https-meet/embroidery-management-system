@@ -1,6 +1,13 @@
 import { JobItemProductionStatus, JobStatus } from '@prisma/client';
 import { z } from 'zod';
 
+const JobStatusQuerySchema = z.union([
+  z.nativeEnum(JobStatus),
+  z.literal('PENDING_PRODUCTION').transform(() => JobStatus.IN_PROGRESS),
+  z.literal('IN_PRODUCTION').transform(() => JobStatus.IN_PROGRESS),
+  z.literal('').transform(() => undefined),
+]);
+
 export const assignProductionSchema = z.object({
   jobId: z.string().uuid('Invalid job ID format.'),
   assignedOperator: z.string().min(1, 'Assigned operator is required.').max(100),
@@ -28,7 +35,7 @@ export const deliveryReadinessSchema = z.object({
 export const productionQuerySchema = z.object({
   search: z.string().optional(),
   assignedOperator: z.string().optional(),
-  status: z.nativeEnum(JobStatus).optional(),
+  status: JobStatusQuerySchema.optional(),
   productionStatus: z.nativeEnum(JobItemProductionStatus).optional(),
   page: z
     .string()

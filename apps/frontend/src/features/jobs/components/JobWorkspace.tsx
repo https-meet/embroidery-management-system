@@ -68,27 +68,15 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
             <Button
               size="sm"
               isLoading={isUpdatingStatus}
-              onClick={() => onStatusChange('PENDING_PRODUCTION')}
+              onClick={() => onStatusChange('IN_PROGRESS')}
               className="flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Play className="h-4 w-4" />
-              <span>Submit to Production</span>
-            </Button>
-          )}
-
-          {job.status === 'PENDING_PRODUCTION' && (
-            <Button
-              size="sm"
-              isLoading={isUpdatingStatus}
-              onClick={() => onStatusChange('IN_PRODUCTION')}
-              className="flex items-center space-x-1.5 bg-amber-600 hover:bg-amber-700 text-white"
             >
               <Play className="h-4 w-4" />
               <span>Start Production</span>
             </Button>
           )}
 
-          {job.status === 'IN_PRODUCTION' && (
+          {(job.status === 'IN_PROGRESS' || (job.status as string) === 'IN_PRODUCTION' || (job.status as string) === 'PENDING_PRODUCTION') && (
             <Button
               size="sm"
               isLoading={isUpdatingStatus}
@@ -99,6 +87,35 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
               <span>Mark Completed</span>
             </Button>
           )}
+
+          {job.status === 'COMPLETED' && (
+            <Button
+              size="sm"
+              isLoading={isUpdatingStatus}
+              onClick={() => onStatusChange('DELIVERED')}
+              className="flex items-center space-x-1.5 bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              <span>Mark Delivered</span>
+            </Button>
+          )}
+
+          {/* Quick Status Selector */}
+          <div className="flex items-center space-x-1.5 border rounded-md px-2 py-1.5 bg-muted/30 text-xs">
+            <span className="text-muted-foreground font-medium">Status:</span>
+            <select
+              value={job.status}
+              disabled={isUpdatingStatus}
+              onChange={(e) => onStatusChange(e.target.value as JobStatus)}
+              className="bg-transparent font-semibold text-foreground focus:outline-none cursor-pointer"
+            >
+              <option value="DRAFT">DRAFT</option>
+              <option value="IN_PROGRESS">IN_PROGRESS</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="DELIVERED">DELIVERED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </div>
 
           <Link to={`${ROUTES.JOBS.DETAIL(job.id)}/edit`}>
             <Button variant="outline" size="sm" className="flex items-center space-x-1.5">
