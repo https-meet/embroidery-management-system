@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { ROUTES } from '@/shared/constants/routes';
 import { isApiBusinessError, isApiValidationError } from '@/shared/types/api.types';
@@ -10,6 +10,9 @@ import type { CreateJobFormValues } from '../schemas/job.schema';
 
 export const CreateJobPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const prefilledCustomerId = searchParams.get('customerId') || undefined;
+
   const createMutation = useCreateJob();
 
   const handleSubmit = async (values: CreateJobFormValues) => {
@@ -52,6 +55,7 @@ export const CreateJobPage: React.FC = () => {
 
       <div className="rounded-lg border bg-card p-6 shadow-sm">
         <JobForm
+          initialValues={{ customerId: prefilledCustomerId }}
           onSubmit={handleSubmit}
           isLoading={createMutation.isPending}
           onCancel={() => navigate(ROUTES.JOBS.LIST)}

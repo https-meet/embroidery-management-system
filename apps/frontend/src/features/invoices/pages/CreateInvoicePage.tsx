@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { ROUTES } from '@/shared/constants/routes';
 import { isApiBusinessError, isApiValidationError } from '@/shared/types/api.types';
@@ -10,6 +10,9 @@ import type { CreateInvoiceFormValues } from '../schemas/invoice.schema';
 
 export const CreateInvoicePage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const prefilledCustomerId = searchParams.get('customerId') || undefined;
+
   const createMutation = useCreateInvoice();
 
   const handleSubmit = async (values: CreateInvoiceFormValues) => {
@@ -49,6 +52,7 @@ export const CreateInvoicePage: React.FC = () => {
 
       <div className="rounded-lg border bg-card p-6 shadow-sm">
         <InvoiceForm
+          initialValues={{ customerId: prefilledCustomerId }}
           onSubmit={handleSubmit}
           isLoading={createMutation.isPending}
           onCancel={() => navigate(ROUTES.INVOICES.LIST)}
