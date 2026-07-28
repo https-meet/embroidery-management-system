@@ -64,6 +64,8 @@ export const QualityCheckModal: React.FC<QualityCheckModalProps> = ({
         </p>
 
         <form onSubmit={handleSubmit(onConfirm)} className="space-y-4">
+          <input type="hidden" value={jobId} {...register('jobId')} />
+
           <FormField label="Quality Check Result" htmlFor="passed" required>
             <div className="flex items-center space-x-4">
               <label className="flex items-center space-x-2 text-xs font-medium text-foreground cursor-pointer">

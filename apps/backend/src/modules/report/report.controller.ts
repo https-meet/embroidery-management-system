@@ -64,6 +64,15 @@ export class ReportController {
       next(error);
     }
   };
+
+  public exportAll = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const data = await this.service.getFullSystemBackup();
+      res.status(200).json({ success: true, data });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export const reportController = new ReportController();

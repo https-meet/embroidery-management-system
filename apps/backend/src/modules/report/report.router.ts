@@ -9,6 +9,12 @@ const router: IRouter = Router();
 router.use(authenticate);
 
 router.get(
+  '/export-all',
+  requireRole('ADMIN', 'MANAGER'),
+  reportController.exportAll,
+);
+
+router.get(
   '/customers',
   requireRole('ADMIN', 'MANAGER'),
   validateRequest(reportFilterSchema, 'query'),

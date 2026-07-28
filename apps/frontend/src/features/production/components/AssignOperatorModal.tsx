@@ -65,6 +65,8 @@ export const AssignOperatorModal: React.FC<AssignOperatorModalProps> = ({
         </p>
 
         <form onSubmit={handleSubmit(onConfirm)} className="space-y-4">
+          <input type="hidden" value={jobId} {...register('jobId')} />
+
           <FormField
             label="Operator Name"
             htmlFor="assignedOperator"

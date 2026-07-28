@@ -297,6 +297,35 @@ export class ReportService {
       byPaymentMethod,
     };
   }
+
+  public async getFullSystemBackup(): Promise<{
+    timestamp: string;
+    customers: unknown[];
+    jobs: unknown[];
+    invoices: unknown[];
+    payments: unknown[];
+    designs: unknown[];
+  }> {
+    const [customers, jobs, invoices, payments, designs] = await Promise.all([
+      prisma.customer.findMany({ where: { deletedAt: null } }),
+      prisma.job.findMany({
+        where: { deletedAt: null },
+        include: { customer: true, items: true },
+      }),
+      prisma.invoice.findMany({ include: { customer: true, items: true } }),
+      prisma.payment.findMany({ include: { customer: true } }),
+      prisma.design.findMany({ where: { deletedAt: null } }),
+    ]);
+
+    return {
+      timestamp: new Date().toISOString(),
+      customers,
+      jobs,
+      invoices,
+      payments,
+      designs,
+    };
+  }
 }
 
 export const reportService = new ReportService();

@@ -43,16 +43,22 @@ export const ProductionWorkspacePage: React.FC = () => {
   };
 
   const handleConfirmAssign = async (values: AssignOperatorFormValues) => {
+    const targetId = id || values.jobId || data?.job.id;
+    if (!targetId) return;
+
     await assignMutation.mutateAsync({
-      jobId: values.jobId,
+      jobId: targetId,
       assignedOperator: values.assignedOperator.trim(),
     });
     assignModal.onClose();
   };
 
   const handleConfirmQC = async (values: QualityCheckFormValues) => {
+    const targetId = id || values.jobId || data?.job.id;
+    if (!targetId) return;
+
     await qcMutation.mutateAsync({
-      jobId: values.jobId,
+      jobId: targetId,
       passed: values.passed,
       notes: values.notes?.trim() || undefined,
     });

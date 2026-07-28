@@ -116,11 +116,11 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
       </div>
 
       {/* Main Printable Invoice Sheet */}
-      <div className="rounded-lg border bg-card p-8 shadow-sm space-y-6">
+      <div className="print-sheet rounded-lg border bg-card p-8 shadow-sm space-y-6">
         {/* Invoice Header */}
         <div className="flex items-start justify-between border-b pb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-primary">EMBROIDERY BUSINESS</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-primary">EMBROIDERY BUSINESS SYSTEM</h1>
             <p className="text-xs text-muted-foreground">Professional Computerized Embroidery Services</p>
             <p className="text-xs text-muted-foreground mt-1">Surat, Gujarat, India</p>
           </div>
@@ -227,13 +227,24 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Terms & Notes */}
-        {invoice.notes && (
-          <div className="border-t pt-4 space-y-1">
-            <p className="text-xs font-semibold text-muted-foreground">Payment Terms & Notes:</p>
-            <p className="text-xs text-foreground whitespace-pre-line">{invoice.notes}</p>
+        {/* Terms, Notes & Signature Block */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 border-t pt-6 text-xs">
+          <div>
+            {invoice.notes && (
+              <div className="space-y-1">
+                <p className="font-semibold text-muted-foreground">Payment Terms & Notes:</p>
+                <p className="text-foreground whitespace-pre-line">{invoice.notes}</p>
+              </div>
+            )}
           </div>
-        )}
+
+          <div className="flex flex-col items-end justify-end space-y-2 pt-8 sm:pt-0">
+            <div className="w-48 border-t border-slate-400 pt-1 text-center">
+              <span className="text-[11px] font-semibold text-foreground">Authorized Signature</span>
+              <p className="text-[10px] text-muted-foreground">Embroidery Management System</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

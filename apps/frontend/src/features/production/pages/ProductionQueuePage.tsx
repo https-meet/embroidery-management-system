@@ -1,70 +1,62 @@
 import React, { useState } from 'react';
 import { PageHeader } from '@/shared/components/PageHeader';
-import { PaginationBar } from '@/shared/components/PaginationBar';
-import { usePagination } from '@/shared/hooks/usePagination';
-import { useDisclosure } from '@/shared/hooks/useDisclosure';
+import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ErrorState } from '@/shared/components/ErrorState';
-import { useProductionQueue } from '../hooks/useProductionQueue';
+import { PaginationBar } from '@/shared/components/PaginationBar';
+import { useDisclosure } from '@/shared/hooks/useDisclosure';
+import { usePagination } from '@/shared/hooks/usePagination';
+import type { JobDto, JobStatus } from '@/features/jobs';
 import {
   useAssignOperator,
   useCompleteProduction,
   useRecordQualityCheck,
   useStartProduction,
 } from '../hooks/useProductionMutations';
-import { ProductionQueueTable } from '../components/ProductionQueueTable';
-import { ProductionFilters } from '../components/ProductionFilters';
-import { AssignOperatorModal } from '../components/AssignOperatorModal';
-import { QualityCheckModal } from '../components/QualityCheckModal';
-import type { JobDto, JobStatus } from '@/features/jobs';
+import { useProductionQueue } from '../hooks/useProductionQueue';
 import type { AssignOperatorFormValues, QualityCheckFormValues } from '../schemas/production.schema';
+import { AssignOperatorModal } from '../components/AssignOperatorModal';
+import { ProductionFilters } from '../components/ProductionFilters';
+import { ProductionQueueTable } from '../components/ProductionQueueTable';
+import { QualityCheckModal } from '../components/QualityCheckModal';
 
 export const ProductionQueuePage: React.FC = () => {
-  const { page, limit, search, setPage, setLimit, setSearch } = usePagination();
+  const [search, setSearchState] = useState<string>('');
   const [assignedOperator, setAssignedOperatorState] = useState<string>('');
   const [status, setStatusState] = useState<JobStatus | undefined>(undefined);
-  const [sortBy, setSortBy] = useState<'jobNo' | 'createdAt' | 'priority'>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
   const [selectedJob, setSelectedJob] = useState<JobDto | null>(null);
+
   const assignModal = useDisclosure();
   const qcModal = useDisclosure();
+  const { page, limit, setPage, setLimit } = usePagination();
 
-  const handleOperatorChange = (op: string) => {
-    setAssignedOperatorState(op);
+  const handleSearchChange = (val: string) => {
+    setSearchState(val);
     setPage(1);
   };
 
-  const handleStatusChange = (st: JobStatus | undefined) => {
-    setStatusState(st);
+  const handleOperatorChange = (val: string) => {
+    setAssignedOperatorState(val);
     setPage(1);
   };
 
-  const { data, isLoading, isError, refetch } = useProductionQueue({
-    page,
-    limit,
-    search,
+  const handleStatusChange = (val?: JobStatus) => {
+    setStatusState(val);
+    setPage(1);
+  };
+
+  const filterParams = {
+    search: search || undefined,
     assignedOperator: assignedOperator || undefined,
     status,
-    sortBy,
-    sortOrder,
-  });
+    page,
+    limit,
+  };
 
+  const { data, isLoading, isError, refetch } = useProductionQueue(filterParams);
   const startMutation = useStartProduction();
   const completeMutation = useCompleteProduction();
   const assignMutation = useAssignOperator();
   const qcMutation = useRecordQualityCheck();
-
-  const handleSort = (columnKey: string) => {
-    if (columnKey === 'jobNo' || columnKey === 'createdAt' || columnKey === 'priority') {
-      if (sortBy === columnKey) {
-        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-      } else {
-        setSortBy(columnKey);
-        setSortOrder('asc');
-      }
-      setPage(1);
-    }
-  };
 
   const handleStartClick = async (job: JobDto) => {
     await startMutation.mutateAsync({ jobId: job.id });
@@ -85,8 +77,11 @@ export const ProductionQueuePage: React.FC = () => {
   };
 
   const handleConfirmAssign = async (values: AssignOperatorFormValues) => {
+    const targetJobId = selectedJob?.id || values.jobId;
+    if (!targetJobId) return;
+
     await assignMutation.mutateAsync({
-      jobId: values.jobId,
+      jobId: targetJobId,
       assignedOperator: values.assignedOperator.trim(),
     });
     assignModal.onClose();
@@ -94,8 +89,11 @@ export const ProductionQueuePage: React.FC = () => {
   };
 
   const handleConfirmQC = async (values: QualityCheckFormValues) => {
+    const targetJobId = selectedJob?.id || values.jobId;
+    if (!targetJobId) return;
+
     await qcMutation.mutateAsync({
-      jobId: values.jobId,
+      jobId: targetJobId,
       passed: values.passed,
       notes: values.notes?.trim() || undefined,
     });
@@ -106,33 +104,31 @@ export const ProductionQueuePage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Production Work Queue"
+        title="Production Queue & Operations"
         description="Monitor active embroidery jobs, operator assignments, and machine output."
       />
 
       <ProductionFilters
         search={search}
-        onSearchChange={setSearch}
         assignedOperator={assignedOperator}
-        onOperatorChange={handleOperatorChange}
         status={status}
+        onSearchChange={handleSearchChange}
+        onOperatorChange={handleOperatorChange}
         onStatusChange={handleStatusChange}
       />
 
-      {isError ? (
+      {isLoading ? (
+        <PageSkeleton />
+      ) : isError ? (
         <ErrorState
           title="Failed to load production queue"
-          message="An error occurred while retrieving active production jobs."
+          message="An error occurred while fetching machine production orders."
           onRetry={() => refetch()}
         />
       ) : (
         <div className="space-y-4">
           <ProductionQueueTable
             jobs={data?.jobs || []}
-            isLoading={isLoading}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSort={handleSort}
             onStartClick={handleStartClick}
             onCompleteClick={handleCompleteClick}
             onAssignClick={handleAssignClick}

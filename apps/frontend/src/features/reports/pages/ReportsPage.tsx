@@ -19,6 +19,7 @@ import { JobReportTable } from '../components/JobReportTable';
 import { ProductionReportTable } from '../components/ProductionReportTable';
 import { PaymentReportTable } from '../components/PaymentReportTable';
 import { ExportCsvButton } from '../components/ExportCsvButton';
+import { SystemBackupCard } from '../components/SystemBackupCard';
 
 type ReportTab = 'revenue' | 'customers' | 'jobs' | 'production' | 'payments';
 
@@ -61,6 +62,9 @@ export const ReportsPage: React.FC = () => {
         title="Operational & Financial Reports"
         description="Comprehensive analytics on revenue trends, customer performance, job flow, and machine production."
       />
+
+      {/* System Backup Hub Card */}
+      <SystemBackupCard />
 
       {/* Date Range Filter Bar */}
       <ReportDateFilter
