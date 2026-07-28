@@ -1,4 +1,5 @@
 import type { Customer } from '@prisma/client';
+import { prisma } from '../../lib/prisma';
 import { AppError, ConflictError } from '../../utils/errors';
 import { customerRepository, type CustomerRepository } from './customer.repository';
 import type {
@@ -63,6 +64,90 @@ export class CustomerService {
       throw new AppError('CUSTOMER_NOT_FOUND', 'Customer not found.', 404);
     }
     return this.mapToDto(customer);
+  }
+
+  public async getCustomer360Data(id: string) {
+    const customer = await this.repo.findById(id);
+    if (!customer) {
+      throw new AppError('CUSTOMER_NOT_FOUND', 'Customer not found.', 404);
+    }
+
+    const [
+      jobs,
+      invoices,
+      payments,
+      outstandingAggregate,
+      revenueAggregate,
+    ] = await Promise.all([
+      prisma.job.findMany({
+        where: { customerId: id, deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        include: { items: true },
+      }),
+      prisma.invoice.findMany({
+        where: { customerId: id },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
+      prisma.payment.findMany({
+        where: { customerId: id, status: 'CONFIRMED' },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
+      prisma.invoice.aggregate({
+        _sum: { outstandingBalance: true },
+        where: { customerId: id, status: { in: ['DRAFT', 'ISSUED', 'PARTIALLY_PAID'] } },
+      }),
+      prisma.payment.aggregate({
+        _sum: { amount: true },
+        where: { customerId: id, status: 'CONFIRMED' },
+      }),
+    ]);
+
+    const activeJobs = jobs.filter((j) => ['DRAFT', 'IN_PROGRESS'].includes(j.status)).length;
+    const lastOrderDate = jobs.length > 0 ? jobs[0]?.jobDate : null;
+    const lifetimeRevenue = revenueAggregate._sum.amount ?? 0;
+    const outstandingBalance = outstandingAggregate._sum.outstandingBalance ?? 0;
+
+    const timeline = [
+      ...jobs.map((j) => ({
+        id: `job-${j.id}`,
+        type: 'JOB',
+        title: `Job #${j.jobNo} (${j.status})`,
+        description: `Logged with ${j.items.length} line item(s) • Priority: ${j.priority}`,
+        timestamp: j.createdAt,
+      })),
+      ...invoices.map((inv) => ({
+        id: `inv-${inv.id}`,
+        type: 'INVOICE',
+        title: `Invoice #${inv.invoiceNo} Issued`,
+        description: `Grand Total: ₹${inv.grandTotal.toLocaleString('en-IN')} (Status: ${inv.status})`,
+        timestamp: inv.createdAt,
+      })),
+      ...payments.map((p) => ({
+        id: `pay-${p.id}`,
+        type: 'PAYMENT',
+        title: `Payment Received (₹${p.amount.toLocaleString('en-IN')})`,
+        description: `Method: ${p.paymentMethod} • Ref: ${p.referenceNo || 'N/A'}`,
+        timestamp: p.createdAt,
+      })),
+    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    return {
+      customer: this.mapToDto(customer),
+      summary: {
+        lifetimeRevenue,
+        outstandingBalance,
+        totalJobs: jobs.length,
+        activeJobs,
+        lastOrderDate,
+      },
+      jobs,
+      invoices,
+      payments,
+      timeline,
+    };
   }
 
   public async listCustomers(filter: CustomerQueryFilter): Promise<PaginatedCustomersResponseDto> {

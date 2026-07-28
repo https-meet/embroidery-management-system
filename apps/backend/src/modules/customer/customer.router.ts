@@ -23,6 +23,8 @@ router.get(
   customerController.list,
 );
 
+router.get('/:id/360', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), customerController.get360);
+
 router.get('/:id', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), customerController.getById);
 
 router.put(

@@ -34,6 +34,20 @@ export class CustomerController {
     }
   };
 
+  public get360 = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = req.params['id'] as string;
+      const data = await this.service.getCustomer360Data(id);
+
+      res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as unknown as CustomerQueryFilter;
