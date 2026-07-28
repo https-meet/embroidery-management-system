@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { setupAuthInterceptors } from '@/shared/api';
 import { queryClient } from '@/shared/lib/queryClient';
 import { getCurrentUserApi, loginApi, logoutApi, refreshTokenApi } from '@/features/auth/api/auth.api';
@@ -24,21 +24,25 @@ export interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, setAccessTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const accessTokenRef = useRef<string | null>(null);
 
-  // Helper to access token in interceptor without state delay
-  const getAccessToken = useCallback(() => accessToken, [accessToken]);
+  const setAccessToken = useCallback((token: string | null) => {
+    accessTokenRef.current = token;
+    setAccessTokenState(token);
+  }, []);
+
+  const getAccessToken = useCallback(() => accessTokenRef.current, []);
 
   const logout = useCallback(() => {
-    // Best effort background logout call
     logoutApi().catch(() => {});
 
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     setAccessToken(null);
     setUser(null);
     queryClient.clear();
-  }, []);
+  }, [setAccessToken]);
 
   const refreshSession = useCallback(async (): Promise<string | null> => {
     const savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
@@ -51,7 +55,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setAccessToken(tokens.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
 
-      // If user profile is not in state yet, fetch profile
       if (!user) {
         const profileData = await getCurrentUserApi();
         setUser(profileData.user);
@@ -64,16 +67,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       return null;
     }
-  }, [user]);
+  }, [user, setAccessToken]);
 
-  const login = useCallback(async (dto: LoginDto): Promise<void> => {
-    const data = await loginApi(dto);
-    setAccessToken(data.tokens.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, data.tokens.refreshToken);
-    setUser(data.user);
-  }, []);
+  const login = useCallback(
+    async (dto: LoginDto): Promise<void> => {
+      const data = await loginApi(dto);
+      setAccessToken(data.tokens.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, data.tokens.refreshToken);
+      setUser(data.user);
+    },
+    [setAccessToken]
+  );
 
-  // Register Auth Interceptors
   useEffect(() => {
     setupAuthInterceptors({
       getAccessToken,
@@ -87,7 +92,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   }, [getAccessToken, refreshSession, logout]);
 
-  // Initial Silent Authentication on Application Load
   useEffect(() => {
     let isMounted = true;
 
@@ -100,7 +104,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setAccessToken(tokens.accessToken);
             localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
 
-            // Fetch user profile with the new access token
             const profileData = await getCurrentUserApi();
             if (isMounted) {
               setUser(profileData.user);
@@ -125,7 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [setAccessToken]);
 
   const value = useMemo(
     () => ({
