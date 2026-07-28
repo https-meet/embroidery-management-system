@@ -1,6 +1,25 @@
 import { PaymentMethod, PaymentStatus } from '@prisma/client';
 import { z } from 'zod';
 
+const optionalUuid = z
+  .string()
+  .uuid('Invalid UUID format.')
+  .optional()
+  .or(z.literal(''))
+  .nullable()
+  .transform((val) => (val && val.trim() !== '' ? val : undefined));
+
+const optionalDateString = z
+  .string()
+  .optional()
+  .or(z.literal(''))
+  .nullable()
+  .transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? undefined : date.toISOString();
+  });
+
 export const createPaymentAllocationSchema = z.object({
   invoiceId: z.string().uuid('Invalid invoice ID format.'),
   allocatedAmount: z.number().positive('Allocated amount must be greater than zero.'),
@@ -8,17 +27,17 @@ export const createPaymentAllocationSchema = z.object({
 
 export const createPaymentSchema = z.object({
   customerId: z.string().uuid('Invalid customer ID format.'),
-  paymentDate: z.string().datetime({ offset: true }).optional(),
+  paymentDate: optionalDateString,
   paymentMethod: z.nativeEnum(PaymentMethod),
-  referenceNo: z.string().max(100).optional(),
+  referenceNo: z.string().max(100).optional().or(z.literal('')).nullable(),
   amount: z.number().positive('Payment amount must be greater than zero.'),
-  notes: z.string().max(1000).optional(),
+  notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
   allocations: z.array(createPaymentAllocationSchema).optional(),
 });
 
 export const paymentQuerySchema = z.object({
   search: z.string().optional(),
-  customerId: z.string().uuid().optional(),
+  customerId: optionalUuid,
   status: z.nativeEnum(PaymentStatus).optional(),
   paymentMethod: z.nativeEnum(PaymentMethod).optional(),
   page: z

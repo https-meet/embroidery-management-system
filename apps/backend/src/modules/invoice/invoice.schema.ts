@@ -1,9 +1,28 @@
 import { DiscountType, InvoiceStatus } from '@prisma/client';
 import { z } from 'zod';
 
+const optionalUuid = z
+  .string()
+  .uuid('Invalid UUID format.')
+  .optional()
+  .or(z.literal(''))
+  .nullable()
+  .transform((val) => (val && val.trim() !== '' ? val : undefined));
+
+const optionalDateString = z
+  .string()
+  .optional()
+  .or(z.literal(''))
+  .nullable()
+  .transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? undefined : date.toISOString();
+  });
+
 export const createInvoiceItemSchema = z.object({
-  sourceJobId: z.string().uuid().optional(),
-  sourceJobItemRef: z.string().uuid().optional(),
+  sourceJobId: optionalUuid,
+  sourceJobItemRef: optionalUuid,
   description: z.string().min(1, 'Item description is required.').max(200),
   quantity: z
     .number()
@@ -15,11 +34,11 @@ export const createInvoiceItemSchema = z.object({
 export const createInvoiceSchema = z
   .object({
     customerId: z.string().uuid('Invalid customer ID format.'),
-    invoiceDate: z.string().datetime({ offset: true }).optional(),
-    dueDate: z.string().datetime({ offset: true }).optional(),
-    discountType: z.nativeEnum(DiscountType).optional(),
-    discountValue: z.number().nonnegative().optional(),
-    notes: z.string().max(1000).optional(),
+    invoiceDate: optionalDateString,
+    dueDate: optionalDateString,
+    discountType: z.nativeEnum(DiscountType).optional().nullable(),
+    discountValue: z.number().nonnegative().optional().nullable(),
+    notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
     items: z.array(createInvoiceItemSchema).optional(),
     jobIds: z.array(z.string().uuid()).optional(),
   })
@@ -32,16 +51,16 @@ export const createInvoiceSchema = z
   );
 
 export const updateInvoiceSchema = z.object({
-  dueDate: z.string().datetime({ offset: true }).optional(),
-  discountType: z.nativeEnum(DiscountType).optional(),
-  discountValue: z.number().nonnegative().optional(),
-  notes: z.string().max(1000).optional(),
+  dueDate: optionalDateString,
+  discountType: z.nativeEnum(DiscountType).optional().nullable(),
+  discountValue: z.number().nonnegative().optional().nullable(),
+  notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
   status: z.nativeEnum(InvoiceStatus).optional(),
 });
 
 export const invoiceQuerySchema = z.object({
   search: z.string().optional(),
-  customerId: z.string().uuid().optional(),
+  customerId: optionalUuid,
   status: z.nativeEnum(InvoiceStatus).optional(),
   page: z
     .string()
