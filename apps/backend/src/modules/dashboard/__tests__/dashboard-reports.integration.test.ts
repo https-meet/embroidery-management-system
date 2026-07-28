@@ -63,6 +63,7 @@ describe('Dashboard & Reports Integration Test Suite', () => {
       });
       vi.spyOn(prisma.job, 'findMany').mockResolvedValue([]);
       vi.spyOn(prisma.invoice, 'findMany').mockResolvedValue([]);
+      vi.spyOn(prisma.payment, 'findMany').mockResolvedValue([]);
 
       const res = await request
         .get('/api/v1/dashboard/summary')
@@ -98,6 +99,7 @@ describe('Dashboard & Reports Integration Test Suite', () => {
       });
       vi.spyOn(prisma.job, 'findMany').mockResolvedValue([]);
       vi.spyOn(prisma.invoice, 'findMany').mockResolvedValue([]);
+      vi.spyOn(prisma.payment, 'findMany').mockResolvedValue([]);
 
       const res = await request
         .get('/api/v1/dashboard/summary')

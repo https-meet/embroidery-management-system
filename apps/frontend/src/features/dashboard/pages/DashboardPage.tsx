@@ -1,11 +1,12 @@
 import React from 'react';
 import { useDashboardSummary } from '../hooks/useDashboardSummary';
 import { WelcomeHeader } from '../components/WelcomeHeader';
-import { SummaryCards } from '../components/SummaryCards';
+import { SummaryCards, SecondaryBusinessOverview } from '../components/SummaryCards';
+import { RecommendedNextSteps } from '../components/RecommendedNextSteps';
 import { QuickActions } from '../components/QuickActions';
 import { WorkQueue } from '../components/WorkQueue';
 import { PaymentFollowup } from '../components/PaymentFollowup';
-import { StatusDistributionChart } from '../components/StatusDistributionChart';
+import { RecentActivityTimeline } from '../components/RecentActivityTimeline';
 import { CardSkeleton, TableSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ErrorState } from '@/shared/components/ErrorState';
 
@@ -16,8 +17,8 @@ export const DashboardPage: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="h-20 w-full animate-pulse rounded-lg bg-muted/60" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
         </div>
@@ -41,23 +42,36 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header */}
+      {/* Professional Page Header */}
       <WelcomeHeader />
+
+      {/* Primary Operational KPI Strip */}
+      <SummaryCards summary={data.summary} />
+
+      {/* Rule-Based Recommended Next Steps & Business Health Summary */}
+      <RecommendedNextSteps
+        summary={data.summary}
+        recommendedActions={data.recommendedActions || []}
+      />
 
       {/* Quick Actions Bar */}
       <QuickActions />
 
-      {/* KPI Metrics Summary Cards */}
-      <SummaryCards summary={data.summary} />
-
-      {/* Workload Status Distribution Visualization */}
-      <StatusDistributionChart summary={data.summary} workQueue={data.workQueue} />
-
-      {/* Main Grid: Work Queue & Payment Follow-up */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <WorkQueue items={data.workQueue} />
-        <PaymentFollowup items={data.paymentFollowUp} />
+      {/* Main Grid: Work Queue (65%) & Payment Follow-up (35%) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-7">
+          <WorkQueue items={data.workQueue} />
+        </div>
+        <div className="lg:col-span-5">
+          <PaymentFollowup items={data.paymentFollowUp} />
+        </div>
       </div>
+
+      {/* Secondary Business Overview */}
+      <SecondaryBusinessOverview summary={data.summary} />
+
+      {/* Recent Business Activity & Audit Log Stream */}
+      <RecentActivityTimeline activities={data.recentActivity || []} />
     </div>
   );
 };
