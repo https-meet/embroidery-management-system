@@ -278,3 +278,48 @@ model PaymentAllocation {
   @@index([invoiceId])
   @@map("payment_allocations")
 }
+
+model BusinessConfig {
+  id                       String   @id @default(uuid()) @db.Uuid
+  companyName              String   @default("EMBROIDERY BUSINESS") @map("company_name")
+  logoUrl                  String?  @map("logo_url")
+  gstin                    String?  @default("24AAAAA0000A1Z5")
+  pan                      String?
+  address                  String?  @default("Ring Road, Surat, Gujarat - 395002, India")
+  mobile                   String?  @default("+91 98765 43210")
+  email                    String?  @default("info@embroidery.com")
+  website                  String?  @default("https://embroidery-management.com")
+  bankName                 String?  @default("HDFC Bank, Surat Branch") @map("bank_name")
+  accountNo                String?  @default("50200012345678") @map("account_no")
+  ifscCode                 String?  @default("HDFC0000123") @map("ifsc_code")
+  upiId                    String?  @default("embroidery@upi") @map("upi_id")
+  upiQrUrl                 String?  @map("upi_qr_url")
+  invoiceFooter            String?  @default("Payment due within 15 days of invoice date. Thank you for your business.") @map("invoice_footer")
+  jobPrefix                String   @default("JOB-") @map("job_prefix")
+  invoicePrefix            String   @default("INV-") @map("invoice_prefix")
+  paymentPrefix            String   @default("PAY-") @map("payment_prefix")
+  defaultTaxRatePercentage Float    @default(18.0) @map("default_tax_rate_percentage")
+  defaultPaymentTermsDays  Int      @default(15) @map("default_payment_terms_days")
+  createdAt                DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("business_config")
+}
+
+model AuditLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String?  @map("user_id") @db.Uuid
+  userName      String   @map("user_name")
+  action        String
+  entityType    String   @map("entity_type")
+  entityId      String?  @map("entity_id")
+  previousValue String?  @map("previous_value")
+  newValue      String?  @map("new_value")
+  reason        String?
+  timestamp     DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([timestamp])
+  @@map("audit_logs")
+}

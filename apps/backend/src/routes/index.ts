@@ -9,6 +9,7 @@ import paymentRouter from '../modules/payment/payment.router';
 import productionRouter from '../modules/production/production.router';
 import reportRouter from '../modules/report/report.router';
 import searchRouter from '../modules/search/search.router';
+import settingsRouter from '../modules/settings/settings.router';
 import healthRouter from './health';
 
 const router: IRouter = Router();
@@ -25,5 +26,6 @@ router.use('/payments', paymentRouter);
 router.use('/dashboard', dashboardRouter);
 router.use('/reports', reportRouter);
 router.use('/search', searchRouter);
+router.use('/settings', settingsRouter);
 
 export default router;
