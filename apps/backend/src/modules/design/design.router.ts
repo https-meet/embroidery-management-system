@@ -2,7 +2,7 @@ import { Router, type IRouter } from 'express';
 import { authenticate, requireRole } from '../../middleware/auth';
 import { validateRequest } from '../../middleware/validateRequest';
 import { designController } from './design.controller';
-import { createDesignSchema, updateDesignSchema } from './design.schema';
+import { createDesignSchema, designQuerySchema, updateDesignSchema } from './design.schema';
 
 const router: IRouter = Router();
 
@@ -16,7 +16,12 @@ router.post(
   designController.create,
 );
 
-router.get('/', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), designController.list);
+router.get(
+  '/',
+  requireRole('ADMIN', 'MANAGER', 'OPERATOR'),
+  validateRequest(designQuerySchema, 'query'),
+  designController.list,
+);
 
 router.get('/:id', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), designController.getById);
 

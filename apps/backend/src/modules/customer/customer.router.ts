@@ -2,7 +2,7 @@ import { Router, type IRouter } from 'express';
 import { authenticate, requireRole } from '../../middleware/auth';
 import { validateRequest } from '../../middleware/validateRequest';
 import { customerController } from './customer.controller';
-import { createCustomerSchema, updateCustomerSchema } from './customer.schema';
+import { createCustomerSchema, customerQuerySchema, updateCustomerSchema } from './customer.schema';
 
 const router: IRouter = Router();
 
@@ -16,7 +16,12 @@ router.post(
   customerController.create,
 );
 
-router.get('/', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), customerController.list);
+router.get(
+  '/',
+  requireRole('ADMIN', 'MANAGER', 'OPERATOR'),
+  validateRequest(customerQuerySchema, 'query'),
+  customerController.list,
+);
 
 router.get('/:id', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), customerController.getById);
 

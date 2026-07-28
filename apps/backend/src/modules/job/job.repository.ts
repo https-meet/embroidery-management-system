@@ -124,16 +124,14 @@ export class JobRepository {
   }
 
   public async findMany(filter: JobQueryFilter): Promise<{ jobs: FullJob[]; total: number }> {
-    const {
-      search,
-      customerId,
-      status,
-      priority,
-      page = 1,
-      limit = 20,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-    } = filter;
+    const search = filter.search;
+    const customerId = filter.customerId;
+    const status = filter.status;
+    const priority = filter.priority;
+    const page = typeof filter.page === 'string' ? parseInt(filter.page, 10) || 1 : (filter.page ?? 1);
+    const limit = typeof filter.limit === 'string' ? parseInt(filter.limit, 10) || 20 : (filter.limit ?? 20);
+    const sortBy = filter.sortBy || 'createdAt';
+    const sortOrder = filter.sortOrder || 'desc';
 
     const where: Prisma.JobWhereInput = {
       deletedAt: null,

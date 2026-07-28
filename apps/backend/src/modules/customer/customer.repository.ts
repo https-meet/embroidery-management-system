@@ -77,15 +77,13 @@ export class CustomerRepository {
   public async findMany(
     filter: CustomerQueryFilter,
   ): Promise<{ customers: Customer[]; total: number }> {
-    const {
-      search,
-      customerType,
-      isActive,
-      page = 1,
-      limit = 20,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-    } = filter;
+    const search = filter.search;
+    const customerType = filter.customerType;
+    const page = typeof filter.page === 'string' ? parseInt(filter.page, 10) || 1 : (filter.page ?? 1);
+    const limit = typeof filter.limit === 'string' ? parseInt(filter.limit, 10) || 20 : (filter.limit ?? 20);
+    const isActive = typeof filter.isActive === 'string' ? filter.isActive === 'true' : filter.isActive;
+    const sortBy = filter.sortBy || 'createdAt';
+    const sortOrder = filter.sortOrder || 'desc';
 
     const where: Prisma.CustomerWhereInput = {
       deletedAt: null,

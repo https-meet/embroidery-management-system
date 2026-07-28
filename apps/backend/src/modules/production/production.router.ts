@@ -6,6 +6,7 @@ import {
   assignProductionSchema,
   completeProductionSchema,
   deliveryReadinessSchema,
+  productionQuerySchema,
   qualityCheckSchema,
   startProductionSchema,
 } from './production.schema';
@@ -15,7 +16,12 @@ const router: IRouter = Router();
 // Protect all production routes with authentication
 router.use(authenticate);
 
-router.get('/', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), productionController.listQueue);
+router.get(
+  '/',
+  requireRole('ADMIN', 'MANAGER', 'OPERATOR'),
+  validateRequest(productionQuerySchema, 'query'),
+  productionController.listQueue,
+);
 
 router.post(
   '/assign',

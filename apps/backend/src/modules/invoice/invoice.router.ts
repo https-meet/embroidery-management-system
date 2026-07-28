@@ -2,13 +2,18 @@ import { Router, type IRouter } from 'express';
 import { authenticate, requireRole } from '../../middleware/auth';
 import { validateRequest } from '../../middleware/validateRequest';
 import { invoiceController } from './invoice.controller';
-import { createInvoiceSchema, updateInvoiceSchema } from './invoice.schema';
+import { createInvoiceSchema, invoiceQuerySchema, updateInvoiceSchema } from './invoice.schema';
 
 const router: IRouter = Router();
 
 router.use(authenticate);
 
-router.get('/', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), invoiceController.list);
+router.get(
+  '/',
+  requireRole('ADMIN', 'MANAGER', 'OPERATOR'),
+  validateRequest(invoiceQuerySchema, 'query'),
+  invoiceController.list,
+);
 router.get('/:id', requireRole('ADMIN', 'MANAGER', 'OPERATOR'), invoiceController.getById);
 
 router.post(
