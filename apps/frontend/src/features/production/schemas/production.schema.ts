@@ -10,7 +10,10 @@ export const assignOperatorSchema = z.object({
 
 export const qualityCheckSchema = z.object({
   jobId: z.string().min(1, 'Job ID is required'),
-  passed: z.boolean(),
+  passed: z.union([
+    z.boolean(),
+    z.string().transform((val) => val === 'true'),
+  ]),
   notes: z.string().max(500).optional().or(z.literal('')),
 });
 
