@@ -3,14 +3,17 @@ import type {
   DashboardDataDto,
   DashboardSummaryResponseDto,
   PaymentFollowUpItemDto,
+  RecentActivityItemDto,
+  RecommendedActionDto,
   WorkQueueItemDto,
 } from './dashboard.types';
 
 export class DashboardService {
   public async getDashboardData(): Promise<DashboardDataDto> {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const [
       totalCustomers,
@@ -18,9 +21,14 @@ export class DashboardService {
       pendingInvoicesCount,
       outstandingInvoices,
       jobsDueTodayCount,
+      delayedJobsCount,
+      jobsAwaitingQcCount,
       monthPayments,
       activeJobsList,
       pendingInvoicesList,
+      recentJobs,
+      recentPayments,
+      recentInvoices,
     ] = await Promise.all([
       prisma.customer.count({ where: { deletedAt: null, isActive: true } }),
       prisma.job.count({
@@ -37,7 +45,21 @@ export class DashboardService {
         where: {
           deletedAt: null,
           status: { in: ['DRAFT', 'IN_PROGRESS'] },
-          expectedDeliveryDate: { lte: endOfDay },
+          expectedDeliveryDate: { gte: startOfDay, lte: endOfDay },
+        },
+      }),
+      prisma.job.count({
+        where: {
+          deletedAt: null,
+          status: { in: ['DRAFT', 'IN_PROGRESS'] },
+          expectedDeliveryDate: { lt: startOfDay },
+        },
+      }),
+      prisma.job.count({
+        where: {
+          deletedAt: null,
+          status: 'COMPLETED',
+          qualityCheckedAt: null,
         },
       }),
       prisma.payment.aggregate({
@@ -59,6 +81,23 @@ export class DashboardService {
         orderBy: { dueDate: 'asc' },
         include: { customer: true },
       }),
+      prisma.job.findMany({
+        where: { deletedAt: null },
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: { customer: true },
+      }),
+      prisma.payment.findMany({
+        where: { status: 'CONFIRMED' },
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: { customer: true },
+      }),
+      prisma.invoice.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: { customer: true },
+      }),
     ]);
 
     const summary: DashboardSummaryResponseDto = {
@@ -67,6 +106,8 @@ export class DashboardService {
       pendingInvoices: pendingInvoicesCount,
       outstandingBalance: outstandingInvoices._sum.outstandingBalance ?? 0,
       jobsDueToday: jobsDueTodayCount,
+      delayedJobs: delayedJobsCount,
+      jobsAwaitingQc: jobsAwaitingQcCount,
       totalRevenueThisMonth: monthPayments._sum.amount ?? 0,
     };
 
@@ -75,6 +116,7 @@ export class DashboardService {
       jobNo: job.jobNo,
       customerName: job.customer.name,
       status: job.status,
+      assignedOperator: job.assignedOperator,
       dueDate: job.expectedDeliveryDate,
       priority: job.priority,
     }));
@@ -87,10 +129,82 @@ export class DashboardService {
       dueDate: inv.dueDate,
     }));
 
+    // Generate deterministic rule-based recommended actions
+    const recommendedActions: RecommendedActionDto[] = [];
+    if (delayedJobsCount > 0) {
+      recommendedActions.push({
+        id: 'action-delayed-jobs',
+        type: 'DELAYED_JOB',
+        title: 'Delayed Embroidery Orders',
+        description: `${delayedJobsCount} order(s) are past their target delivery date. Inspect production queue immediately.`,
+        actionUrl: '/production?status=IN_PROGRESS',
+        actionLabel: 'View Delayed Orders',
+        urgency: 'HIGH',
+      });
+    }
+
+    if (jobsAwaitingQcCount > 0) {
+      recommendedActions.push({
+        id: 'action-qc-pending',
+        type: 'AWAITING_QC',
+        title: 'Quality Check Required',
+        description: `${jobsAwaitingQcCount} completed order(s) require stitch quality verification before billing.`,
+        actionUrl: '/production?status=COMPLETED',
+        actionLabel: 'Perform Quality Check',
+        urgency: 'MEDIUM',
+      });
+    }
+
+    if (pendingInvoicesList.length > 0) {
+      recommendedActions.push({
+        id: 'action-overdue-payments',
+        type: 'OVERDUE_PAYMENT',
+        title: 'Pending Customer Collections',
+        description: `₹${(outstandingInvoices._sum.outstandingBalance ?? 0).toLocaleString('en-IN')} pending collection across ${pendingInvoicesCount} invoice(s).`,
+        actionUrl: '/payments/new',
+        actionLabel: 'Record Payment',
+        urgency: 'MEDIUM',
+      });
+    }
+
+    // Build unified Recent Activity Timeline
+    const rawActivityList: RecentActivityItemDto[] = [
+      ...recentJobs.map((j) => ({
+        id: `job-${j.id}`,
+        type: 'JOB' as const,
+        title: `Job ${j.jobNo} Created`,
+        description: `Order logged for ${j.customer.name} (${j.priority} Priority)`,
+        timestamp: j.createdAt,
+        linkUrl: `/jobs/${j.id}`,
+      })),
+      ...recentPayments.map((p) => ({
+        id: `pay-${p.id}`,
+        type: 'PAYMENT' as const,
+        title: `Payment of ₹${p.amount.toLocaleString('en-IN')} Received`,
+        description: `Collected via ${p.paymentMethod} from ${p.customer.name}`,
+        timestamp: p.createdAt,
+        linkUrl: `/payments`,
+      })),
+      ...recentInvoices.map((inv) => ({
+        id: `inv-${inv.id}`,
+        type: 'INVOICE' as const,
+        title: `Invoice ${inv.invoiceNo} Generated`,
+        description: `Issued for ${inv.customer.name} (Amount: ₹${inv.grandTotal.toLocaleString('en-IN')})`,
+        timestamp: inv.createdAt,
+        linkUrl: `/invoices/${inv.id}`,
+      })),
+    ];
+
+    const recentActivity = rawActivityList
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 8);
+
     return {
       summary,
       workQueue,
       paymentFollowUp,
+      recommendedActions,
+      recentActivity,
     };
   }
 }
