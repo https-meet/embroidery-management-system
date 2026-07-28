@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Printer, Edit2, Archive, DollarSign } from 'lucide-react';
+import { FileText, Printer, Archive, DollarSign } from 'lucide-react';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/shared/components/ui/button';
 import { ROUTES } from '@/shared/constants/routes';
+import { useBusinessSettings } from '@/features/settings/hooks/useBusinessSettings';
 import type { InvoiceDto } from '../types/invoice.types';
 
 export interface InvoiceWorkspaceProps {
@@ -17,6 +18,9 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
   invoice,
   onCancelClick,
 }) => {
+  const { data: configData } = useBusinessSettings();
+  const config = configData?.config;
+
   const handlePrint = () => {
     window.print();
   };
@@ -58,15 +62,6 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
               <Button size="sm" className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
                 <DollarSign className="h-4 w-4" />
                 <span>Record Payment</span>
-              </Button>
-            </Link>
-          )}
-
-          {invoice.status !== 'PAID' && invoice.status !== 'CANCELLED' && (
-            <Link to={`${ROUTES.INVOICES.DETAIL(invoice.id)}/edit`}>
-              <Button variant="outline" size="sm" className="flex items-center space-x-1.5">
-                <Edit2 className="h-4 w-4" />
-                <span>Edit Invoice</span>
               </Button>
             </Link>
           )}
@@ -117,12 +112,23 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
 
       {/* Main Printable Invoice Sheet */}
       <div className="print-sheet rounded-lg border bg-card p-8 shadow-sm space-y-6">
-        {/* Invoice Header */}
+        {/* Invoice Header (Database Configured) */}
         <div className="flex items-start justify-between border-b pb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-primary">EMBROIDERY BUSINESS SYSTEM</h1>
-            <p className="text-xs text-muted-foreground">Professional Computerized Embroidery Services</p>
-            <p className="text-xs text-muted-foreground mt-1">Surat, Gujarat, India</p>
+            <h1 className="text-2xl font-bold tracking-tight text-primary">
+              {config?.companyName || 'EMBROIDERY BUSINESS SYSTEM'}
+            </h1>
+            <p className="text-xs font-semibold text-muted-foreground">
+              {config?.address || 'Surat, Gujarat, India'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Mobile: {config?.mobile || '+91 98765 43210'} | Email: {config?.email || 'info@embroidery.com'}
+            </p>
+            {config?.gstin && (
+              <p className="text-xs font-mono font-semibold text-foreground mt-1">
+                GSTIN: {config.gstin} {config.pan ? `| PAN: ${config.pan}` : ''}
+              </p>
+            )}
           </div>
 
           <div className="text-right space-y-1">
@@ -159,9 +165,10 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
           </div>
 
           <div className="space-y-1 sm:text-right">
-            <span className="font-semibold text-muted-foreground uppercase text-[10px]">Invoice Summary:</span>
-            <p className="text-muted-foreground">Status: <strong className="font-bold text-foreground">{invoice.status}</strong></p>
-            <p className="text-muted-foreground">Balance Due: <strong className="font-bold text-foreground font-mono">{formatCurrency(invoice.outstandingBalance)}</strong></p>
+            <span className="font-semibold text-muted-foreground uppercase text-[10px]">Bank Payment Account Details:</span>
+            <p className="text-foreground font-semibold">{config?.bankName || 'HDFC Bank, Surat Branch'}</p>
+            <p className="text-muted-foreground font-mono">A/C: {config?.accountNo || '50200012345678'} | IFSC: {config?.ifscCode || 'HDFC0000123'}</p>
+            {config?.upiId && <p className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">UPI ID: {config.upiId}</p>}
           </div>
         </div>
 
@@ -229,19 +236,17 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
 
         {/* Terms, Notes & Signature Block */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 border-t pt-6 text-xs">
-          <div>
-            {invoice.notes && (
-              <div className="space-y-1">
-                <p className="font-semibold text-muted-foreground">Payment Terms & Notes:</p>
-                <p className="text-foreground whitespace-pre-line">{invoice.notes}</p>
-              </div>
-            )}
+          <div className="space-y-2">
+            <p className="font-semibold text-muted-foreground">Terms & Conditions / Invoice Footer:</p>
+            <p className="text-muted-foreground whitespace-pre-line bg-muted/20 p-2.5 rounded border">
+              {config?.invoiceFooter || 'Payment due within 15 days of invoice date. Thank you for your business.'}
+            </p>
           </div>
 
           <div className="flex flex-col items-end justify-end space-y-2 pt-8 sm:pt-0">
             <div className="w-48 border-t border-slate-400 pt-1 text-center">
               <span className="text-[11px] font-semibold text-foreground">Authorized Signature</span>
-              <p className="text-[10px] text-muted-foreground">Embroidery Management System</p>
+              <p className="text-[10px] text-muted-foreground">{config?.companyName || 'Embroidery Business'}</p>
             </div>
           </div>
         </div>

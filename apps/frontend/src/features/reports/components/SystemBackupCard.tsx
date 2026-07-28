@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
-import { Database, Download, FileSpreadsheet, ShieldCheck } from 'lucide-react';
+import { Database, Download, FileSpreadsheet, ShieldCheck, Clock, HardDrive, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { axiosClient } from '@/shared/api';
+import { useSystemHealth } from '@/features/settings/hooks/useBusinessSettings';
 
 export const SystemBackupCard: React.FC = () => {
   const [isExportingJson, setIsExportingJson] = useState<boolean>(false);
   const [isExportingCsv, setIsExportingCsv] = useState<boolean>(false);
+  const [lastBackupTime, setLastBackupTime] = useState<string | null>(() => {
+    return localStorage.getItem('ebms_last_backup_timestamp');
+  });
+
+  const { data: health } = useSystemHealth();
 
   const fetchBackupData = async () => {
     const res = await axiosClient.get('/reports/export-all');
     return res.data?.data || res.data;
+  };
+
+  const markBackupTaken = () => {
+    const nowStr = new Date().toLocaleString();
+    setLastBackupTime(nowStr);
+    localStorage.setItem('ebms_last_backup_timestamp', nowStr);
   };
 
   const handleDownloadJsonBackup = async () => {
@@ -31,6 +43,7 @@ export const SystemBackupCard: React.FC = () => {
       downloadAnchor.click();
       document.body.removeChild(downloadAnchor);
       URL.revokeObjectURL(url);
+      markBackupTaken();
     } catch {
       alert('Failed to download system backup. Please check your network connection.');
     } finally {
@@ -84,6 +97,7 @@ export const SystemBackupCard: React.FC = () => {
       downloadAnchor.click();
       document.body.removeChild(downloadAnchor);
       URL.revokeObjectURL(url);
+      markBackupTaken();
     } catch {
       alert('Failed to generate CSV backup ledger.');
     } finally {
@@ -91,26 +105,65 @@ export const SystemBackupCard: React.FC = () => {
     }
   };
 
+  const totalRecords = health
+    ? health.recordCounts.customers +
+      health.recordCounts.jobs +
+      health.recordCounts.invoices +
+      health.recordCounts.payments +
+      health.recordCounts.designs
+    : 0;
+
   return (
-    <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 rounded-lg border bg-card p-5 shadow-sm">
-      <div className="flex items-center space-x-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Database className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="flex items-center space-x-2">
-            <h3 className="text-sm font-bold text-foreground">Full System Data Backup & Recovery</h3>
-            <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
-              <ShieldCheck className="h-3 w-3 mr-1" /> Ready
-            </span>
+    <div className="space-y-4 rounded-lg border bg-card p-6 shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b pb-4">
+        <div className="flex items-center space-x-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Database className="h-5 w-5" />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Export a complete offline database backup snapshot in JSON or Master Spreadsheet CSV format.
-          </p>
+          <div>
+            <div className="flex items-center space-x-2">
+              <h3 className="text-sm font-bold text-foreground">Backup & Recovery Metadata Hub</h3>
+              <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
+                <ShieldCheck className="h-3 w-3 mr-1" /> Backup Ready
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Monitor backup status, record counts, payload size estimates, and generate offline recovery snapshots.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Metadata Strip */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 text-xs">
+        <div className="rounded-md border bg-muted/20 p-3 flex items-center space-x-3">
+          <Clock className="h-5 w-5 text-amber-500 shrink-0" />
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Last Offline Backup</p>
+            <p className="font-semibold text-foreground truncate">{lastBackupTime || 'Never (Take initial backup)'}</p>
+          </div>
+        </div>
+
+        <div className="rounded-md border bg-muted/20 p-3 flex items-center space-x-3">
+          <HardDrive className="h-5 w-5 text-blue-500 shrink-0" />
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Active Database Records</p>
+            <p className="font-semibold text-foreground">{totalRecords} total entries across 5 tables</p>
+          </div>
+        </div>
+
+        <div className="rounded-md border bg-muted/20 p-3 flex items-center space-x-3">
+          <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Disaster Recovery</p>
+            <p className="font-semibold text-emerald-600 dark:text-emerald-400">JSON & CSV Ledgers Ready</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Download Action Bar */}
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-4">
         <Button
           size="sm"
           variant="outline"
