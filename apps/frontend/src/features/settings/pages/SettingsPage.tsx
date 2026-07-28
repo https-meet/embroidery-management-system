@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, CreditCard, Sliders, Users, ShieldCheck, HardDrive, Activity } from 'lucide-react';
+import { Building2, CreditCard, Sliders, Users, ShieldCheck, HardDrive, Activity, History } from 'lucide-react';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { SystemBackupCard } from '@/features/reports/components/SystemBackupCard';
@@ -11,9 +11,10 @@ import { PermissionsMatrixCard } from '../components/PermissionsMatrixCard';
 import { UserProfileCard } from '../components/UserProfileCard';
 import { ChangePasswordForm } from '../components/ChangePasswordForm';
 import { SystemHealthCard } from '../components/SystemHealthCard';
+import { AuditLogViewer } from '../components/AuditLogViewer';
 import type { BusinessConfig } from '../hooks/useBusinessSettings';
 
-type SettingsTab = 'company' | 'billing' | 'tax' | 'users' | 'security' | 'backups' | 'system';
+type SettingsTab = 'company' | 'billing' | 'tax' | 'users' | 'security' | 'audit' | 'backups' | 'system';
 
 export const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('company');
@@ -32,10 +33,10 @@ export const SettingsPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title="Settings & System Configuration"
-        description="Centralized business configuration, firm profiles, numbering formats, user permissions, and system diagnostics."
+        description="Centralized business configuration, firm profiles, numbering formats, user permissions, audit logs, and system diagnostics."
       />
 
-      {/* 7-Section Navigation Tabs */}
+      {/* 8-Section Navigation Tabs */}
       <div className="flex flex-wrap border-b gap-1">
         <TabButton
           active={activeTab === 'company'}
@@ -60,6 +61,12 @@ export const SettingsPage: React.FC = () => {
           onClick={() => setActiveTab('users')}
           icon={<Users className="h-4 w-4" />}
           label="Users & Capabilities"
+        />
+        <TabButton
+          active={activeTab === 'audit'}
+          onClick={() => setActiveTab('audit')}
+          icon={<History className="h-4 w-4" />}
+          label="Audit Trail"
         />
         <TabButton
           active={activeTab === 'security'}
@@ -114,6 +121,10 @@ export const SettingsPage: React.FC = () => {
 
       {activeTab === 'users' && (
         <PermissionsMatrixCard />
+      )}
+
+      {activeTab === 'audit' && (
+        <AuditLogViewer />
       )}
 
       {activeTab === 'security' && (
