@@ -4,6 +4,8 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { MobileNav } from './MobileNav';
 import { Breadcrumbs } from '@/shared/components/Breadcrumbs';
+import { OnboardingWizardModal } from '@/shared/components/OnboardingWizardModal';
+import { useCustomers } from '@/features/customers';
 
 const SIDEBAR_COLLAPSED_KEY = 'ebms_sidebar_collapsed';
 
@@ -16,6 +18,9 @@ export const AppLayout: React.FC = () => {
     }
   });
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
+
+  const { data: customerData } = useCustomers({ limit: 1 });
 
   useEffect(() => {
     try {
@@ -24,6 +29,15 @@ export const AppLayout: React.FC = () => {
       // Safe fallback if localStorage is disabled
     }
   }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    if (customerData && customerData.total === 0) {
+      const completed = localStorage.getItem('ebms_onboarding_completed');
+      if (!completed) {
+        setIsOnboardingOpen(true);
+      }
+    }
+  }, [customerData]);
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarCollapsed((prev) => !prev);
@@ -64,6 +78,12 @@ export const AppLayout: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Guided Onboarding Setup Wizard */}
+      <OnboardingWizardModal
+        isOpen={isOnboardingOpen}
+        onComplete={() => setIsOnboardingOpen(false)}
+      />
     </div>
   );
 };
