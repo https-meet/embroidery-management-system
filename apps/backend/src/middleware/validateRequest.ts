@@ -27,10 +27,16 @@ export function validateRequest(
     }
 
     if (target === 'query') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      req.query = result.data as Record<string, any>;
+      if (req.query && typeof req.query === 'object') {
+        for (const key of Object.keys(req.query)) {
+          delete (req.query as Record<string, unknown>)[key];
+        }
+        Object.assign(req.query, result.data);
+      }
     } else if (target === 'params') {
-      req.params = result.data as Record<string, string>;
+      if (req.params && typeof req.params === 'object') {
+        Object.assign(req.params, result.data);
+      }
     } else {
       req.body = result.data;
     }
