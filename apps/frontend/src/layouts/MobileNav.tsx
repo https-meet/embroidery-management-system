@@ -13,7 +13,7 @@ export interface MobileNavProps {
 export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
 
-  // Close mobile nav on route change
+  // Close mobile nav ONLY when route path actually changes
   useEffect(() => {
     onClose();
   }, [location.pathname, onClose]);

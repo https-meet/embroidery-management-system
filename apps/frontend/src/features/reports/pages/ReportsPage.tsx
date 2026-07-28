@@ -109,32 +109,83 @@ export const ReportsPage: React.FC = () => {
         <div>
           {activeTab === 'revenue' && (
             <ExportCsvButton
-              filename="revenue_report"
-              data={revenueQuery.data?.byPaymentMethod || []}
+              filename="revenue_summary_report"
+              data={
+                revenueQuery.data
+                  ? [
+                      {
+                        'Metric / Method': 'Total Invoiced Amount (₹)',
+                        'Value / Amount (₹)': revenueQuery.data.totalInvoiced,
+                      },
+                      {
+                        'Metric / Method': 'Total Payments Collected (₹)',
+                        'Value / Amount (₹)': revenueQuery.data.totalCollected,
+                      },
+                      {
+                        'Metric / Method': 'Total Outstanding Balance (₹)',
+                        'Value / Amount (₹)': revenueQuery.data.totalOutstanding,
+                      },
+                      ...(revenueQuery.data.byPaymentMethod || []).map((m) => ({
+                        'Metric / Method': `Collected via ${m.method}`,
+                        'Value / Amount (₹)': m.total,
+                      })),
+                    ]
+                  : []
+              }
             />
           )}
           {activeTab === 'customers' && (
             <ExportCsvButton
-              filename="customer_report"
-              data={(customerQuery.data?.items || []) as unknown as Record<string, unknown>[]}
+              filename="customer_performance_report"
+              data={(customerQuery.data?.items || []).map((c) => ({
+                'Customer Code': c.customerCode,
+                'Customer Name': c.name,
+                'Type': c.customerType,
+                'Total Orders': c.totalJobs,
+                'Total Invoiced (₹)': c.totalInvoiced,
+                'Total Paid (₹)': c.totalPaid,
+                'Outstanding Balance (₹)': c.outstandingBalance,
+              }))}
             />
           )}
           {activeTab === 'jobs' && (
             <ExportCsvButton
-              filename="jobs_report"
-              data={(jobQuery.data?.items || []) as unknown as Record<string, unknown>[]}
+              filename="job_volume_report"
+              data={(jobQuery.data?.items || []).map((j) => ({
+                'Job No': j.jobNo,
+                'Customer Name': j.customerName,
+                'Order Date': new Date(j.jobDate).toLocaleDateString(),
+                'Status': j.status,
+                'Priority': j.priority,
+                'Total Amount (₹)': j.totalAmount,
+              }))}
             />
           )}
           {activeTab === 'production' && (
             <ExportCsvButton
-              filename="production_report"
-              data={(productionQuery.data?.items || []) as unknown as Record<string, unknown>[]}
+              filename="production_queue_report"
+              data={(productionQuery.data?.items || []).map((p) => ({
+                'Job No': p.jobNo,
+                'Customer Name': p.customerName,
+                'Assigned Operator': p.assignedOperator || 'Unassigned',
+                'Status': p.status,
+                'Started At': p.startedAt ? new Date(p.startedAt).toLocaleString() : 'Not Started',
+                'Completed At': p.completedAt ? new Date(p.completedAt).toLocaleString() : 'In Progress',
+                'Total Line Items': p.itemCount,
+              }))}
             />
           )}
           {activeTab === 'payments' && (
             <ExportCsvButton
-              filename="payments_report"
-              data={(paymentQuery.data?.items || []) as unknown as Record<string, unknown>[]}
+              filename="payment_audit_report"
+              data={(paymentQuery.data?.items || []).map((p) => ({
+                'Payment No': p.paymentNo,
+                'Customer Name': p.customerName,
+                'Payment Date': new Date(p.paymentDate).toLocaleDateString(),
+                'Payment Method': p.paymentMethod,
+                'Reference No': p.referenceNo || 'N/A',
+                'Amount Received (₹)': p.amount,
+              }))}
             />
           )}
         </div>

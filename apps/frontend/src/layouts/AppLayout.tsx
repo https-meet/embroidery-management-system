@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -25,9 +25,17 @@ export const AppLayout: React.FC = () => {
     }
   }, [isSidebarCollapsed]);
 
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     setIsSidebarCollapsed((prev) => !prev);
-  };
+  }, []);
+
+  const closeMobileNav = useCallback(() => {
+    setIsMobileNavOpen(false);
+  }, []);
+
+  const openMobileNav = useCallback(() => {
+    setIsMobileNavOpen(true);
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -37,7 +45,7 @@ export const AppLayout: React.FC = () => {
       {/* Mobile Navigation Drawer */}
       <MobileNav
         isOpen={isMobileNavOpen}
-        onClose={() => setIsMobileNavOpen(false)}
+        onClose={closeMobileNav}
       />
 
       {/* Main Content Area */}
@@ -45,7 +53,7 @@ export const AppLayout: React.FC = () => {
         <Header
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={toggleSidebar}
-          onOpenMobileNav={() => setIsMobileNavOpen(true)}
+          onOpenMobileNav={openMobileNav}
           isMobileNavOpen={isMobileNavOpen}
         />
 
