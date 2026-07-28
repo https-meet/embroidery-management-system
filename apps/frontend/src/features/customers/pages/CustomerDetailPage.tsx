@@ -1,9 +1,11 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ErrorState } from '@/shared/components/ErrorState';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { Button } from '@/shared/components/ui/button';
 import { useDisclosure } from '@/shared/hooks/useDisclosure';
 import { ROUTES } from '@/shared/constants/routes';
 import { useCustomer360 } from '../hooks/useCustomer360';
@@ -48,6 +50,17 @@ export const CustomerDetailPage: React.FC = () => {
       <PageHeader
         title={data.customer.name}
         description={`Customer 360° Workspace (${data.customer.customerCode})`}
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(ROUTES.CUSTOMERS.LIST)}
+            className="flex items-center space-x-1.5"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Customers</span>
+          </Button>
+        }
       />
 
       <CustomerWorkspace
