@@ -20,6 +20,17 @@ const optionalDateString = z
     return isNaN(date.getTime()) ? undefined : date.toISOString();
   });
 
+const PrioritySchema = z.union([
+  z.nativeEnum(Priority),
+  z.literal('URGENT').transform(() => Priority.HIGH),
+]);
+
+const JobStatusSchema = z.union([
+  z.nativeEnum(JobStatus),
+  z.literal('PENDING_PRODUCTION').transform(() => JobStatus.IN_PROGRESS),
+  z.literal('IN_PRODUCTION').transform(() => JobStatus.IN_PROGRESS),
+]);
+
 export const createJobItemSchema = z.object({
   designId: optionalUuid,
   position: z.string().min(1, 'Embroidery position is required.').max(100),
@@ -37,7 +48,7 @@ export const createJobSchema = z.object({
   customerId: z.string().uuid('Invalid customer ID format.'),
   jobDate: optionalDateString,
   expectedDeliveryDate: optionalDateString,
-  priority: z.nativeEnum(Priority).optional().default(Priority.NORMAL),
+  priority: PrioritySchema.optional().default(Priority.NORMAL),
   notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
   items: z.array(createJobItemSchema).min(1, 'A Job must contain at least one Job Item.'),
 });
@@ -47,8 +58,8 @@ export const updateJobSchema = z.object({
   assignedOperator: z.string().max(100).optional().or(z.literal('')).nullable(),
   jobDate: optionalDateString,
   expectedDeliveryDate: optionalDateString,
-  priority: z.nativeEnum(Priority).optional(),
-  status: z.nativeEnum(JobStatus).optional(),
+  priority: PrioritySchema.optional(),
+  status: JobStatusSchema.optional(),
   notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
   items: z.array(createJobItemSchema).optional(),
 });
@@ -56,8 +67,8 @@ export const updateJobSchema = z.object({
 export const jobQuerySchema = z.object({
   search: z.string().optional(),
   customerId: optionalUuid,
-  status: z.nativeEnum(JobStatus).optional(),
-  priority: z.nativeEnum(Priority).optional(),
+  status: JobStatusSchema.optional(),
+  priority: PrioritySchema.optional(),
   page: z
     .string()
     .default('1')

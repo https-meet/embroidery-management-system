@@ -1,10 +1,56 @@
-import type { Customer, Design, Job, JobItem, Prisma } from '@prisma/client';
+import type { CustomerType, Job, JobItemProductionStatus, Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import type { CreateJobDto, JobQueryFilter, UpdateJobDto } from './job.types';
 
 export type FullJob = Job & {
-  customer: Customer;
-  items: (JobItem & { design: Design | null })[];
+  customer: {
+    id: string;
+    customerCode: string;
+    customerType: CustomerType;
+    name: string;
+    contactPerson: string | null;
+    mobile: string | null;
+    alternateMobile: string | null;
+    email: string | null;
+    address: string | null;
+    notes: string | null;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  items: Array<{
+    id: string;
+    jobId: string;
+    designId: string | null;
+    design: {
+      id: string;
+      designCode: string;
+      name: string;
+      description: string | null;
+      category: string | null;
+      previewUrl: string | null;
+      primaryFileUrl: string | null;
+      primaryFileType: string | null;
+      stitchCount: number | null;
+      widthMm: number | null;
+      heightMm: number | null;
+      colorCount: number | null;
+      notes: string | null;
+      isActive: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    } | null;
+    position: string;
+    quantity: number;
+    rate: number;
+    lineTotal: number;
+    threadColor: string | null;
+    dimensions: string | null;
+    remarks: string | null;
+    productionStatus: JobItemProductionStatus;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
 };
 
 export class JobRepository {
@@ -50,20 +96,16 @@ export class JobRepository {
     });
   }
 
-  public async create(
-    data: CreateJobDto & { jobNo: string; createdBy?: string },
-  ): Promise<FullJob> {
+  public async create(data: CreateJobDto & { jobNo: string; createdBy?: string }): Promise<FullJob> {
     return prisma.job.create({
       data: {
         jobNo: data.jobNo,
         customerId: data.customerId,
         jobDate: data.jobDate ? new Date(data.jobDate) : new Date(),
-        expectedDeliveryDate: data.expectedDeliveryDate
-          ? new Date(data.expectedDeliveryDate)
-          : null,
-        priority: data.priority ?? 'NORMAL',
-        notes: data.notes || null,
-        createdBy: data.createdBy || null,
+        expectedDeliveryDate: data.expectedDeliveryDate ? new Date(data.expectedDeliveryDate) : null,
+        priority: data.priority,
+        notes: data.notes ?? null,
+        createdBy: data.createdBy ?? null,
         items: {
           create: data.items.map((item) => ({
             designId: item.designId || null,
@@ -92,6 +134,10 @@ export class JobRepository {
     return prisma.job.update({
       where: { id },
       data: {
+        ...(data.customerId && { customerId: data.customerId }),
+        ...(data.assignedOperator !== undefined && {
+          assignedOperator: data.assignedOperator || null,
+        }),
         ...(data.jobDate && { jobDate: new Date(data.jobDate) }),
         ...(data.expectedDeliveryDate !== undefined && {
           expectedDeliveryDate: data.expectedDeliveryDate
@@ -123,7 +169,9 @@ export class JobRepository {
     });
   }
 
-  public async findMany(filter: JobQueryFilter): Promise<{ jobs: FullJob[]; total: number }> {
+  public async findMany(
+    filter: JobQueryFilter,
+  ): Promise<{ jobs: FullJob[]; total: number }> {
     const search = filter.search;
     const customerId = filter.customerId;
     const status = filter.status;
@@ -142,7 +190,6 @@ export class JobRepository {
         OR: [
           { jobNo: { contains: search, mode: 'insensitive' } },
           { customer: { name: { contains: search, mode: 'insensitive' } } },
-          { customer: { customerCode: { contains: search, mode: 'insensitive' } } },
           { notes: { contains: search, mode: 'insensitive' } },
         ],
       }),

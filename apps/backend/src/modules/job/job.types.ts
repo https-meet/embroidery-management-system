@@ -62,11 +62,14 @@ export interface CreateJobDto {
 }
 
 export interface UpdateJobDto {
+  customerId?: string;
+  assignedOperator?: string | null;
   jobDate?: string;
   expectedDeliveryDate?: string;
   priority?: Priority;
   status?: JobStatus;
   notes?: string;
+  items?: CreateJobItemDto[];
 }
 
 export interface JobQueryFilter {
