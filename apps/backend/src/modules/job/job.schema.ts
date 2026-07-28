@@ -43,11 +43,14 @@ export const createJobSchema = z.object({
 });
 
 export const updateJobSchema = z.object({
+  customerId: optionalUuid,
+  assignedOperator: z.string().max(100).optional().or(z.literal('')).nullable(),
   jobDate: optionalDateString,
   expectedDeliveryDate: optionalDateString,
   priority: z.nativeEnum(Priority).optional(),
   status: z.nativeEnum(JobStatus).optional(),
   notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
+  items: z.array(createJobItemSchema).optional(),
 });
 
 export const jobQuerySchema = z.object({

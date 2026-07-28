@@ -12,13 +12,13 @@ export const startProductionSchema = z.object({
 
 export const completeProductionSchema = z.object({
   jobId: z.string().uuid('Invalid job ID format.'),
-  notes: z.string().max(1000).optional(),
+  notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
 });
 
 export const qualityCheckSchema = z.object({
   jobId: z.string().uuid('Invalid job ID format.'),
-  passed: z.boolean(),
-  notes: z.string().max(1000).optional(),
+  passed: z.union([z.boolean(), z.string().transform((val) => val === 'true')]),
+  notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
 });
 
 export const deliveryReadinessSchema = z.object({
