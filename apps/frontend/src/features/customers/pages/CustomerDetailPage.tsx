@@ -6,7 +6,7 @@ import { ErrorState } from '@/shared/components/ErrorState';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { useDisclosure } from '@/shared/hooks/useDisclosure';
 import { ROUTES } from '@/shared/constants/routes';
-import { useCustomer } from '../hooks/useCustomers';
+import { useCustomer360 } from '../hooks/useCustomer360';
 import { useArchiveCustomer } from '../hooks/useCustomerMutations';
 import { CustomerWorkspace } from '../components/CustomerWorkspace';
 
@@ -15,7 +15,7 @@ export const CustomerDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const archiveDialog = useDisclosure();
 
-  const { data, isLoading, isError, refetch } = useCustomer(id);
+  const { data, isLoading, isError, refetch } = useCustomer360(id);
   const archiveMutation = useArchiveCustomer();
 
   const handleConfirmArchive = async () => {
@@ -33,7 +33,7 @@ export const CustomerDetailPage: React.FC = () => {
   if (isError || !data?.customer) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Customer Details" />
+        <PageHeader title="Customer 360° Overview" />
         <ErrorState
           title="Customer Not Found"
           message="The requested customer record could not be loaded."
@@ -47,11 +47,11 @@ export const CustomerDetailPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title={data.customer.name}
-        description={`Customer Workspace (${data.customer.customerCode})`}
+        description={`Customer 360° Workspace (${data.customer.customerCode})`}
       />
 
       <CustomerWorkspace
-        customer={data.customer}
+        data={data}
         onArchiveClick={archiveDialog.onOpen}
       />
 
