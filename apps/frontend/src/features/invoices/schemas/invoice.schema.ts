@@ -12,7 +12,7 @@ export const createInvoiceSchema = z.object({
   customerId: z.string().min(1, 'Customer selection is required'),
   invoiceDate: z.string().optional().or(z.literal('')),
   dueDate: z.string().optional().or(z.literal('')),
-  discountType: z.enum(['PERCENTAGE', 'FIXED']).optional(),
+  discountType: z.enum(['PERCENTAGE', 'FIXED', 'FIXED_AMOUNT']).optional(),
   discountValue: z.number().min(0, 'Discount value must be non-negative').optional(),
   notes: z.string().max(500).optional().or(z.literal('')),
   items: z.array(invoiceItemSchema).optional(),
@@ -21,7 +21,7 @@ export const createInvoiceSchema = z.object({
 
 export const updateInvoiceSchema = z.object({
   dueDate: z.string().optional().or(z.literal('')),
-  discountType: z.enum(['PERCENTAGE', 'FIXED']).optional(),
+  discountType: z.enum(['PERCENTAGE', 'FIXED', 'FIXED_AMOUNT']).optional(),
   discountValue: z.number().min(0, 'Discount value must be non-negative').optional(),
   status: z.enum(['DRAFT', 'ISSUED', 'PARTIALLY_PAID', 'PAID', 'CANCELLED']).optional(),
   notes: z.string().max(500).optional().or(z.literal('')),

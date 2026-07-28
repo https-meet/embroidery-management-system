@@ -20,6 +20,16 @@ const optionalDateString = z
     return isNaN(date.getTime()) ? undefined : date.toISOString();
   });
 
+const DiscountTypeSchema = z
+  .union([
+    z.nativeEnum(DiscountType),
+    z.literal('FIXED').transform(() => DiscountType.FIXED_AMOUNT),
+    z.literal('FIXED_AMOUNT').transform(() => DiscountType.FIXED_AMOUNT),
+    z.literal('').transform(() => undefined),
+  ])
+  .optional()
+  .nullable();
+
 export const createInvoiceItemSchema = z.object({
   sourceJobId: optionalUuid,
   sourceJobItemRef: optionalUuid,
@@ -36,10 +46,7 @@ export const createInvoiceSchema = z
     customerId: z.string().uuid('Invalid customer ID format.'),
     invoiceDate: optionalDateString,
     dueDate: optionalDateString,
-    discountType: z
-      .union([z.nativeEnum(DiscountType), z.literal('').transform(() => undefined)])
-      .optional()
-      .nullable(),
+    discountType: DiscountTypeSchema,
     discountValue: z.coerce.number().nonnegative().optional().nullable(),
     notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
     items: z.array(createInvoiceItemSchema).optional(),
@@ -55,10 +62,7 @@ export const createInvoiceSchema = z
 
 export const updateInvoiceSchema = z.object({
   dueDate: optionalDateString,
-  discountType: z
-    .union([z.nativeEnum(DiscountType), z.literal('').transform(() => undefined)])
-    .optional()
-    .nullable(),
+  discountType: DiscountTypeSchema,
   discountValue: z.coerce.number().nonnegative().optional().nullable(),
   notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
   status: z.nativeEnum(InvoiceStatus).optional(),
