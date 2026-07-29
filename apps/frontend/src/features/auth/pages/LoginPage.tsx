@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { Eye, EyeOff, Lock, AlertCircle, Shield } from 'lucide-react';
 import { ROUTES } from '@/shared/constants/routes';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { FormField } from '@/shared/components/FormField';
@@ -17,6 +18,7 @@ export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Where to redirect after login (default: /dashboard)
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || ROUTES.DASHBOARD;
@@ -66,19 +68,25 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header Info */}
       <div className="space-y-1 text-center">
-        <h2 className="text-xl font-semibold tracking-tight">Sign In</h2>
+        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          Sign In
+        </h2>
         <p className="text-xs text-muted-foreground">
-          Enter your credentials to access your account
+          Enter your email address and password to access your account
         </p>
       </div>
 
+      {/* Error Alert Box */}
       {generalError && (
-        <div className="rounded-md bg-destructive/15 p-3 text-xs text-destructive">
-          {generalError}
+        <div className="flex items-start space-x-2.5 rounded-md border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>{generalError}</span>
         </div>
       )}
 
+      {/* Form Credentials */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FormField
           label="Email Address"
@@ -89,7 +97,7 @@ export const LoginPage: React.FC = () => {
           <Input
             id="email"
             type="email"
-            placeholder="admin@example.com"
+            placeholder="admin@ebms.local"
             autoComplete="email"
             error={Boolean(errors.email)}
             {...register('email')}
@@ -102,24 +110,62 @@ export const LoginPage: React.FC = () => {
           required
           error={errors.password?.message}
         >
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            autoComplete="current-password"
-            error={Boolean(errors.password)}
-            {...register('password')}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              error={Boolean(errors.password)}
+              className="pr-10"
+              {...register('password')}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </FormField>
 
+        {/* Remember Me & Help Link */}
+        <div className="flex items-center justify-between text-xs pt-1">
+          <label className="flex items-center space-x-2 cursor-pointer select-none text-muted-foreground hover:text-foreground">
+            <input
+              type="checkbox"
+              className="h-3.5 w-3.5 rounded border-input text-primary focus:ring-primary/20 accent-primary"
+            />
+            <span>Remember Me</span>
+          </label>
+          <span className="text-muted-foreground text-[11px]">
+            Forgot password? Contact Administrator
+          </span>
+        </div>
+
+        {/* Submit Action */}
         <Button
           type="submit"
-          className="w-full"
+          className="w-full h-10 text-sm font-semibold flex items-center justify-center space-x-2"
           isLoading={isSubmitting}
         >
-          Sign In
+          <Lock className="h-4 w-4" />
+          <span>Sign In to Dashboard</span>
         </Button>
       </form>
+
+      {/* Generic Trust Footer */}
+      <div className="flex items-center justify-center space-x-1.5 text-[11px] text-muted-foreground border-t border-border/40 pt-4">
+        <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+        <span>Authorized Personnel Access • Secure Session</span>
+      </div>
     </div>
   );
 };
+

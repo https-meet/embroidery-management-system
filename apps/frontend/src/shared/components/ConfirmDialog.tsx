@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, HelpCircle } from 'lucide-react';
 import { Button } from './ui/button';
 
 export interface ConfirmDialogProps {
@@ -25,11 +25,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  // Close dialog on Escape key press
+  // Handle Escape key to cancel and Enter key to confirm
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (!isOpen) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
         onCancel();
+      } else if (e.key === 'Enter' && !isLoading) {
+        e.preventDefault();
+        onConfirm();
       }
     };
 
@@ -40,13 +45,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onCancel]);
+  }, [isOpen, isLoading, onCancel, onConfirm]);
 
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 select-none"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
@@ -54,30 +59,38 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-150"
         onClick={onCancel}
       />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-md rounded-lg border bg-card p-6 shadow-lg sm:p-6">
-        <div className="flex items-start space-x-4">
-          {isDestructive && (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-              <AlertCircle className="h-5 w-5" />
-            </div>
-          )}
+      <div className="relative w-full max-w-md rounded-lg border border-border/80 bg-card p-5 shadow-lg space-y-4">
+        <div className="flex items-start space-x-3.5">
+          <div
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border ${
+              isDestructive
+                ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                : 'border-border/60 bg-muted/40 text-muted-foreground'
+            }`}
+          >
+            {isDestructive ? (
+              <AlertCircle className="h-4 w-4" />
+            ) : (
+              <HelpCircle className="h-4 w-4 text-primary" />
+            )}
+          </div>
           <div className="space-y-1">
-            <h3 id="confirm-dialog-title" className="text-lg font-semibold leading-none text-foreground">
+            <h3 id="confirm-dialog-title" className="text-sm font-semibold tracking-tight text-foreground">
               {title}
             </h3>
-            <p id="confirm-dialog-description" className="text-xs text-muted-foreground">
+            <p id="confirm-dialog-description" className="text-xs text-muted-foreground leading-relaxed">
               {description}
             </p>
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-end space-x-3">
-          <Button variant="outline" size="sm" onClick={onCancel} disabled={isLoading}>
+        <div className="flex items-center justify-end space-x-2 pt-2 border-t border-border/50">
+          <Button variant="outline" size="sm" onClick={onCancel} disabled={isLoading} className="h-8 text-xs font-semibold">
             {cancelText}
           </Button>
           <Button
@@ -85,6 +98,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             size="sm"
             onClick={onConfirm}
             isLoading={isLoading}
+            className="h-8 text-xs font-semibold"
           >
             {confirmText}
           </Button>
@@ -93,3 +107,4 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     </div>
   );
 };
+

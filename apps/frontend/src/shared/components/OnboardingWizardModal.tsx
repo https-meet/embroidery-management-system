@@ -86,15 +86,17 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog">
-      <div className="w-full max-w-xl rounded-xl border bg-card p-6 shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-none" role="dialog">
+      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-150" />
+
+      <div className="relative w-full max-w-xl rounded-lg border border-border/80 bg-card p-6 shadow-xl space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-3 border-b pb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Sparkles className="h-5 w-5" />
+        <div className="flex items-center space-x-3 border-b border-border/60 pb-4">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border/50 bg-muted/40 text-foreground shrink-0">
+            <Sparkles className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">Welcome to EBMS Setup Wizard</h2>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Welcome to EBMS Setup Wizard</h2>
             <p className="text-xs text-muted-foreground">
               Commercial Onboarding — Step {step} of 3
             </p>
@@ -103,13 +105,13 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
         {/* Step Progress Bar */}
         <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
-          <div className={`p-2 rounded-md border ${step === 1 ? 'bg-primary text-primary-foreground' : 'bg-muted/30 text-muted-foreground'}`}>
+          <div className={`p-2 rounded-md border transition-all duration-150 ${step === 1 ? 'bg-primary text-primary-foreground shadow-xs border-primary' : 'bg-muted/30 text-muted-foreground border-border/50'}`}>
             1. Firm Details
           </div>
-          <div className={`p-2 rounded-md border ${step === 2 ? 'bg-primary text-primary-foreground' : 'bg-muted/30 text-muted-foreground'}`}>
+          <div className={`p-2 rounded-md border transition-all duration-150 ${step === 2 ? 'bg-primary text-primary-foreground shadow-xs border-primary' : 'bg-muted/30 text-muted-foreground border-border/50'}`}>
             2. First Customer
           </div>
-          <div className={`p-2 rounded-md border ${step === 3 ? 'bg-primary text-primary-foreground' : 'bg-muted/30 text-muted-foreground'}`}>
+          <div className={`p-2 rounded-md border transition-all duration-150 ${step === 3 ? 'bg-primary text-primary-foreground shadow-xs border-primary' : 'bg-muted/30 text-muted-foreground border-border/50'}`}>
             3. First Job Order
           </div>
         </div>
@@ -117,8 +119,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
         {/* Step 1 Form */}
         {step === 1 && (
           <div className="space-y-4 text-xs">
-            <div className="flex items-center space-x-2 text-sm font-semibold text-foreground">
-              <Building2 className="h-4 w-4 text-primary" />
+            <div className="flex items-center space-x-2 text-xs font-semibold text-foreground">
+              <Building2 className="h-4 w-4 text-muted-foreground" />
               <span>Configure Your Embroidery Firm Profile</span>
             </div>
             <FormField label="Firm / Business Name" required>
@@ -132,12 +134,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             </FormField>
             <Button
               type="button"
-              className="w-full flex items-center justify-center space-x-2"
+              className="w-full flex items-center justify-center space-x-2 h-9 text-xs font-semibold"
               onClick={handleStep1}
               isLoading={updateSettingsMutation.isPending}
             >
               <span>Save Firm Details & Next</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </div>
         )}
@@ -145,8 +147,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
         {/* Step 2 Form */}
         {step === 2 && (
           <div className="space-y-4 text-xs">
-            <div className="flex items-center space-x-2 text-sm font-semibold text-foreground">
-              <UserPlus className="h-4 w-4 text-primary" />
+            <div className="flex items-center space-x-2 text-xs font-semibold text-foreground">
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
               <span>Add Your First Master Customer</span>
             </div>
             <FormField label="Customer / Client Name" required>
@@ -157,12 +159,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             </FormField>
             <Button
               type="button"
-              className="w-full flex items-center justify-center space-x-2"
+              className="w-full flex items-center justify-center space-x-2 h-9 text-xs font-semibold"
               onClick={handleStep2}
               isLoading={createCustomerMutation.isPending}
             >
               <span>Create Customer & Next</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </div>
         )}
@@ -170,8 +172,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
         {/* Step 3 Form */}
         {step === 3 && (
           <div className="space-y-4 text-xs">
-            <div className="flex items-center space-x-2 text-sm font-semibold text-foreground">
-              <Briefcase className="h-4 w-4 text-primary" />
+            <div className="flex items-center space-x-2 text-xs font-semibold text-foreground">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
               <span>Create Your First Operational Job Order</span>
             </div>
             <FormField label="Embroidery Placement / Position" required>
@@ -195,7 +197,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             </div>
             <Button
               type="button"
-              className="w-full flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="w-full flex items-center justify-center space-x-2 h-9 text-xs font-semibold"
               onClick={handleStep3}
               isLoading={createJobMutation.isPending}
             >
@@ -208,3 +210,4 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     </div>
   );
 };
+

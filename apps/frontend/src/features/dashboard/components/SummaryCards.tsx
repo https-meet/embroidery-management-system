@@ -14,30 +14,28 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ summary }) => {
       value: summary.jobsDueToday,
       subtitle: 'Target delivery today',
       icon: Clock,
-      color: 'text-amber-600 bg-amber-100 dark:bg-amber-950 dark:text-amber-300',
+      isAlert: false,
     },
     {
       title: 'Delayed Jobs Alert',
       value: summary.delayedJobs,
       subtitle: 'Past target delivery date',
       icon: AlertTriangle,
-      color: summary.delayedJobs > 0
-        ? 'text-rose-600 bg-rose-100 dark:bg-rose-950 dark:text-rose-300 font-bold'
-        : 'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-300',
+      isAlert: summary.delayedJobs > 0,
     },
     {
       title: 'Pending Collection Balance',
       value: formatCurrency(summary.outstandingBalance),
       subtitle: 'Total unpaid receivables',
       icon: CreditCard,
-      color: 'text-rose-600 bg-rose-100 dark:bg-rose-950 dark:text-rose-300',
+      isAlert: false,
     },
     {
       title: 'Revenue Collected This Month',
       value: formatCurrency(summary.totalRevenueThisMonth),
       subtitle: 'Confirmed payment inflows',
       icon: TrendingUp,
-      color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300',
+      isAlert: false,
     },
   ];
 
@@ -50,17 +48,19 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ summary }) => {
           return (
             <div
               key={kpi.title}
-              className="flex items-center justify-between rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow-md"
+              className={`flex items-center justify-between rounded-lg border bg-card p-4 shadow-xs transition-all hover:border-border/90 ${
+                kpi.isAlert ? 'border-destructive/40 bg-destructive/5' : 'border-border/70'
+              }`}
             >
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground">{kpi.title}</p>
-                <p className="text-2xl font-bold font-mono tracking-tight text-foreground">
+                <p className={`text-2xl font-bold font-mono tracking-tight ${kpi.isAlert ? 'text-destructive' : 'text-foreground'}`}>
                   {kpi.value}
                 </p>
                 <p className="text-[11px] text-muted-foreground">{kpi.subtitle}</p>
               </div>
-              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${kpi.color}`}>
-                <Icon className="h-5 w-5" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border/50 bg-muted/40 text-foreground">
+                <Icon className={`h-4 w-4 ${kpi.isAlert ? 'text-destructive' : 'text-muted-foreground'}`} />
               </div>
             </div>
           );
@@ -76,37 +76,34 @@ export const SecondaryBusinessOverview: React.FC<{ summary: DashboardSummaryResp
       title: 'Total Active Customers',
       value: summary.totalCustomers,
       icon: Users,
-      color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400',
     },
     {
       title: 'Active Jobs in Production',
       value: summary.activeJobs,
       icon: Briefcase,
-      color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400',
     },
     {
       title: 'Pending Invoices Issued',
       value: summary.pendingInvoices,
       icon: FileText,
-      color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400',
     },
   ];
 
   return (
-    <div className="space-y-3 rounded-lg border bg-card p-5 shadow-sm">
-      <h3 className="text-sm font-semibold tracking-tight text-foreground border-b pb-2">
+    <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs space-y-3">
+      <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase border-b border-border/50 pb-2">
         Secondary Business Overview
       </h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {secondaryKpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.title} className="flex items-center justify-between border-r last:border-r-0 pr-4">
+            <div key={kpi.title} className="flex items-center justify-between border-r border-border/40 last:border-r-0 pr-4">
               <div>
                 <p className="text-xs text-muted-foreground">{kpi.title}</p>
                 <p className="text-xl font-bold font-mono text-foreground mt-0.5">{kpi.value}</p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-md ${kpi.color}`}>
+              <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
                 <Icon className="h-4 w-4" />
               </div>
             </div>
@@ -116,3 +113,4 @@ export const SecondaryBusinessOverview: React.FC<{ summary: DashboardSummaryResp
     </div>
   );
 };
+

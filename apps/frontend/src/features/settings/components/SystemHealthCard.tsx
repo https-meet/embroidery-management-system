@@ -18,87 +18,96 @@ export const SystemHealthCard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-3 border-b pb-3">
-        <Activity className="h-5 w-5 text-primary" />
+      <div className="flex items-center space-x-3 border-b border-border/60 pb-3">
+        <Activity className="h-5 w-5 text-muted-foreground" />
         <div>
-          <h3 className="text-base font-bold text-foreground">System Health & Environment Diagnostics</h3>
-          <p className="text-xs text-muted-foreground">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">System Health & Environment Diagnostics</h3>
+          <p className="text-[11px] text-muted-foreground">
             Real-time status monitor for database connectivity, API response latency, and system metrics.
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border bg-card p-4 shadow-sm flex items-center justify-between">
+        <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground font-medium">App Release Version</p>
-            <p className="text-base font-bold font-mono text-primary mt-0.5">{health.appVersion}</p>
+            <p className="text-xs text-muted-foreground font-semibold">App Release Version</p>
+            <p className="text-base font-bold font-mono text-foreground mt-0.5">{health.appVersion}</p>
           </div>
-          <Server className="h-7 w-7 text-primary/20" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
+            <Server className="h-4 w-4" />
+          </div>
         </div>
 
-        <div className="rounded-lg border bg-card p-4 shadow-sm flex items-center justify-between">
+        <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground font-medium">PostgreSQL Database</p>
-            <div className="flex items-center space-x-2 mt-0.5">
-              <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400">
+            <p className="text-xs text-muted-foreground font-semibold">PostgreSQL Database</p>
+            <div className="flex items-center space-x-2 mt-1">
+              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="text-sm font-bold font-mono text-foreground">
                 {health.database.status} ({health.database.latencyMs}ms)
               </span>
             </div>
           </div>
-          <Database className="h-7 w-7 text-emerald-500/20" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
+            <Database className="h-4 w-4" />
+          </div>
         </div>
 
-        <div className="rounded-lg border bg-card p-4 shadow-sm flex items-center justify-between">
+        <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground font-medium">Server Uptime</p>
+            <p className="text-xs text-muted-foreground font-semibold">Server Uptime</p>
             <p className="text-base font-bold font-mono text-foreground mt-0.5">
               {formatUptime(health.systemUptimeSeconds)}
             </p>
           </div>
-          <Clock className="h-7 w-7 text-indigo-500/20" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
+            <Clock className="h-4 w-4" />
+          </div>
         </div>
 
-        <div className="rounded-lg border bg-card p-4 shadow-sm flex items-center justify-between">
+        <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground font-medium">Environment</p>
+            <p className="text-xs text-muted-foreground font-semibold">Environment</p>
             <p className="text-base font-bold font-mono text-foreground uppercase mt-0.5">
               {health.environment}
             </p>
           </div>
-          <HardDrive className="h-7 w-7 text-amber-500/20" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
+            <HardDrive className="h-4 w-4" />
+          </div>
         </div>
       </div>
 
       {/* Master Database Record Counts */}
-      <div className="rounded-lg border bg-card p-5 shadow-sm space-y-3">
-        <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+      <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs space-y-3">
+        <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase border-b border-border/50 pb-2">
           Master Database Active Records Count
         </h4>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-5 text-center">
-          <div className="rounded-md border bg-muted/20 p-3">
+          <div className="rounded-md border border-border/50 bg-muted/30 p-3">
             <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.customers}</p>
-            <p className="text-[11px] text-muted-foreground">Customers</p>
+            <p className="text-[11px] text-muted-foreground font-medium">Customers</p>
           </div>
-          <div className="rounded-md border bg-muted/20 p-3">
+          <div className="rounded-md border border-border/50 bg-muted/30 p-3">
             <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.jobs}</p>
-            <p className="text-[11px] text-muted-foreground">Job Orders</p>
+            <p className="text-[11px] text-muted-foreground font-medium">Job Orders</p>
           </div>
-          <div className="rounded-md border bg-muted/20 p-3">
+          <div className="rounded-md border border-border/50 bg-muted/30 p-3">
             <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.invoices}</p>
-            <p className="text-[11px] text-muted-foreground">Invoices</p>
+            <p className="text-[11px] text-muted-foreground font-medium">Invoices</p>
           </div>
-          <div className="rounded-md border bg-muted/20 p-3">
+          <div className="rounded-md border border-border/50 bg-muted/30 p-3">
             <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.payments}</p>
-            <p className="text-[11px] text-muted-foreground">Payments</p>
+            <p className="text-[11px] text-muted-foreground font-medium">Payments</p>
           </div>
-          <div className="rounded-md border bg-muted/20 p-3">
+          <div className="rounded-md border border-border/50 bg-muted/30 p-3">
             <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.designs}</p>
-            <p className="text-[11px] text-muted-foreground">Designs</p>
+            <p className="text-[11px] text-muted-foreground font-medium">Designs</p>
           </div>
         </div>
       </div>
     </div>
   );
 };
+

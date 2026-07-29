@@ -32,65 +32,65 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Settings & System Configuration"
-        description="Centralized business configuration, firm profiles, numbering formats, user permissions, audit logs, and system diagnostics."
+        title="Settings & System Diagnostics"
+        description="Centralized business configuration, firm profiles, numbering formats, user capabilities, audit trail, and system diagnostics."
       />
 
       {/* 8-Section Navigation Tabs */}
-      <div className="flex flex-wrap border-b gap-1">
+      <div className="flex flex-wrap border-b border-border/60 gap-1 pb-1 select-none">
         <TabButton
           active={activeTab === 'company'}
           onClick={() => setActiveTab('company')}
-          icon={<Building2 className="h-4 w-4" />}
+          icon={<Building2 className="h-3.5 w-3.5" />}
           label="Company Profile"
         />
         <TabButton
           active={activeTab === 'billing'}
           onClick={() => setActiveTab('billing')}
-          icon={<CreditCard className="h-4 w-4" />}
+          icon={<CreditCard className="h-3.5 w-3.5" />}
           label="Billing & Banking"
         />
         <TabButton
           active={activeTab === 'tax'}
           onClick={() => setActiveTab('tax')}
-          icon={<Sliders className="h-4 w-4" />}
+          icon={<Sliders className="h-3.5 w-3.5" />}
           label="Tax & Formats"
         />
         <TabButton
           active={activeTab === 'users'}
           onClick={() => setActiveTab('users')}
-          icon={<Users className="h-4 w-4" />}
+          icon={<Users className="h-3.5 w-3.5" />}
           label="Users & Capabilities"
         />
         <TabButton
           active={activeTab === 'audit'}
           onClick={() => setActiveTab('audit')}
-          icon={<History className="h-4 w-4" />}
+          icon={<History className="h-3.5 w-3.5" />}
           label="Audit Trail"
         />
         <TabButton
           active={activeTab === 'security'}
           onClick={() => setActiveTab('security')}
-          icon={<ShieldCheck className="h-4 w-4" />}
+          icon={<ShieldCheck className="h-3.5 w-3.5" />}
           label="Security"
         />
         <TabButton
           active={activeTab === 'backups'}
           onClick={() => setActiveTab('backups')}
-          icon={<HardDrive className="h-4 w-4" />}
+          icon={<HardDrive className="h-3.5 w-3.5" />}
           label="Backups"
         />
         <TabButton
           active={activeTab === 'system'}
           onClick={() => setActiveTab('system')}
-          icon={<Activity className="h-4 w-4" />}
+          icon={<Activity className="h-3.5 w-3.5" />}
           label="System Health"
         />
       </div>
 
       {/* Section Panels */}
       {activeTab === 'company' && (
-        <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs">
           <CompanySettingsCard
             config={data?.config}
             onSave={handleSaveConfig}
@@ -100,7 +100,7 @@ export const SettingsPage: React.FC = () => {
       )}
 
       {activeTab === 'billing' && (
-        <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs">
           <BillingSettingsCard
             config={data?.config}
             onSave={handleSaveConfig}
@@ -110,7 +110,7 @@ export const SettingsPage: React.FC = () => {
       )}
 
       {activeTab === 'tax' && (
-        <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs">
           <TaxFormatsCard
             config={data?.config}
             onSave={handleSaveConfig}
@@ -158,13 +158,14 @@ const TabButton: React.FC<TabButtonProps> = ({ active, onClick, icon, label }) =
   <button
     type="button"
     onClick={onClick}
-    className={`flex items-center space-x-1.5 border-b-2 px-3 py-2 text-xs font-semibold transition-colors ${
+    className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 ${
       active
-        ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-        : 'border-transparent text-muted-foreground hover:border-muted hover:text-foreground'
+        ? 'bg-primary text-primary-foreground shadow-xs'
+        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
     }`}
   >
     {icon}
     <span>{label}</span>
   </button>
 );
+

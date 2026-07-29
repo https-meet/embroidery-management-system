@@ -135,19 +135,19 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-20"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-xs p-4 pt-16 transition-opacity duration-150"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl rounded-lg border bg-card shadow-2xl overflow-hidden"
+        className="w-full max-w-xl rounded-lg border border-border bg-card shadow-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Search Header Input */}
-        <div className="flex items-center border-b px-4 py-3">
-          <Search className="h-5 w-5 text-muted-foreground mr-3 shrink-0" />
+        <div className="flex items-center border-b border-border/60 px-4 py-3 bg-card">
+          <Search className="h-4 w-4 text-muted-foreground mr-3 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -156,10 +156,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
             placeholder="Search Customers, Jobs (#JOB-...), Invoices, Payments, Designs..."
             className="w-full bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
-          <kbd className="hidden sm:inline-flex items-center rounded border bg-muted px-2 py-0.5 text-[10px] font-mono text-muted-foreground ml-2">
+          <kbd className="hidden sm:inline-flex items-center rounded border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-mono text-muted-foreground ml-2">
             ESC
           </kbd>
         </div>
+
 
         {/* Results Stream */}
         <div className="max-h-96 overflow-y-auto p-2 space-y-3">
