@@ -114,17 +114,17 @@ export const SystemBackupCard: React.FC = () => {
     : 0;
 
   return (
-    <div className="space-y-4 rounded-lg border border-border/70 bg-card p-5 shadow-xs">
+    <div className="space-y-4 rounded-lg border border-border bg-card p-5 shadow-xs">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+      <div className="flex items-center justify-between border-b border-border pb-3">
         <div className="flex items-center space-x-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border/50 bg-muted/40 text-foreground shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40 text-foreground shrink-0">
             <Database className="h-4 w-4" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <h3 className="text-sm font-semibold tracking-tight text-foreground">Backup & Recovery Metadata Hub</h3>
-              <span className="inline-flex items-center rounded-md bg-muted/50 px-2 py-0.5 text-[10px] font-semibold text-foreground border border-border/50">
+              <span className="inline-flex items-center rounded-md bg-muted/50 px-2 py-0.5 text-[10px] font-semibold text-foreground border border-border">
                 <ShieldCheck className="h-3 w-3 mr-1 text-emerald-600 dark:text-emerald-400" /> Backup Ready
               </span>
             </div>
@@ -137,23 +137,23 @@ export const SystemBackupCard: React.FC = () => {
 
       {/* Metadata Strip */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 text-xs">
-        <div className="rounded-md border border-border/50 bg-muted/30 p-3 flex items-center space-x-3">
+        <div className="rounded-md border border-border bg-muted/30 p-3 flex items-center space-x-3">
           <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
           <div>
             <p className="text-[11px] text-muted-foreground font-semibold">Last Offline Backup</p>
-            <p className="font-semibold font-mono text-foreground truncate">{lastBackupTime || 'Never (Take initial backup)'}</p>
+            <p className="font-semibold font-mono tabular-nums text-foreground truncate">{lastBackupTime || 'Never (Take initial backup)'}</p>
           </div>
         </div>
 
-        <div className="rounded-md border border-border/50 bg-muted/30 p-3 flex items-center space-x-3">
+        <div className="rounded-md border border-border bg-muted/30 p-3 flex items-center space-x-3">
           <HardDrive className="h-4 w-4 text-muted-foreground shrink-0" />
           <div>
             <p className="text-[11px] text-muted-foreground font-semibold">Active Database Records</p>
-            <p className="font-semibold font-mono text-foreground">{totalRecords} total entries across 5 tables</p>
+            <p className="font-semibold font-mono tabular-nums text-foreground">{totalRecords} total entries across 5 tables</p>
           </div>
         </div>
 
-        <div className="rounded-md border border-border/50 bg-muted/30 p-3 flex items-center space-x-3">
+        <div className="rounded-md border border-border bg-muted/30 p-3 flex items-center space-x-3">
           <CheckCircle2 className="h-4 w-4 text-muted-foreground shrink-0" />
           <div>
             <p className="text-[11px] text-muted-foreground font-semibold">Disaster Recovery</p>
@@ -163,7 +163,7 @@ export const SystemBackupCard: React.FC = () => {
       </div>
 
       {/* Download Action Bar */}
-      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border/60 pt-3">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
         <Button
           size="sm"
           variant="outline"
@@ -188,4 +188,3 @@ export const SystemBackupCard: React.FC = () => {
     </div>
   );
 };
-

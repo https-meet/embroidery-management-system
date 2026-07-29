@@ -37,7 +37,7 @@ export const SettingsPage: React.FC = () => {
       />
 
       {/* 8-Section Navigation Tabs */}
-      <div className="flex flex-wrap border-b border-border/60 gap-1 pb-1 select-none">
+      <div className="flex flex-wrap border-b border-border gap-1 pb-1 select-none">
         <TabButton
           active={activeTab === 'company'}
           onClick={() => setActiveTab('company')}
@@ -90,7 +90,7 @@ export const SettingsPage: React.FC = () => {
 
       {/* Section Panels */}
       {activeTab === 'company' && (
-        <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-xs">
           <CompanySettingsCard
             config={data?.config}
             onSave={handleSaveConfig}
@@ -100,7 +100,7 @@ export const SettingsPage: React.FC = () => {
       )}
 
       {activeTab === 'billing' && (
-        <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-xs">
           <BillingSettingsCard
             config={data?.config}
             onSave={handleSaveConfig}
@@ -110,7 +110,7 @@ export const SettingsPage: React.FC = () => {
       )}
 
       {activeTab === 'tax' && (
-        <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-xs">
           <TaxFormatsCard
             config={data?.config}
             onSave={handleSaveConfig}
@@ -158,14 +158,13 @@ const TabButton: React.FC<TabButtonProps> = ({ active, onClick, icon, label }) =
   <button
     type="button"
     onClick={onClick}
-    className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 ${
+    className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ${
       active
-        ? 'bg-primary text-primary-foreground shadow-xs'
-        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+        ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
     }`}
   >
     {icon}
     <span>{label}</span>
   </button>
 );
-

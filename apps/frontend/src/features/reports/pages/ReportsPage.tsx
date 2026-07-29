@@ -75,36 +75,36 @@ export const ReportsPage: React.FC = () => {
       />
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex flex-wrap items-center justify-between border-b pb-2 gap-2">
-        <div className="flex flex-wrap items-center space-x-1 sm:space-x-2">
+      <div className="flex flex-wrap items-center justify-between border-b border-border pb-2 gap-2 select-none">
+        <div className="flex flex-wrap items-center space-x-1">
           <TabButton
             active={activeTab === 'revenue'}
             onClick={() => setActiveTab('revenue')}
-            icon={<BarChart3 className="h-4 w-4" />}
+            icon={<BarChart3 className="h-3.5 w-3.5" />}
             label="Revenue Analytics"
           />
           <TabButton
             active={activeTab === 'customers'}
             onClick={() => setActiveTab('customers')}
-            icon={<Users className="h-4 w-4" />}
+            icon={<Users className="h-3.5 w-3.5" />}
             label="Customer Performance"
           />
           <TabButton
             active={activeTab === 'jobs'}
             onClick={() => setActiveTab('jobs')}
-            icon={<Briefcase className="h-4 w-4" />}
+            icon={<Briefcase className="h-3.5 w-3.5" />}
             label="Job Volume"
           />
           <TabButton
             active={activeTab === 'production'}
             onClick={() => setActiveTab('production')}
-            icon={<Layers className="h-4 w-4" />}
+            icon={<Layers className="h-3.5 w-3.5" />}
             label="Machine Production"
           />
           <TabButton
             active={activeTab === 'payments'}
             onClick={() => setActiveTab('payments')}
-            icon={<CreditCard className="h-4 w-4" />}
+            icon={<CreditCard className="h-3.5 w-3.5" />}
             label="Payment Audit"
           />
         </div>
@@ -338,10 +338,10 @@ const TabButton: React.FC<TabButtonProps> = ({ active, onClick, icon, label }) =
   <button
     type="button"
     onClick={onClick}
-    className={`flex items-center space-x-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+    className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ${
       active
-        ? 'bg-primary text-primary-foreground shadow-sm'
-        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+        ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
     }`}
   >
     {icon}
