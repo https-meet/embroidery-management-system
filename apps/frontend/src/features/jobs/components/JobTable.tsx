@@ -20,15 +20,15 @@ export interface JobTableProps {
 
 const PriorityBadge: React.FC<{ priority: JobPriority }> = ({ priority }) => {
   const colorMap: Record<JobPriority, string> = {
-    LOW: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-    NORMAL: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-    HIGH: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-    URGENT: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 font-bold',
+    LOW: 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:border-slate-500/20',
+    NORMAL: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20',
+    HIGH: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20',
+    URGENT: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20 font-bold',
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium uppercase ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium uppercase select-none ${
         colorMap[priority] || colorMap.NORMAL
       }`}
     >
@@ -48,12 +48,12 @@ export const JobTable: React.FC<JobTableProps> = ({
   const columns: Column<JobDto>[] = [
     {
       key: 'jobNo',
-      header: 'Job No.',
+      header: 'Job ID',
       sortable: true,
       accessor: (item) => (
         <Link
           to={ROUTES.JOBS.DETAIL(item.id)}
-          className="font-mono font-bold text-foreground hover:text-primary hover:underline"
+          className="font-mono text-xs font-semibold text-foreground hover:text-primary hover:underline"
         >
           {item.jobNo}
         </Link>
@@ -68,7 +68,7 @@ export const JobTable: React.FC<JobTableProps> = ({
             {item.customer?.name || '—'}
           </span>
           {item.customer?.customerCode && (
-            <p className="text-xs text-muted-foreground">{item.customer.customerCode}</p>
+            <p className="text-xs text-muted-foreground font-mono">{item.customer.customerCode}</p>
           )}
         </div>
       ),
@@ -88,14 +88,18 @@ export const JobTable: React.FC<JobTableProps> = ({
     {
       key: 'expectedDeliveryDate',
       header: 'Due Date',
-      accessor: (item) => formatDate(item.expectedDeliveryDate || item.jobDate),
+      accessor: (item) => (
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          {formatDate(item.expectedDeliveryDate || item.jobDate)}
+        </span>
+      ),
     },
     {
       key: 'totalAmount',
       header: 'Total Amount',
       align: 'right',
       accessor: (item) => (
-        <span className="font-mono font-semibold text-foreground">
+        <span className="font-mono text-xs font-semibold text-foreground tabular-nums">
           {formatCurrency(item.totalAmount)}
         </span>
       ),
@@ -107,12 +111,12 @@ export const JobTable: React.FC<JobTableProps> = ({
       accessor: (item) => (
         <div className="flex items-center justify-end space-x-1">
           <Link to={ROUTES.JOBS.DETAIL(item.id)}>
-            <Button variant="ghost" size="icon" title="View Job Workspace" className="h-8 w-8">
+            <Button variant="ghost" size="icon" title="View Job Workspace" className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <Eye className="h-4 w-4" />
             </Button>
           </Link>
           <Link to={`${ROUTES.JOBS.DETAIL(item.id)}/edit`}>
-            <Button variant="ghost" size="icon" title="Edit Job Details" className="h-8 w-8">
+            <Button variant="ghost" size="icon" title="Edit Job Details" className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <Edit2 className="h-4 w-4" />
             </Button>
           </Link>

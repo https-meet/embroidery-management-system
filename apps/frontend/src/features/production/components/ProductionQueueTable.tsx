@@ -21,15 +21,15 @@ export interface ProductionQueueTableProps {
 
 const PriorityBadge: React.FC<{ priority: JobPriority }> = ({ priority }) => {
   const colorMap: Record<JobPriority, string> = {
-    LOW: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-    NORMAL: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-    HIGH: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-    URGENT: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 font-bold',
+    LOW: 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:border-slate-500/20',
+    NORMAL: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20',
+    HIGH: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20',
+    URGENT: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20 font-bold',
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium uppercase ${
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium uppercase select-none ${
         colorMap[priority] || colorMap.NORMAL
       }`}
     >
@@ -52,12 +52,12 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
   const columns: Column<JobDto>[] = [
     {
       key: 'jobNo',
-      header: 'Job No.',
+      header: 'Job ID',
       sortable: true,
       accessor: (item) => (
         <Link
           to={`/production/${item.id}`}
-          className="font-mono font-bold text-foreground hover:text-primary hover:underline"
+          className="font-mono text-xs font-semibold text-foreground hover:text-primary hover:underline"
         >
           {item.jobNo}
         </Link>
@@ -70,7 +70,7 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
         <div>
           <span className="font-semibold text-foreground">{item.customer?.name || '—'}</span>
           {item.customer?.customerCode && (
-            <p className="text-xs text-muted-foreground">{item.customer.customerCode}</p>
+            <p className="text-xs text-muted-foreground font-mono">{item.customer.customerCode}</p>
           )}
         </div>
       ),
@@ -91,21 +91,25 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
       header: 'Operator',
       accessor: (item) =>
         item.assignedOperator ? (
-          <span className="font-medium text-foreground">{item.assignedOperator}</span>
+          <span className="font-medium text-foreground text-xs">{item.assignedOperator}</span>
         ) : (
-          <span className="text-xs italic text-amber-600 dark:text-amber-400">Unassigned</span>
+          <span className="text-xs italic text-amber-600 dark:text-amber-400 font-medium">Unassigned</span>
         ),
     },
     {
       key: 'expectedDeliveryDate',
       header: 'Target Due Date',
-      accessor: (item) => formatDate(item.expectedDeliveryDate || item.jobDate),
+      accessor: (item) => (
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          {formatDate(item.expectedDeliveryDate || item.jobDate)}
+        </span>
+      ),
     },
     {
       key: 'items',
       header: 'Items Count',
       align: 'right',
-      accessor: (item) => <span className="font-mono font-medium">{item.items?.length || 0}</span>,
+      accessor: (item) => <span className="font-mono text-xs font-semibold tabular-nums">{item.items?.length || 0}</span>,
     },
     {
       key: 'actions',
@@ -118,10 +122,10 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
               variant="outline"
               size="icon"
               title="Start Production"
-              className="h-8 w-8 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
+              className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-950"
               onClick={() => onStartClick(item)}
             >
-              <Play className="h-4 w-4" />
+              <Play className="h-3.5 w-3.5" />
             </Button>
           )}
 
@@ -130,10 +134,10 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
               variant="outline"
               size="icon"
               title="Mark Production Completed"
-              className="h-8 w-8 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950"
+              className="h-8 w-8 text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-950"
               onClick={() => onCompleteClick(item)}
             >
-              <CheckCircle2 className="h-4 w-4" />
+              <CheckCircle2 className="h-3.5 w-3.5" />
             </Button>
           )}
 
@@ -141,25 +145,25 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
             variant="ghost"
             size="icon"
             title="Assign Machine Operator"
-            className="h-8 w-8"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
             onClick={() => onAssignClick(item)}
           >
-            <UserPlus className="h-4 w-4" />
+            <UserPlus className="h-3.5 w-3.5" />
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
             title="Record Quality Check (QC)"
-            className="h-8 w-8"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
             onClick={() => onQualityCheckClick(item)}
           >
-            <ShieldCheck className="h-4 w-4" />
+            <ShieldCheck className="h-3.5 w-3.5" />
           </Button>
 
           <Link to={`/production/${item.id}`}>
-            <Button variant="ghost" size="icon" title="View Production Workspace" className="h-8 w-8">
-              <Eye className="h-4 w-4" />
+            <Button variant="ghost" size="icon" title="View Production Workspace" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+              <Eye className="h-3.5 w-3.5" />
             </Button>
           </Link>
         </div>
