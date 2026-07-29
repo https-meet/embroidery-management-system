@@ -7,7 +7,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.0-4169E1.svg?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.2-2D3748.svg?style=flat-square&logo=prisma)](https://www.prisma.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC.svg?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![License: All Rights Reserved](https://img.shields.io/badge/License-All_Rights_Reserved-red.svg?style=flat-square)](LICENSE)
 
 EBMS is a full-stack business management application for embroidery businesses. It helps teams manage the complete operational workflow: customers, embroidery designs, jobs, production progress, invoices, payments, reports, and business settings.
 
@@ -42,6 +42,7 @@ The project is built as a TypeScript pnpm workspace with a React frontend, an Ex
 - [API Overview](#api-overview)
 - [Documentation Links](#documentation-links)
 - [Future Roadmap](#future-roadmap)
+- [Evaluation Notice](#evaluation-notice)
 - [License](#license)
 - [Author](#author)
 
@@ -523,9 +524,33 @@ Base URL: `/api/v1`
 
 ---
 
+## 🔍 Evaluation Notice
+
+This repository is publicly available so that recruiters, developers, and learners can review the architecture, implementation, and engineering practices of the Embroidery Business Management System (EBMS).
+
+If you are interested in using EBMS for a real business, production deployment, customization, or commercial licensing, please contact:
+
+work.meetchauhan@gmail.com
+
+---
+
 ## 📄 License
 
-This project is released under the [MIT License](LICENSE).
+This project is protected under an "All Rights Reserved" copyright.
+
+The source code is publicly available for:
+
+- portfolio demonstration
+- educational learning
+- technical evaluation
+- local evaluation and testing
+
+Visitors, recruiters, and evaluators are permitted to clone, build, and run this project locally for evaluation purposes.
+
+No permission is granted for commercial use, production deployment, redistribution, sublicensing, selling the software, or creating commercial derivative works without prior written permission from the copyright holder.
+
+For licensing or commercial inquiries:
+work.meetchauhan@gmail.com
 
 ---
 
@@ -533,4 +558,8 @@ This project is released under the [MIT License](LICENSE).
 
 **Meet Chauhan**
 - GitHub: [@https-meet](https://github.com/https-meet)
+
+---
+
+© 2026 Meet Chauhan. All Rights Reserved.
 
