@@ -7,90 +7,112 @@ import { ROUTES } from '@/shared/constants/routes';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
 
-// Route-level lazy loading for page components
-const LoginPage = lazy(() =>
+/**
+ * Resilient lazy loader wrapper that automatically reloads page on deployment chunk hash mismatches
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function safeLazy<T extends React.ComponentType<any>>(
+  factory: () => Promise<{ default: T }>
+) {
+  return lazy(async () => {
+    try {
+      return await factory();
+    } catch (error) {
+      const storageKey = 'ebms_chunk_retry';
+      const hasRetried = sessionStorage.getItem(storageKey);
+      if (!hasRetried) {
+        sessionStorage.setItem(storageKey, 'true');
+        window.location.reload();
+      }
+      throw error;
+    }
+  });
+}
+
+// Route-level lazy loading for page components with chunk retry wrapper
+const LoginPage = safeLazy(() =>
   import('@/features/auth/pages/LoginPage').then((m) => ({ default: m.LoginPage }))
 );
-const DashboardPage = lazy(() =>
+const DashboardPage = safeLazy(() =>
   import('@/features/dashboard').then((m) => ({ default: m.DashboardPage }))
 );
 
-const CustomersListPage = lazy(() =>
+const CustomersListPage = safeLazy(() =>
   import('@/features/customers').then((m) => ({ default: m.CustomersListPage }))
 );
-const CreateCustomerPage = lazy(() =>
+const CreateCustomerPage = safeLazy(() =>
   import('@/features/customers').then((m) => ({ default: m.CreateCustomerPage }))
 );
-const CustomerDetailPage = lazy(() =>
+const CustomerDetailPage = safeLazy(() =>
   import('@/features/customers').then((m) => ({ default: m.CustomerDetailPage }))
 );
-const EditCustomerPage = lazy(() =>
+const EditCustomerPage = safeLazy(() =>
   import('@/features/customers').then((m) => ({ default: m.EditCustomerPage }))
 );
 
-const DesignsListPage = lazy(() =>
+const DesignsListPage = safeLazy(() =>
   import('@/features/designs').then((m) => ({ default: m.DesignsListPage }))
 );
-const CreateDesignPage = lazy(() =>
+const CreateDesignPage = safeLazy(() =>
   import('@/features/designs').then((m) => ({ default: m.CreateDesignPage }))
 );
-const DesignDetailPage = lazy(() =>
+const DesignDetailPage = safeLazy(() =>
   import('@/features/designs').then((m) => ({ default: m.DesignDetailPage }))
 );
-const EditDesignPage = lazy(() =>
+const EditDesignPage = safeLazy(() =>
   import('@/features/designs').then((m) => ({ default: m.EditDesignPage }))
 );
 
-const JobsListPage = lazy(() =>
+const JobsListPage = safeLazy(() =>
   import('@/features/jobs').then((m) => ({ default: m.JobsListPage }))
 );
-const CreateJobPage = lazy(() =>
+const CreateJobPage = safeLazy(() =>
   import('@/features/jobs').then((m) => ({ default: m.CreateJobPage }))
 );
-const JobDetailPage = lazy(() =>
+const JobDetailPage = safeLazy(() =>
   import('@/features/jobs').then((m) => ({ default: m.JobDetailPage }))
 );
-const EditJobPage = lazy(() =>
+const EditJobPage = safeLazy(() =>
   import('@/features/jobs').then((m) => ({ default: m.EditJobPage }))
 );
 
-const ProductionQueuePage = lazy(() =>
+const ProductionQueuePage = safeLazy(() =>
   import('@/features/production').then((m) => ({ default: m.ProductionQueuePage }))
 );
-const ProductionWorkspacePage = lazy(() =>
+const ProductionWorkspacePage = safeLazy(() =>
   import('@/features/production').then((m) => ({ default: m.ProductionWorkspacePage }))
 );
 
-const InvoicesListPage = lazy(() =>
+const InvoicesListPage = safeLazy(() =>
   import('@/features/invoices').then((m) => ({ default: m.InvoicesListPage }))
 );
-const CreateInvoicePage = lazy(() =>
+const CreateInvoicePage = safeLazy(() =>
   import('@/features/invoices').then((m) => ({ default: m.CreateInvoicePage }))
 );
-const InvoiceDetailPage = lazy(() =>
+const InvoiceDetailPage = safeLazy(() =>
   import('@/features/invoices').then((m) => ({ default: m.InvoiceDetailPage }))
 );
-const EditInvoicePage = lazy(() =>
+const EditInvoicePage = safeLazy(() =>
   import('@/features/invoices').then((m) => ({ default: m.EditInvoicePage }))
 );
 
-const PaymentsListPage = lazy(() =>
+const PaymentsListPage = safeLazy(() =>
   import('@/features/payments').then((m) => ({ default: m.PaymentsListPage }))
 );
-const CreatePaymentPage = lazy(() =>
+const CreatePaymentPage = safeLazy(() =>
   import('@/features/payments').then((m) => ({ default: m.CreatePaymentPage }))
 );
-const PaymentDetailPage = lazy(() =>
+const PaymentDetailPage = safeLazy(() =>
   import('@/features/payments').then((m) => ({ default: m.PaymentDetailPage }))
 );
 
-const ReportsPage = lazy(() =>
+const ReportsPage = safeLazy(() =>
   import('@/features/reports').then((m) => ({ default: m.ReportsPage }))
 );
-const SettingsPage = lazy(() =>
+const SettingsPage = safeLazy(() =>
   import('@/features/settings').then((m) => ({ default: m.SettingsPage }))
 );
-const NotFoundPage = lazy(() =>
+const NotFoundPage = safeLazy(() =>
   import('@/shared/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
 );
 
