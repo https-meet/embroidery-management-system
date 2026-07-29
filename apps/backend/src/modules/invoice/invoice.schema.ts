@@ -9,6 +9,13 @@ const optionalUuid = z
   .nullable()
   .transform((val) => (val && val.trim() !== '' ? val : undefined));
 
+const optionalString = z
+  .string()
+  .optional()
+  .or(z.literal(''))
+  .nullable()
+  .transform((val) => (val && val.trim() !== '' ? val.trim() : undefined));
+
 const optionalDateString = z
   .string()
   .optional()
@@ -25,6 +32,14 @@ const DiscountTypeSchema = z
     z.nativeEnum(DiscountType),
     z.literal('FIXED').transform(() => DiscountType.FIXED_AMOUNT),
     z.literal('FIXED_AMOUNT').transform(() => DiscountType.FIXED_AMOUNT),
+    z.literal('').transform(() => undefined),
+  ])
+  .optional()
+  .nullable();
+
+const InvoiceStatusSchema = z
+  .union([
+    z.nativeEnum(InvoiceStatus),
     z.literal('').transform(() => undefined),
   ])
   .optional()
@@ -65,13 +80,13 @@ export const updateInvoiceSchema = z.object({
   discountType: DiscountTypeSchema,
   discountValue: z.coerce.number().nonnegative().optional().nullable(),
   notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
-  status: z.nativeEnum(InvoiceStatus).optional(),
+  status: InvoiceStatusSchema,
 });
 
 export const invoiceQuerySchema = z.object({
-  search: z.string().optional(),
+  search: optionalString,
   customerId: optionalUuid,
-  status: z.nativeEnum(InvoiceStatus).optional(),
+  status: InvoiceStatusSchema,
   page: z
     .string()
     .default('1')

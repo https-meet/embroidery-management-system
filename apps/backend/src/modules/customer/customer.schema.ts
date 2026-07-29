@@ -1,6 +1,21 @@
 import { CustomerType } from '@prisma/client';
 import { z } from 'zod';
 
+const optionalString = z
+  .string()
+  .optional()
+  .or(z.literal(''))
+  .nullable()
+  .transform((val) => (val && val.trim() !== '' ? val.trim() : undefined));
+
+const CustomerTypeSchema = z
+  .union([
+    z.nativeEnum(CustomerType),
+    z.literal('').transform(() => undefined),
+  ])
+  .optional()
+  .nullable();
+
 export const createCustomerSchema = z.object({
   customerType: z.nativeEnum(CustomerType).optional().default(CustomerType.INDIVIDUAL),
   name: z.string().min(1, 'Customer name is required.').max(100),
@@ -21,7 +36,7 @@ export const createCustomerSchema = z.object({
 });
 
 export const updateCustomerSchema = z.object({
-  customerType: z.nativeEnum(CustomerType).optional(),
+  customerType: CustomerTypeSchema,
   name: z.string().min(1, 'Customer name cannot be empty.').max(100).optional(),
   contactPerson: z.string().max(100).optional(),
   mobile: z
@@ -41,12 +56,15 @@ export const updateCustomerSchema = z.object({
 });
 
 export const customerQuerySchema = z.object({
-  search: z.string().optional(),
-  customerType: z.nativeEnum(CustomerType).optional(),
+  search: optionalString,
+  customerType: CustomerTypeSchema,
   isActive: z
-    .string()
-    .transform((val) => val === 'true')
-    .optional(),
+    .union([
+      z.string().transform((val) => (val === '' ? undefined : val === 'true')),
+      z.boolean(),
+    ])
+    .optional()
+    .nullable(),
   page: z
     .string()
     .default('1')

@@ -9,6 +9,13 @@ const optionalUuid = z
   .nullable()
   .transform((val) => (val && val.trim() !== '' ? val : undefined));
 
+const optionalString = z
+  .string()
+  .optional()
+  .or(z.literal(''))
+  .nullable()
+  .transform((val) => (val && val.trim() !== '' ? val.trim() : undefined));
+
 const optionalDateString = z
   .string()
   .optional()
@@ -20,16 +27,24 @@ const optionalDateString = z
     return isNaN(date.getTime()) ? undefined : date.toISOString();
   });
 
-const PrioritySchema = z.union([
-  z.nativeEnum(Priority),
-  z.literal('URGENT').transform(() => Priority.HIGH),
-]);
+const PrioritySchema = z
+  .union([
+    z.nativeEnum(Priority),
+    z.literal('URGENT').transform(() => Priority.HIGH),
+    z.literal('').transform(() => undefined),
+  ])
+  .optional()
+  .nullable();
 
-const JobStatusSchema = z.union([
-  z.nativeEnum(JobStatus),
-  z.literal('PENDING_PRODUCTION').transform(() => JobStatus.IN_PROGRESS),
-  z.literal('IN_PRODUCTION').transform(() => JobStatus.IN_PROGRESS),
-]);
+const JobStatusSchema = z
+  .union([
+    z.nativeEnum(JobStatus),
+    z.literal('PENDING_PRODUCTION').transform(() => JobStatus.IN_PROGRESS),
+    z.literal('IN_PRODUCTION').transform(() => JobStatus.IN_PROGRESS),
+    z.literal('').transform(() => undefined),
+  ])
+  .optional()
+  .nullable();
 
 export const createJobItemSchema = z.object({
   designId: optionalUuid,
@@ -58,17 +73,17 @@ export const updateJobSchema = z.object({
   assignedOperator: z.string().max(100).optional().or(z.literal('')).nullable(),
   jobDate: optionalDateString,
   expectedDeliveryDate: optionalDateString,
-  priority: PrioritySchema.optional(),
-  status: JobStatusSchema.optional(),
+  priority: PrioritySchema,
+  status: JobStatusSchema,
   notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
   items: z.array(createJobItemSchema).optional(),
 });
 
 export const jobQuerySchema = z.object({
-  search: z.string().optional(),
+  search: optionalString,
   customerId: optionalUuid,
-  status: JobStatusSchema.optional(),
-  priority: PrioritySchema.optional(),
+  status: JobStatusSchema,
+  priority: PrioritySchema,
   page: z
     .string()
     .default('1')

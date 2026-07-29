@@ -9,6 +9,13 @@ const optionalUuid = z
   .nullable()
   .transform((val) => (val && val.trim() !== '' ? val : undefined));
 
+const optionalString = z
+  .string()
+  .optional()
+  .or(z.literal(''))
+  .nullable()
+  .transform((val) => (val && val.trim() !== '' ? val.trim() : undefined));
+
 const optionalDateString = z
   .string()
   .optional()
@@ -19,6 +26,22 @@ const optionalDateString = z
     const date = new Date(val);
     return isNaN(date.getTime()) ? undefined : date.toISOString();
   });
+
+const PaymentStatusSchema = z
+  .union([
+    z.nativeEnum(PaymentStatus),
+    z.literal('').transform(() => undefined),
+  ])
+  .optional()
+  .nullable();
+
+const PaymentMethodSchema = z
+  .union([
+    z.nativeEnum(PaymentMethod),
+    z.literal('').transform(() => undefined),
+  ])
+  .optional()
+  .nullable();
 
 export const createPaymentAllocationSchema = z.object({
   invoiceId: z.string().uuid('Invalid invoice ID format.'),
@@ -36,10 +59,10 @@ export const createPaymentSchema = z.object({
 });
 
 export const paymentQuerySchema = z.object({
-  search: z.string().optional(),
+  search: optionalString,
   customerId: optionalUuid,
-  status: z.nativeEnum(PaymentStatus).optional(),
-  paymentMethod: z.nativeEnum(PaymentMethod).optional(),
+  status: PaymentStatusSchema,
+  paymentMethod: PaymentMethodSchema,
   page: z
     .string()
     .default('1')
