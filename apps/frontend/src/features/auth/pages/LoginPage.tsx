@@ -68,13 +68,13 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Info */}
-      <div className="space-y-1 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          Sign In
-        </h2>
+      {/* Header Info (Style Guide §8.1) */}
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          Sign in to EBMS
+        </h1>
         <p className="text-xs text-muted-foreground">
-          Enter your email address and password to access your account
+          Enter your credentials to access your commercial workspace
         </p>
       </div>
 
@@ -140,32 +140,31 @@ export const LoginPage: React.FC = () => {
           <label className="flex items-center space-x-2 cursor-pointer select-none text-muted-foreground hover:text-foreground">
             <input
               type="checkbox"
-              className="h-3.5 w-3.5 rounded border-input text-primary focus:ring-primary/20 accent-primary"
+              className="h-3.5 w-3.5 rounded border-input text-primary focus:ring-ring/20 accent-primary"
             />
             <span>Remember Me</span>
           </label>
-          <span className="text-muted-foreground text-[11px]">
-            Forgot password? Contact Administrator
+          <span className="text-muted-foreground text-xs">
+            Forgot password? Contact admin
           </span>
         </div>
 
-        {/* Submit Action */}
+        {/* Submit Action (Style Guide §8.1: Primary submit w-full h-10) */}
         <Button
           type="submit"
           className="w-full h-10 text-sm font-semibold flex items-center justify-center space-x-2"
           isLoading={isSubmitting}
         >
           <Lock className="h-4 w-4" />
-          <span>Sign In to Dashboard</span>
+          <span>Sign In to EBMS</span>
         </Button>
       </form>
 
-      {/* Generic Trust Footer */}
-      <div className="flex items-center justify-center space-x-1.5 text-[11px] text-muted-foreground border-t border-border/40 pt-4">
+      {/* Trust Footer */}
+      <div className="flex items-center justify-center space-x-1.5 text-xs text-muted-foreground border-t border-border pt-4">
         <Shield className="h-3.5 w-3.5 text-muted-foreground" />
         <span>Authorized Personnel Access • Secure Session</span>
       </div>
     </div>
   );
 };
-
