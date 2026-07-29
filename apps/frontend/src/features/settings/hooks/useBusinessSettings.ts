@@ -48,7 +48,7 @@ export function useBusinessSettings() {
     queryKey: ['businessConfig'],
     queryFn: async () => {
       const res = await axiosClient.get('/settings/business');
-      return res.data.data;
+      return (res as any).data;
     },
   });
 }
@@ -59,7 +59,7 @@ export function useUpdateBusinessSettings() {
   return useMutation({
     mutationFn: async (dto: Partial<BusinessConfig>) => {
       const res = await axiosClient.put('/settings/business', dto);
-      return res.data.data;
+      return (res as any).data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['businessConfig'] });
@@ -76,7 +76,7 @@ export function useSystemHealth() {
     queryKey: ['systemHealth'],
     queryFn: async () => {
       const res = await axiosClient.get('/settings/health');
-      return res.data.data;
+      return (res as any).data;
     },
     refetchInterval: 30000,
   });

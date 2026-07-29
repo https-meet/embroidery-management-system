@@ -38,9 +38,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       })()
     : null;
 
+  // Start isLoading as true so ProtectedRoute waits for session initialization
   const [user, setUserState] = useState<AuthUser | null>(initialUser);
   const [accessToken, setAccessTokenState] = useState<string | null>(initialAccessToken);
-  const [isLoading, setIsLoading] = useState<boolean>(!initialAccessToken);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const accessTokenRef = useRef<string | null>(initialAccessToken);
 
   const setUser = useCallback((u: AuthUser | null) => {
@@ -87,17 +88,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setAccessToken(tokens.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
 
-      if (!user) {
-        const profileData = await getCurrentUserApi();
-        setUser(profileData.user);
-      }
+      const profileData = await getCurrentUserApi();
+      setUser(profileData.user);
 
       return tokens.accessToken;
     } catch {
       logout();
       return null;
     }
-  }, [user, setAccessToken, setUser, logout]);
+  }, [setAccessToken, setUser, logout]);
 
   const login = useCallback(
     async (dto: LoginDto): Promise<void> => {
@@ -126,14 +125,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let isMounted = true;
 
     async function initAuth() {
+      const savedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
       const savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-      if (savedRefreshToken) {
+
+      if (savedAccessToken) {
+        try {
+          // Validate existing access token with backend
+          const profileData = await getCurrentUserApi();
+          if (isMounted) {
+            setUser(profileData.user);
+            setAccessToken(savedAccessToken);
+          }
+        } catch {
+          // Token expired or invalid, attempt silent refresh
+          if (savedRefreshToken) {
+            try {
+              const tokens = await refreshTokenApi(savedRefreshToken);
+              if (isMounted) {
+                setAccessToken(tokens.accessToken);
+                localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+                const profileData = await getCurrentUserApi();
+                if (isMounted) {
+                  setUser(profileData.user);
+                }
+              }
+            } catch {
+              if (isMounted) {
+                logout();
+              }
+            }
+          } else if (isMounted) {
+            logout();
+          }
+        }
+      } else if (savedRefreshToken) {
         try {
           const tokens = await refreshTokenApi(savedRefreshToken);
           if (isMounted) {
             setAccessToken(tokens.accessToken);
             localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
-
             const profileData = await getCurrentUserApi();
             if (isMounted) {
               setUser(profileData.user);
@@ -144,6 +174,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             logout();
           }
         }
+      } else if (isMounted) {
+        logout();
       }
 
       if (isMounted) {

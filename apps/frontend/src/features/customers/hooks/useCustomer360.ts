@@ -63,7 +63,7 @@ export function useCustomer360(customerId: string) {
     queryKey: ['customer360', customerId],
     queryFn: async () => {
       const res = await axiosClient.get(`/customers/${customerId}/360`);
-      return res.data.data;
+      return (res as any).data;
     },
     enabled: Boolean(customerId),
   });

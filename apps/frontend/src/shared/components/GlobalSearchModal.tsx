@@ -60,8 +60,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
       try {
         setIsLoading(true);
         const res = await axiosClient.get(`/search?q=${encodeURIComponent(query.trim())}`);
-        if (res.data?.data?.results) {
-          setResults(res.data.data.results);
+        const data = (res as any).data || res;
+        if (data?.results) {
+          setResults(data.results);
           setSelectedIndex(0);
         }
       } catch {

@@ -26,8 +26,10 @@ export const Breadcrumbs: React.FC = () => {
         {pathnames.map((name, index) => {
           const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
           const isLast = index === pathnames.length - 1;
-          const displayName =
-            name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' ');
+          const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(name);
+          const displayName = isUuid
+            ? name
+            : name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' ');
 
           return (
             <li key={routeTo} className="flex items-center space-x-1.5">
