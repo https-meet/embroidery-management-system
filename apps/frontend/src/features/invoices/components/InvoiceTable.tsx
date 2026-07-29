@@ -29,12 +29,12 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const columns: Column<InvoiceDto>[] = [
     {
       key: 'invoiceNo',
-      header: 'Invoice No.',
+      header: 'Invoice ID',
       sortable: true,
       accessor: (item) => (
         <Link
           to={ROUTES.INVOICES.DETAIL(item.id)}
-          className="font-mono font-bold text-foreground hover:text-primary hover:underline"
+          className="font-mono text-xs font-semibold text-foreground hover:text-primary hover:underline"
         >
           {item.invoiceNo}
         </Link>
@@ -47,7 +47,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
         <div>
           <span className="font-semibold text-foreground">{item.customer?.name || '—'}</span>
           {item.customer?.customerCode && (
-            <p className="text-xs text-muted-foreground">{item.customer.customerCode}</p>
+            <p className="text-xs text-muted-foreground font-mono">{item.customer.customerCode}</p>
           )}
         </div>
       ),
@@ -62,12 +62,12 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
       key: 'invoiceDate',
       header: 'Issue Date',
       sortable: true,
-      accessor: (item) => formatDate(item.invoiceDate),
+      accessor: (item) => <span className="font-mono text-xs text-muted-foreground tabular-nums">{formatDate(item.invoiceDate)}</span>,
     },
     {
       key: 'dueDate',
       header: 'Due Date',
-      accessor: (item) => formatDate(item.dueDate || item.invoiceDate),
+      accessor: (item) => <span className="font-mono text-xs text-muted-foreground tabular-nums">{formatDate(item.dueDate || item.invoiceDate)}</span>,
     },
     {
       key: 'grandTotal',
@@ -75,7 +75,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
       align: 'right',
       sortable: true,
       accessor: (item) => (
-        <span className="font-mono font-semibold text-foreground">
+        <span className="font-mono text-xs font-semibold text-foreground tabular-nums">
           {formatCurrency(item.grandTotal)}
         </span>
       ),
@@ -86,9 +86,9 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
       align: 'right',
       accessor: (item) => (
         <span
-          className={`font-mono font-bold ${
+          className={`font-mono text-xs font-semibold tabular-nums ${
             item.outstandingBalance > 0
-              ? 'text-rose-600 dark:text-rose-400'
+              ? 'text-destructive'
               : 'text-emerald-600 dark:text-emerald-400'
           }`}
         >
@@ -103,13 +103,13 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
       accessor: (item) => (
         <div className="flex items-center justify-end space-x-1">
           <Link to={ROUTES.INVOICES.DETAIL(item.id)}>
-            <Button variant="ghost" size="icon" title="View Invoice Workspace" className="h-8 w-8">
+            <Button variant="ghost" size="icon" title="View Invoice Workspace" className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <Eye className="h-4 w-4" />
             </Button>
           </Link>
           {item.status !== 'PAID' && item.status !== 'CANCELLED' && (
             <Link to={`${ROUTES.INVOICES.DETAIL(item.id)}/edit`}>
-              <Button variant="ghost" size="icon" title="Edit Invoice" className="h-8 w-8">
+              <Button variant="ghost" size="icon" title="Edit Invoice" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                 <Edit2 className="h-4 w-4" />
               </Button>
             </Link>

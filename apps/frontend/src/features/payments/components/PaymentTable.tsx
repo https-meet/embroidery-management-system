@@ -19,7 +19,7 @@ export interface PaymentTableProps {
 
 const MethodBadge: React.FC<{ method: PaymentMethod }> = ({ method }) => {
   return (
-    <span className="inline-flex items-center space-x-1 rounded bg-muted px-2 py-0.5 text-xs font-semibold text-foreground uppercase">
+    <span className="inline-flex items-center space-x-1 rounded bg-muted px-2 py-0.5 text-xs font-semibold text-foreground uppercase border border-border">
       <CreditCard className="h-3 w-3 text-muted-foreground" />
       <span>{method.replace('_', ' ')}</span>
     </span>
@@ -36,12 +36,12 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
   const columns: Column<PaymentDto>[] = [
     {
       key: 'paymentNo',
-      header: 'Receipt / Payment No.',
+      header: 'Receipt / Payment ID',
       sortable: true,
       accessor: (item) => (
         <Link
           to={ROUTES.PAYMENTS.DETAIL(item.id)}
-          className="font-mono font-bold text-foreground hover:text-primary hover:underline"
+          className="font-mono text-xs font-semibold text-foreground hover:text-primary hover:underline"
         >
           {item.paymentNo}
         </Link>
@@ -54,7 +54,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
         <div>
           <span className="font-semibold text-foreground">{item.customer?.name || '—'}</span>
           {item.customer?.customerCode && (
-            <p className="text-xs text-muted-foreground">{item.customer.customerCode}</p>
+            <p className="text-xs text-muted-foreground font-mono">{item.customer.customerCode}</p>
           )}
         </div>
       ),
@@ -68,14 +68,14 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
       key: 'paymentDate',
       header: 'Payment Date',
       sortable: true,
-      accessor: (item) => formatDate(item.paymentDate),
+      accessor: (item) => <span className="font-mono text-xs text-muted-foreground tabular-nums">{formatDate(item.paymentDate)}</span>,
     },
     {
       key: 'referenceNo',
       header: 'Reference / Txn ID',
       accessor: (item) =>
         item.referenceNo ? (
-          <span className="font-mono text-xs text-muted-foreground">{item.referenceNo}</span>
+          <span className="font-mono text-xs text-muted-foreground tabular-nums">{item.referenceNo}</span>
         ) : (
           <span className="text-muted-foreground">—</span>
         ),
@@ -86,7 +86,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
       align: 'right',
       sortable: true,
       accessor: (item) => (
-        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+        <span className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
           {formatCurrency(item.amount)}
         </span>
       ),
@@ -103,7 +103,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
       accessor: (item) => (
         <div className="flex items-center justify-end space-x-1">
           <Link to={ROUTES.PAYMENTS.DETAIL(item.id)}>
-            <Button variant="ghost" size="icon" title="View Payment Receipt" className="h-8 w-8">
+            <Button variant="ghost" size="icon" title="View Payment Receipt" className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <Eye className="h-4 w-4" />
             </Button>
           </Link>
