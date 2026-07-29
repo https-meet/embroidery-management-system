@@ -33,7 +33,7 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
       accessor: (item) => (
         <Link
           to={ROUTES.CUSTOMERS.DETAIL(item.id)}
-          className="font-mono font-medium text-foreground hover:text-primary hover:underline"
+          className="font-mono text-xs font-semibold text-foreground hover:text-primary hover:underline"
         >
           {item.customerCode}
         </Link>
@@ -54,9 +54,9 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
     },
     {
       key: 'customerType',
-      header: 'Type',
+      header: 'Segment',
       accessor: (item) => (
-        <span className="inline-flex items-center rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground uppercase">
+        <span className="inline-flex items-center rounded bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide border border-border">
           {item.customerType}
         </span>
       ),
@@ -64,13 +64,13 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
     {
       key: 'mobile',
       header: 'Mobile Number',
-      accessor: (item) => item.mobile || <span className="text-muted-foreground">—</span>,
+      accessor: (item) => item.mobile ? <span className="font-mono text-xs tabular-nums">{item.mobile}</span> : <span className="text-muted-foreground">—</span>,
     },
     {
       key: 'createdAt',
       header: 'Created Date',
       sortable: true,
-      accessor: (item) => formatDate(item.createdAt),
+      accessor: (item) => <span className="font-mono text-xs tabular-nums text-muted-foreground">{formatDate(item.createdAt)}</span>,
     },
     {
       key: 'isActive',
@@ -86,12 +86,12 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
       accessor: (item) => (
         <div className="flex items-center justify-end space-x-1">
           <Link to={ROUTES.CUSTOMERS.DETAIL(item.id)}>
-            <Button variant="ghost" size="icon" title="View Customer Workspace" className="h-8 w-8">
+            <Button variant="ghost" size="icon" title="View Customer Workspace" className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <Eye className="h-4 w-4" />
             </Button>
           </Link>
           <Link to={`${ROUTES.CUSTOMERS.DETAIL(item.id)}/edit`}>
-            <Button variant="ghost" size="icon" title="Edit Customer" className="h-8 w-8">
+            <Button variant="ghost" size="icon" title="Edit Customer" className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <Edit2 className="h-4 w-4" />
             </Button>
           </Link>

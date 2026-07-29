@@ -39,15 +39,15 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Top Profile Header Banner (Who is this customer?) */}
-      <div className="flex flex-col space-y-4 rounded-lg border border-border/70 bg-card p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:space-y-0 select-none">
+      {/* Top Profile Header Card (Style Guide §8.4: 48px Avatar + Quick Actions) */}
+      <div className="flex flex-col space-y-4 rounded-lg border border-border bg-card p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:space-y-0 select-none">
         <div className="flex items-center space-x-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary border border-primary/20 shrink-0">
             {customer.name.substring(0, 2).toUpperCase()}
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-xl font-bold tracking-tight text-foreground">{customer.name}</h2>
+              <h2 className="text-xl font-semibold tracking-tight text-foreground">{customer.name}</h2>
               <StatusBadge status={customer.isActive ? 'COMPLETED' : 'CANCELLED'} />
             </div>
             <p className="font-mono text-xs text-muted-foreground mt-0.5">
@@ -56,6 +56,7 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
           </div>
         </div>
 
+        {/* Action Toolbar */}
         <div className="flex flex-wrap items-center gap-2">
           <Link to={`${ROUTES.JOBS.CREATE}?customerId=${customer.id}`}>
             <Button size="sm" className="flex items-center space-x-1.5 h-8 text-xs font-semibold">
@@ -95,68 +96,67 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
         </div>
       </div>
 
-      {/* Contextual Customer Financial Summary Strip */}
+      {/* Customer 360 Financial KPI Stat Strip (Style Guide §8.4: Large tabular numbers) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground font-semibold">Lifetime Revenue</p>
-            <p className="text-lg font-bold font-mono text-foreground mt-0.5">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground font-medium">Lifetime Revenue</p>
+            <p className="text-2xl font-semibold tracking-tight tabular-nums text-foreground">
               {formatCurrency(summary.lifetimeRevenue)}
             </p>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
             <TrendingUp className="h-4 w-4" />
           </div>
         </div>
 
-        <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground font-semibold">Outstanding Balance</p>
+        <div className="rounded-lg border border-border bg-card p-5 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground font-medium">Outstanding Balance</p>
             <p
-              className={`text-lg font-bold font-mono mt-0.5 ${
+              className={`text-2xl font-semibold tracking-tight tabular-nums ${
                 summary.outstandingBalance > 0 ? 'text-destructive' : 'text-foreground'
               }`}
             >
               {formatCurrency(summary.outstandingBalance)}
             </p>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
             <CreditCard className="h-4 w-4" />
           </div>
         </div>
 
-        <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground font-semibold">Active Production Jobs</p>
-            <p className="text-lg font-bold font-mono text-foreground mt-0.5">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground font-medium">Active Production Jobs</p>
+            <p className="text-2xl font-semibold tracking-tight tabular-nums text-foreground">
               {summary.activeJobs} of {summary.totalJobs}
             </p>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
             <Briefcase className="h-4 w-4" />
           </div>
         </div>
 
-        <div className="rounded-lg border border-border/70 bg-card p-4 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground font-semibold">Last Order Date</p>
-            <p className="text-sm font-semibold font-mono text-foreground mt-0.5">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground font-medium">Last Order Date</p>
+            <p className="text-sm font-semibold font-mono tabular-nums text-foreground">
               {formatDate(summary.lastOrderDate, 'No orders yet')}
             </p>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
             <Clock className="h-4 w-4" />
           </div>
         </div>
       </div>
 
-      {/* Main Grid: Left Details & Notes, Right Tabbed Customer Workspace */}
+      {/* Main Grid: Left Contact Details & Right Workspace Tabs */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Contact & Internal Notes Column (4/12 Width) */}
+        {/* Contact Profile & Internal Notes (4/12 Width) */}
         <div className="space-y-6 lg:col-span-4">
-          {/* Profile Card */}
-          <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs space-y-4">
-            <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase border-b border-border/50 pb-2">
+          <div className="rounded-lg border border-border bg-card p-5 shadow-xs space-y-4">
+            <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase border-b border-border pb-3">
               Contact Profile
             </h3>
             <div className="space-y-3 text-xs">
@@ -171,8 +171,8 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
                 <Phone className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-muted-foreground">Mobile Number</p>
-                  <p className="font-semibold text-foreground font-mono">{customer.mobile || '—'}</p>
-                  {customer.alternateMobile && <p className="text-muted-foreground font-mono">Alt: {customer.alternateMobile}</p>}
+                  <p className="font-semibold text-foreground font-mono tabular-nums">{customer.mobile || '—'}</p>
+                  {customer.alternateMobile && <p className="text-muted-foreground font-mono tabular-nums">Alt: {customer.alternateMobile}</p>}
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -189,41 +189,40 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
                   <p className="text-foreground whitespace-pre-line leading-relaxed">{customer.address || 'Unspecified'}</p>
                 </div>
               </div>
-              <div className="flex items-start space-x-3 border-t border-border/50 pt-3">
+              <div className="flex items-start space-x-3 border-t border-border pt-3">
                 <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-muted-foreground">Customer Since</p>
-                  <p className="font-semibold text-foreground font-mono">{formatDate(customer.createdAt)}</p>
+                  <p className="font-semibold text-foreground font-mono tabular-nums">{formatDate(customer.createdAt)}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Internal Operational Notes Card */}
-          <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-border/50 pb-2">
+          <div className="rounded-lg border border-border bg-card p-5 shadow-xs space-y-3">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Internal Operational Notes
               </h3>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </div>
-            <p className="text-xs text-foreground whitespace-pre-line bg-muted/30 p-3 rounded-md border border-border/50 min-h-20 leading-relaxed">
+            <p className="text-xs text-foreground whitespace-pre-line bg-muted/40 p-3 rounded-md border border-border min-h-20 leading-relaxed">
               {customer.notes || 'No internal operational notes recorded for this customer.'}
             </p>
           </div>
         </div>
 
-        {/* Customer 360 Embedded Tabbed Workspace (8/12 Width) */}
+        {/* Customer 360 Embedded Workspace Tabs (8/12 Width - Style Guide §8.4) */}
         <div className="space-y-4 lg:col-span-8">
           {/* Tab Navigation Header */}
-          <div className="flex items-center space-x-1 border-b border-border/60 pb-2">
+          <div className="flex items-center space-x-1 border-b border-border pb-2">
             <button
               type="button"
               onClick={() => setActiveTab('JOBS')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ${
                 activeTab === 'JOBS'
-                  ? 'bg-primary text-primary-foreground shadow-xs'
-                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
               }`}
             >
               <Briefcase className="h-3.5 w-3.5" />
@@ -232,10 +231,10 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('INVOICES')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ${
                 activeTab === 'INVOICES'
-                  ? 'bg-primary text-primary-foreground shadow-xs'
-                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
               }`}
             >
               <FileText className="h-3.5 w-3.5" />
@@ -244,10 +243,10 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('PAYMENTS')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ${
                 activeTab === 'PAYMENTS'
-                  ? 'bg-primary text-primary-foreground shadow-xs'
-                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
               }`}
             >
               <CreditCard className="h-3.5 w-3.5" />
@@ -256,10 +255,10 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('TIMELINE')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ${
                 activeTab === 'TIMELINE'
-                  ? 'bg-primary text-primary-foreground shadow-xs'
-                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
               }`}
             >
               <History className="h-3.5 w-3.5" />
@@ -269,33 +268,33 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
 
           {/* Jobs Tab View */}
           {activeTab === 'JOBS' && (
-            <div className="rounded-lg border border-border/70 bg-card shadow-xs overflow-hidden">
+            <div className="rounded-lg border border-border bg-card shadow-xs overflow-hidden">
               {jobs.length === 0 ? (
                 <p className="p-5 text-xs text-muted-foreground italic">No job orders found for this customer.</p>
               ) : (
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="border-b border-border/60 bg-muted/40 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <table className="w-full text-left text-sm border-collapse">
+                  <thead className="h-10 border-b border-border bg-muted/40 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <tr>
-                      <th className="px-3.5 py-2.5">Job No</th>
-                      <th className="px-3.5 py-2.5">Priority</th>
-                      <th className="px-3.5 py-2.5">Date</th>
-                      <th className="px-3.5 py-2.5">Status</th>
-                      <th className="px-3.5 py-2.5 text-right">Action</th>
+                      <th className="px-4 py-2.5">Job ID</th>
+                      <th className="px-4 py-2.5">Priority</th>
+                      <th className="px-4 py-2.5">Date</th>
+                      <th className="px-4 py-2.5">Status</th>
+                      <th className="px-4 py-2.5 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/40">
+                  <tbody className="divide-y divide-border">
                     {jobs.map((job) => (
-                      <tr key={job.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-3.5 py-2.5 font-mono font-bold text-foreground">{job.jobNo}</td>
-                        <td className="px-3.5 py-2.5">
-                          <span className="inline-flex rounded px-2 py-0.5 text-[10px] font-semibold uppercase bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60">
+                      <tr key={job.id} className="hover:bg-muted/40 transition-colors duration-150">
+                        <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">{job.jobNo}</td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex rounded px-2 py-0.5 text-[10px] font-semibold uppercase bg-muted text-muted-foreground border border-border">
                             {job.priority}
                           </span>
                         </td>
-                        <td className="px-3.5 py-2.5 font-mono text-muted-foreground">{formatDate(job.jobDate)}</td>
-                        <td className="px-3.5 py-2.5"><StatusBadge status={job.status} /></td>
-                        <td className="px-3.5 py-2.5 text-right">
-                          <Link to={ROUTES.JOBS.DETAIL(job.id)} className="text-primary hover:underline font-medium">
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground tabular-nums">{formatDate(job.jobDate)}</td>
+                        <td className="px-4 py-3"><StatusBadge status={job.status} /></td>
+                        <td className="px-4 py-3 text-right">
+                          <Link to={ROUTES.JOBS.DETAIL(job.id)} className="text-primary hover:underline font-medium text-xs">
                             View →
                           </Link>
                         </td>
@@ -309,32 +308,32 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
 
           {/* Invoices Tab View */}
           {activeTab === 'INVOICES' && (
-            <div className="rounded-lg border border-border/70 bg-card shadow-xs overflow-hidden">
+            <div className="rounded-lg border border-border bg-card shadow-xs overflow-hidden">
               {invoices.length === 0 ? (
                 <p className="p-5 text-xs text-muted-foreground italic">No invoices issued for this customer.</p>
               ) : (
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="border-b border-border/60 bg-muted/40 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <table className="w-full text-left text-sm border-collapse">
+                  <thead className="h-10 border-b border-border bg-muted/40 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <tr>
-                      <th className="px-3.5 py-2.5">Invoice No</th>
-                      <th className="px-3.5 py-2.5">Issue Date</th>
-                      <th className="px-3.5 py-2.5 text-right">Grand Total</th>
-                      <th className="px-3.5 py-2.5 text-right">Balance Due</th>
-                      <th className="px-3.5 py-2.5">Status</th>
+                      <th className="px-4 py-2.5">Invoice ID</th>
+                      <th className="px-4 py-2.5">Issue Date</th>
+                      <th className="px-4 py-2.5 text-right">Grand Total</th>
+                      <th className="px-4 py-2.5 text-right">Balance Due</th>
+                      <th className="px-4 py-2.5">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/40">
+                  <tbody className="divide-y divide-border">
                     {invoices.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-3.5 py-2.5 font-mono font-bold text-foreground">
+                      <tr key={inv.id} className="hover:bg-muted/40 transition-colors duration-150">
+                        <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">
                           <Link to={ROUTES.INVOICES.DETAIL(inv.id)} className="hover:underline">
                             {inv.invoiceNo}
                           </Link>
                         </td>
-                        <td className="px-3.5 py-2.5 font-mono text-muted-foreground">{formatDate(inv.invoiceDate)}</td>
-                        <td className="px-3.5 py-2.5 text-right font-mono font-bold text-foreground">{formatCurrency(inv.grandTotal)}</td>
-                        <td className="px-3.5 py-2.5 text-right font-mono font-bold text-foreground">{formatCurrency(inv.outstandingBalance)}</td>
-                        <td className="px-3.5 py-2.5"><StatusBadge status={inv.status} /></td>
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground tabular-nums">{formatDate(inv.invoiceDate)}</td>
+                        <td className="px-4 py-3 text-right font-mono text-xs font-semibold text-foreground tabular-nums">{formatCurrency(inv.grandTotal)}</td>
+                        <td className="px-4 py-3 text-right font-mono text-xs font-semibold text-foreground tabular-nums">{formatCurrency(inv.outstandingBalance)}</td>
+                        <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
                       </tr>
                     ))}
                   </tbody>
@@ -345,28 +344,28 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
 
           {/* Payments Tab View */}
           {activeTab === 'PAYMENTS' && (
-            <div className="rounded-lg border border-border/70 bg-card shadow-xs overflow-hidden">
+            <div className="rounded-lg border border-border bg-card shadow-xs overflow-hidden">
               {payments.length === 0 ? (
                 <p className="p-5 text-xs text-muted-foreground italic">No confirmed payments recorded for this customer.</p>
               ) : (
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="border-b border-border/60 bg-muted/40 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <table className="w-full text-left text-sm border-collapse">
+                  <thead className="h-10 border-b border-border bg-muted/40 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <tr>
-                      <th className="px-3.5 py-2.5">Payment No</th>
-                      <th className="px-3.5 py-2.5">Date</th>
-                      <th className="px-3.5 py-2.5">Method</th>
-                      <th className="px-3.5 py-2.5">Reference</th>
-                      <th className="px-3.5 py-2.5 text-right">Amount</th>
+                      <th className="px-4 py-2.5">Payment ID</th>
+                      <th className="px-4 py-2.5">Date</th>
+                      <th className="px-4 py-2.5">Method</th>
+                      <th className="px-4 py-2.5">Reference</th>
+                      <th className="px-4 py-2.5 text-right">Amount</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/40">
+                  <tbody className="divide-y divide-border">
                     {payments.map((pay) => (
-                      <tr key={pay.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-3.5 py-2.5 font-mono font-bold text-foreground">{pay.paymentNo}</td>
-                        <td className="px-3.5 py-2.5 font-mono text-muted-foreground">{formatDate(pay.paymentDate)}</td>
-                        <td className="px-3.5 py-2.5 font-semibold text-foreground">{pay.paymentMethod}</td>
-                        <td className="px-3.5 py-2.5 font-mono text-muted-foreground">{pay.referenceNo || 'N/A'}</td>
-                        <td className="px-3.5 py-2.5 text-right font-mono font-bold text-foreground">{formatCurrency(pay.amount)}</td>
+                      <tr key={pay.id} className="hover:bg-muted/40 transition-colors duration-150">
+                        <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">{pay.paymentNo}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground tabular-nums">{formatDate(pay.paymentDate)}</td>
+                        <td className="px-4 py-3 font-semibold text-foreground text-xs">{pay.paymentMethod}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{pay.referenceNo || 'N/A'}</td>
+                        <td className="px-4 py-3 text-right font-mono text-xs font-semibold text-foreground tabular-nums">{formatCurrency(pay.amount)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -375,20 +374,20 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
             </div>
           )}
 
-          {/* Activity Timeline Stream Tab View */}
+          {/* Timeline Stream Tab View */}
           {activeTab === 'TIMELINE' && (
-            <div className="rounded-lg border border-border/70 bg-card p-5 shadow-xs">
-              <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border/60">
+            <div className="rounded-lg border border-border bg-card p-5 shadow-xs">
+              <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                 {timeline.map((act) => (
                   <div key={act.id} className="relative flex items-start justify-between text-xs">
-                    <div className="absolute -left-6 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-card border border-border/60 shadow-xs">
+                    <div className="absolute -left-6 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-card border border-border shadow-xs">
                       {act.type === 'JOB' ? <Briefcase className="h-3 w-3 text-muted-foreground" /> : act.type === 'INVOICE' ? <FileText className="h-3 w-3 text-muted-foreground" /> : <CreditCard className="h-3 w-3 text-muted-foreground" />}
                     </div>
                     <div>
                       <p className="font-semibold text-foreground leading-tight">{act.title}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{act.description}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{act.description}</p>
                     </div>
-                    <span className="font-mono text-[11px] text-muted-foreground shrink-0 ml-2">{formatDate(act.timestamp)}</span>
+                    <span className="font-mono text-xs text-muted-foreground tabular-nums shrink-0 ml-2">{formatDate(act.timestamp)}</span>
                   </div>
                 ))}
               </div>
@@ -399,4 +398,3 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
     </div>
   );
 };
-
