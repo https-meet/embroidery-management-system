@@ -35,8 +35,10 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# TypeScript cache
+# TypeScript & Dev cache
 *.tsbuildinfo
+.vite/
+.cache/
 
 # Test coverage
 coverage/
@@ -50,3 +52,7 @@ prisma/migrations/
 # Temporary files
 tmp/
 temp/
+*.tmp
+*.temp
+*.bak
+

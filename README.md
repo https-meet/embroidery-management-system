@@ -1,22 +1,37 @@
 # Embroidery Business Management System (EBMS)
 
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.0-61DAFB.svg?style=flat-square&logo=react)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF.svg?style=flat-square&logo=vite)](https://vitejs.dev/)
+[![Express](https://img.shields.io/badge/Express-4.21-000000.svg?style=flat-square&logo=express)](https://expressjs.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.0-4169E1.svg?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.2-2D3748.svg?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC.svg?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+
 EBMS is a full-stack business management application for embroidery businesses. It helps teams manage the complete operational workflow: customers, embroidery designs, jobs, production progress, invoices, payments, reports, and business settings.
 
 The project is built as a TypeScript pnpm workspace with a React frontend, an Express API, Prisma ORM, and PostgreSQL. It is organized around business features rather than generic technical layers, making the system easier to understand, extend, and maintain.
 
-## Highlights
+---
 
-- Full-stack TypeScript application with React, Express, Prisma, and PostgreSQL
-- Feature-based frontend and modular backend organization
-- JWT authentication with role-based authorization
-- End-to-end embroidery workflow from customer intake to payment reporting
-- Production-ready workspace scripts for build, type checking, linting, testing, and formatting
+## 🌟 Highlights
 
-## Table of Contents
+- **Full-stack TypeScript**: React 19, Express, Prisma ORM, and PostgreSQL.
+- **Feature-Based Architecture**: Modular frontend and backend codebase organized by business domain.
+- **Enterprise Design System**: Commercial UI/UX with HSL color tokens, dark mode, light mode, and keyboard-first accessibility.
+- **JWT & Role-Based Security**: Access/refresh token flow with `ADMIN`, `MANAGER`, and `OPERATOR` roles.
+- **End-to-End Embroidery Lifecycle**: Customer intake → Design catalog → Job tracking → Production queue → Quality inspection → Tax invoice → Payment settlement.
+- **Production-Ready Quality**: Complete workspace scripts for build, type checking, linting, testing, and offline disaster recovery backups.
+
+---
+
+## 📋 Table of Contents
 
 - [Project Overview](#project-overview)
 - [Key Features](#key-features)
 - [Business Workflow](#business-workflow)
+- [Screenshots](#screenshots)
 - [Architecture Overview](#architecture-overview)
 - [Tech Stack](#tech-stack)
 - [Repository Structure](#repository-structure)
@@ -24,14 +39,15 @@ The project is built as a TypeScript pnpm workspace with a React frontend, an Ex
 - [Environment Variables](#environment-variables)
 - [Running the Application](#running-the-application)
 - [Build and Quality Checks](#build-and-quality-checks)
-- [Screenshots](#screenshots)
 - [API Overview](#api-overview)
 - [Documentation Links](#documentation-links)
 - [Future Roadmap](#future-roadmap)
 - [License](#license)
 - [Author](#author)
 
-## Project Overview
+---
+
+## 🎯 Project Overview
 
 Embroidery businesses often manage work across notebooks, phone calls, WhatsApp messages, design files, and memory. EBMS centralizes that information into one operational system.
 
@@ -48,80 +64,71 @@ The application supports:
 - Business reports
 - Local business profile and preference settings
 
-## Key Features
+---
+
+## 🚀 Key Features
 
 ### Authentication and Authorization
 
 - User registration and login
 - JWT access and refresh token flow
-- Protected frontend routes
-- Protected backend API routes
+- Protected frontend routes & backend API routes
 - Role-based access control for `ADMIN`, `MANAGER`, and `OPERATOR`
 
-### Customers
+### Customers & Customer 360
 
 - Create, view, update, list, search, and archive customers
-- Customer codes
-- Customer type support for individuals and companies
-- Pagination and filtering support
+- Customer codes and type support for individuals and companies
+- Customer 360 Workspace consolidating profile, active jobs, outstanding balance, and activity stream
 
-### Designs
+### Designs Catalog
 
 - Create, view, update, list, search, and archive embroidery designs
-- Design codes
-- Category filtering
+- Design codes and category filtering
 - Design metadata such as stitch count, dimensions, color count, preview URL, and file URL
 
-### Jobs
+### Job Orders
 
 - Create, view, update, list, and archive jobs
-- Multiple job items per job
-- Customer and design associations
-- Job priority and lifecycle status
+- Multiple job items per job with position placement, stitch count, quantity, and rate
+- Job priority (`LOW`, `NORMAL`, `HIGH`, `URGENT`) and lifecycle status
 - Automatic line-total handling through the business workflow
 
-### Production
+### Production & Quality Control
 
-- Production queue
-- Operator assignment
-- Start production
-- Complete production
-- Quality check
-- Delivery status transition
+- Real-time production queue
+- Operator assignment (`OPERATOR` role)
+- Stage transitions: Start → Complete → Quality Check → Deliver
 
-### Invoices
+### Invoices & Tax Billing
 
 - Create, view, update, list, and cancel invoices
-- Invoice items
-- Invoice status lifecycle
-- Discounts by percentage or fixed amount
-- Subtotal, grand total, paid amount, and outstanding balance tracking
+- Invoice items, percentage or fixed discount, subtotal, and tax calculation
+- Outstanding balance tracking and printable tax invoice view
 
-### Payments
+### Payments & Collections
 
 - Create, view, and list payments
-- Payment methods: cash, UPI, bank transfer, and cheque
-- Payment allocations to invoices
-- Partial and full payment support
-- Automatic invoice balance updates
+- Payment methods: Cash, UPI, Bank Transfer, and Cheque
+- Automatic invoice balance updates and payment allocations
 
-### Dashboard and Reports
+### Dashboard & Reports
 
-- Dashboard summary metrics
-- Customer reports
-- Job reports
-- Production reports
-- Invoice reports
-- Payment reports
-- Revenue reports
+- Real-time operational KPI summaries (Jobs Due Today, Delayed Jobs Alert, Pending Collections, Monthly Revenue)
+- Embedded tables for Today's Production Queue, Payment Follow-up, and Recent Activity Stream
+- Specialized reports for customers, jobs, production, invoices, payments, and revenue
 
-### Settings
+### Settings, Diagnostics & Backups
 
-- Business profile preferences
-- Invoice notes and bank details
-- Local frontend persistence for application preferences
+- Business profile, GSTIN, banking details, and invoice footer configuration
+- User permissions matrix and security settings
+- Immutable Audit Trail tracking all user and financial actions
+- System Health diagnostic monitor (DB latency, server uptime, database record counts)
+- Offline Disaster Recovery Backup Hub (JSON database snapshot & CSV transaction ledger)
 
-## Business Workflow
+---
+
+## 🔄 Business Workflow
 
 EBMS follows the real operational flow of an embroidery business:
 
@@ -132,14 +139,46 @@ Customer
   -> Job Items
   -> Production Queue
   -> Production Completion
+  -> Quality Check
   -> Invoice
   -> Payment
-  -> Dashboard and Reports
+  -> Dashboard & Reports
 ```
 
 The workflow keeps customer, production, and financial information connected so users can track work from the first customer interaction through final payment.
 
-## Architecture Overview
+---
+
+## 🖼️ Screenshots
+
+### Authentication & Split-Screen Login
+![Authentication & Split-Screen Login](screenshots/01_login_screen.png)
+
+### Operational Dashboard
+![Operational Dashboard](screenshots/02_operational_dashboard.png)
+
+### Customer 360 Hub
+![Customer 360 Hub](screenshots/03_customer_360_hub.png)
+
+### Job Orders Workspace
+![Job Orders Workspace](screenshots/04_job_orders_workspace.png)
+
+### Invoices & Tax Billing
+![Invoices & Tax Billing](screenshots/05_printable_tax_invoice.png)
+
+### Global Search & Command Palette Modal
+![Global Search & Command Palette Modal](screenshots/06_global_search_modal.png)
+
+### Commercial Settings & System Health
+![Commercial Settings & System Health](screenshots/07_commercial_settings_hub.png)
+
+### Reports & Offline Backup Hub
+![Reports & Offline Backup Hub](screenshots/08_reports_backup_hub.png)
+
+
+---
+
+## 📐 Architecture Overview
 
 EBMS uses a modular full-stack architecture.
 
@@ -160,10 +199,7 @@ flowchart LR
 
 ### Frontend Architecture
 
-The frontend is organized by feature under `apps/frontend/src/features`.
-
-Each feature typically owns:
-
+The frontend is organized by feature under `apps/frontend/src/features`. Each feature owns:
 - `api`
 - `components`
 - `hooks`
@@ -171,16 +207,11 @@ Each feature typically owns:
 - `schemas`
 - `types`
 
-Shared frontend code lives under `apps/frontend/src/shared`, including reusable UI components, hooks, constants, API utilities, query configuration, providers, and formatting helpers.
-
-Routing is centralized in `apps/frontend/src/routes/AppRoutes.tsx` and uses route-level lazy loading with `React.lazy()` and `Suspense`.
+Shared frontend code lives under `apps/frontend/src/shared`, including reusable UI components, hooks, constants, API utilities, query configuration, providers, and formatting helpers. Routing is centralized in `apps/frontend/src/routes/AppRoutes.tsx` using `React.lazy()` and `Suspense`.
 
 ### Backend Architecture
 
-The backend is organized by business module under `apps/backend/src/modules`.
-
-Each module follows a consistent structure:
-
+The backend is organized by business module under `apps/backend/src/modules`. Each module follows a consistent structure:
 - `router`
 - `controller`
 - `service`
@@ -191,43 +222,33 @@ Each module follows a consistent structure:
 
 The backend exposes a versioned REST API under `/api/v1`, validates requests with Zod, applies authentication and role checks through middleware, and persists data through Prisma and PostgreSQL.
 
-## Tech Stack
+---
+
+## 🛠️ Tech Stack
 
 ### Frontend
-
-- React 19
-- Vite
-- TypeScript
-- React Router
-- TanStack Query
-- Axios
-- React Hook Form
-- Zod
-- Tailwind CSS
-- Sonner
-- Lucide React
+- **Framework**: React 19, Vite
+- **Language**: TypeScript 5.7
+- **Routing & Querying**: React Router v7, TanStack Query v5, Axios
+- **Form & Validation**: React Hook Form, Zod
+- **Styling & Icons**: Tailwind CSS v3.4, Lucide React, Sonner
 
 ### Backend
-
-- Node.js
-- Express
-- TypeScript
-- Prisma
-- PostgreSQL
-- Zod
-- JSON Web Tokens
-- bcryptjs
-- Vitest
-- Supertest
+- **Runtime & Framework**: Node.js, Express v4.21
+- **Language**: TypeScript 5.7
+- **Database & ORM**: PostgreSQL 16, Prisma ORM v6.2
+- **Auth & Security**: JWT, bcryptjs, Zod
+- **Testing**: Vitest v4.1, Supertest
 
 ### Workspace and Tooling
-
 - pnpm workspaces
 - ESLint flat config
 - Prettier
 - Shared TypeScript configuration
 
-## Repository Structure
+---
+
+## 📁 Repository Structure
 
 ```text
 .
@@ -269,15 +290,17 @@ The backend exposes a versioned REST API under `/api/v1`, validates requests wit
 `-- pnpm-workspace.yaml
 ```
 
-## Installation
+---
+
+## ⚡ Quick Start & Installation
 
 ### Prerequisites
 
 - Node.js 20 or newer
 - pnpm 9 or newer
-- PostgreSQL
+- PostgreSQL 16 or newer
 
-### Install Dependencies
+### 1. Install Dependencies
 
 From the repository root:
 
@@ -285,11 +308,9 @@ From the repository root:
 pnpm install
 ```
 
-### Database Setup
+### 2. Database Setup
 
-Create a PostgreSQL database for the application.
-
-Example:
+Create a PostgreSQL database for the application:
 
 ```sql
 CREATE DATABASE ebms;
@@ -313,19 +334,13 @@ Seed local development data:
 pnpm db:seed
 ```
 
-## Environment Variables
+---
 
-The root [.env.example](.env.example) file is the single source of truth for environment configuration.
+## 🔑 Environment Variables
 
-The backend reads environment variables from `.env` in the backend package working directory.
+The root [.env.example](.env.example) file is the single source of truth for environment configuration. The backend reads environment variables from `.env` in `apps/backend/.env`.
 
-Create:
-
-```text
-apps/backend/.env
-```
-
-Backend variables:
+Backend configuration (`apps/backend/.env`):
 
 ```env
 PORT=3000
@@ -339,15 +354,15 @@ CORS_ORIGIN="http://localhost:5173"
 BCRYPT_SALT_ROUNDS=10
 ```
 
-The frontend defaults to `/api/v1`, which works with the Vite development proxy in `apps/frontend/vite.config.ts`.
-
-For deployments or custom API hosts, configure:
+Frontend configuration (defaults to `/api/v1` via Vite dev proxy):
 
 ```env
 VITE_API_BASE_URL="http://localhost:3000/api/v1"
 ```
 
-## Running the Application
+---
+
+## 🏃 Running the Application
 
 Run the backend API:
 
@@ -355,17 +370,8 @@ Run the backend API:
 pnpm dev:backend
 ```
 
-Backend URL:
-
-```text
-http://localhost:3000
-```
-
-Health check:
-
-```text
-http://localhost:3000/api/v1/health
-```
+Backend URL: `http://localhost:3000`  
+Health check: `http://localhost:3000/api/v1/health`
 
 Run the frontend application:
 
@@ -373,82 +379,49 @@ Run the frontend application:
 pnpm dev:frontend
 ```
 
-Frontend URL:
+Frontend URL: `http://localhost:5173`
 
-```text
-http://localhost:5173
-```
+---
 
-## Build and Quality Checks
+## 🧪 Build and Quality Checks
 
 Run all workspace builds:
-
 ```bash
 pnpm build
 ```
 
 Run TypeScript checks:
-
 ```bash
 pnpm typecheck
 ```
 
 Run ESLint:
-
 ```bash
 pnpm lint
 ```
 
 Run backend tests:
-
 ```bash
 pnpm test
 ```
 
 Check formatting:
-
 ```bash
 pnpm format:check
 ```
 
-## Screenshots
+---
 
-### Login
+## 📡 API Overview
 
-### Dashboard
-
-### Customers
-
-### Designs
-
-### Jobs
-
-### Production
-
-### Invoices
-
-### Payments
-
-### Reports
-
-### Settings
-
-## API Overview
-
-Base URL:
-
-```text
-/api/v1
-```
+Base URL: `/api/v1`
 
 ### Health
-
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/health` | Server liveness check |
 
 ### Authentication
-
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | POST | `/auth/register` | Register a user |
@@ -458,7 +431,6 @@ Base URL:
 | POST | `/auth/logout` | Logout |
 
 ### Customers
-
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/customers` | List customers |
@@ -468,7 +440,6 @@ Base URL:
 | DELETE | `/customers/:id` | Archive customer |
 
 ### Designs
-
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/designs` | List designs |
@@ -478,7 +449,6 @@ Base URL:
 | DELETE | `/designs/:id` | Archive design |
 
 ### Jobs
-
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/jobs` | List jobs |
@@ -487,10 +457,9 @@ Base URL:
 | PUT | `/jobs/:id` | Update job |
 | DELETE | `/jobs/:id` | Archive job |
 
-The backend also exposes `/orders` as an alias for job routes.
+*(Note: `/orders` is exposed as an alias for job routes).*
 
 ### Production
-
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/production` | List production queue |
@@ -501,7 +470,6 @@ The backend also exposes `/orders` as an alias for job routes.
 | POST | `/production/deliver` | Mark job as delivered |
 
 ### Invoices
-
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/invoices` | List invoices |
@@ -511,23 +479,16 @@ The backend also exposes `/orders` as an alias for job routes.
 | POST | `/invoices/:id/cancel` | Cancel invoice |
 
 ### Payments
-
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/payments` | List payments |
 | GET | `/payments/:id` | Get payment by ID |
 | POST | `/payments` | Create payment |
 
-### Dashboard
-
+### Dashboard & Reports
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/dashboard/summary` | Get dashboard summary metrics |
-
-### Reports
-
-| Method | Endpoint | Description |
-| --- | --- | --- |
 | GET | `/reports/customers` | Customer report |
 | GET | `/reports/jobs` | Job report |
 | GET | `/reports/production` | Production report |
@@ -535,7 +496,9 @@ The backend also exposes `/orders` as an alias for job routes.
 | GET | `/reports/payments` | Payment report |
 | GET | `/reports/revenue` | Revenue report |
 
-## Documentation Links
+---
+
+## 📚 Documentation Links
 
 - [Project Context](docs/PROJECT_CONTEXT.md)
 - [AI Engineering Guide](docs/AI_ENGINEERING_GUIDE.md)
@@ -548,27 +511,26 @@ The backend also exposes `/orders` as an alias for job routes.
 - [Coding Standards](docs/developer-kit/09_CODING_STANDARDS.md)
 - [ADR Index](docs/developer-kit/13_ADR_INDEX.md)
 
-## Future Roadmap
+---
 
-The completed v1 application focuses on the core business workflow. Future improvements may include:
+## 🗺️ Future Roadmap
 
-- Deployment documentation
-- CI/CD workflow automation
-- Seed data for demos and local testing
-- Public API collection or OpenAPI documentation
-- Frontend automated tests
-- File upload storage for design and job attachments
-- PDF invoice generation
-- Notification integrations
-- Inventory support
-- Audit log views
+- Deployment documentation & Docker Compose setup
+- CI/CD workflow automation (GitHub Actions)
+- PDF invoice generation engine
+- WhatsApp / SMS notification integrations
+- Machine thread & garment inventory management
 
-## License
+---
+
+## 📄 License
 
 This project is released under the [MIT License](LICENSE).
 
-## Author
+---
 
-Meet Chauhan
+## 👤 Author
 
-- GitHub: [https-meet](https://github.com/https-meet)
+**Meet Chauhan**
+- GitHub: [@https-meet](https://github.com/https-meet)
+
