@@ -150,32 +150,105 @@ The workflow keeps customer, production, and financial information connected so 
 
 ---
 
-## 🖼️ Screenshots
+## 🖼️ UI Design System — Light & Dark Mode Parity
 
-### Authentication & Split-Screen Login
-![Authentication & Split-Screen Login](screenshots/01_login_screen.png)
+The EBMS enterprise design system features complete **Light + Dark theme parity** with WCAG AA accessibility contrast compliance captured directly from the live Vercel deployment ([https://embroidery-management-system-fronte.vercel.app](https://embroidery-management-system-fronte.vercel.app)).
 
-### Operational Dashboard
-![Operational Dashboard](screenshots/02_operational_dashboard.png)
+### 1. Split-Screen Authentication (`/login`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Login Light](screenshots/01_login_screen_light.png) | ![Login Dark](screenshots/01_login_screen_dark.png) |
 
-### Customer 360 Hub
-![Customer 360 Hub](screenshots/03_customer_360_hub.png)
+---
 
-### Job Orders Workspace
-![Job Orders Workspace](screenshots/04_job_orders_workspace.png)
+### 2. Operational Dashboard (`/dashboard`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Dashboard Light](screenshots/02_operational_dashboard_light.png) | ![Dashboard Dark](screenshots/02_operational_dashboard_dark.png) |
 
-### Invoices & Tax Billing
-![Invoices & Tax Billing](screenshots/05_printable_tax_invoice.png)
+---
 
-### Global Search & Command Palette Modal
-![Global Search & Command Palette Modal](screenshots/06_global_search_modal.png)
+### 3. Customers Directory (`/customers`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Customers List Light](screenshots/03_customers_list_light.png) | ![Customers List Dark](screenshots/03_customers_list_dark.png) |
 
-### Commercial Settings & System Health
-![Commercial Settings & System Health](screenshots/07_commercial_settings_hub.png)
+---
 
-### Reports & Offline Backup Hub
-![Reports & Offline Backup Hub](screenshots/08_reports_backup_hub.png)
+### 4. Customer 360 Workspace (`/customers/:id`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Customer 360 Light](screenshots/04_customer_360_hub_light.png) | ![Customer 360 Dark](screenshots/04_customer_360_hub_dark.png) |
 
+---
+
+### 5. Designs Catalog (`/designs`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Designs Catalog Light](screenshots/05_designs_catalog_light.png) | ![Designs Catalog Dark](screenshots/05_designs_catalog_dark.png) |
+
+---
+
+### 6. Job Orders List (`/jobs`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Job Orders List Light](screenshots/06_job_orders_list_light.png) | ![Job Orders List Dark](screenshots/06_job_orders_list_dark.png) |
+
+---
+
+### 7. Job Order Detail Workspace (`/jobs/:id`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Job Workspace Light](screenshots/07_job_workspace_light.png) | ![Job Workspace Dark](screenshots/07_job_workspace_dark.png) |
+
+---
+
+### 8. Real-Time Production Queue (`/production`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Production Queue Light](screenshots/08_production_queue_light.png) | ![Production Queue Dark](screenshots/08_production_queue_dark.png) |
+
+---
+
+### 9. Invoices Directory (`/invoices`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Invoices List Light](screenshots/09_invoices_list_light.png) | ![Invoices List Dark](screenshots/09_invoices_list_dark.png) |
+
+---
+
+### 10. Tax Invoice & Billing Workspace (`/invoices/:id`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Tax Invoice Light](screenshots/10_printable_tax_invoice_light.png) | ![Tax Invoice Dark](screenshots/10_printable_tax_invoice_dark.png) |
+
+---
+
+### 11. Payments & Collections Ledger (`/payments`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Payments Ledger Light](screenshots/11_payments_ledger_light.png) | ![Payments Ledger Dark](screenshots/11_payments_ledger_dark.png) |
+
+---
+
+### 12. Global Search & Command Palette (`Ctrl + K`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Global Search Light](screenshots/12_global_search_modal_light.png) | ![Global Search Dark](screenshots/12_global_search_modal_dark.png) |
+
+---
+
+### 13. Commercial Settings & System Diagnostics (`/settings`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Settings Light](screenshots/13_commercial_settings_hub_light.png) | ![Settings Dark](screenshots/13_commercial_settings_hub_dark.png) |
+
+---
+
+### 14. Operational Reports & Offline Backup Hub (`/reports`)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![Reports Light](screenshots/14_reports_backup_hub_light.png) | ![Reports Dark](screenshots/14_reports_backup_hub_dark.png) |
 
 ---
 

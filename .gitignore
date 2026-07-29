@@ -49,7 +49,9 @@ prisma/migrations/
 *.db
 *.db-journal
 
-# Temporary files
+# Temporary files & test artifacts
+scratch/
+test-results/
 tmp/
 temp/
 *.tmp
