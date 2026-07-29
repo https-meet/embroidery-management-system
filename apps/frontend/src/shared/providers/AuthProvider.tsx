@@ -130,11 +130,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (savedAccessToken) {
         try {
-          // Validate existing access token with backend
+          // Set access token in state/ref first so Axios interceptors attach Bearer token
+          setAccessToken(savedAccessToken);
           const profileData = await getCurrentUserApi();
           if (isMounted) {
             setUser(profileData.user);
-            setAccessToken(savedAccessToken);
           }
         } catch {
           // Token expired or invalid, attempt silent refresh

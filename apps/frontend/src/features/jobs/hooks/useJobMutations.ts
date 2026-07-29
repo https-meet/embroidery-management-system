@@ -12,7 +12,9 @@ export function useCreateJob() {
     onSuccess: (data) => {
       toast.success(`Job '${data.job.jobNo}' created successfully.`);
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.production.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }
@@ -27,7 +29,9 @@ export function useUpdateJob() {
       toast.success(`Job '${data.job.jobNo}' updated successfully.`);
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.production.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }
@@ -41,7 +45,9 @@ export function useArchiveJob() {
       toast.success('Job archived successfully.');
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.production.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }

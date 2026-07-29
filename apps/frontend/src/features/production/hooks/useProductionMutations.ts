@@ -26,6 +26,7 @@ export function useAssignOperator() {
       queryClient.invalidateQueries({ queryKey: queryKeys.production.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }
@@ -40,6 +41,7 @@ export function useStartProduction() {
       queryClient.invalidateQueries({ queryKey: queryKeys.production.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }
@@ -54,6 +56,7 @@ export function useCompleteProduction() {
       queryClient.invalidateQueries({ queryKey: queryKeys.production.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }
@@ -68,6 +71,7 @@ export function useRecordQualityCheck() {
       queryClient.invalidateQueries({ queryKey: queryKeys.production.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }
@@ -82,6 +86,7 @@ export function useMarkReadyForDelivery() {
       queryClient.invalidateQueries({ queryKey: queryKeys.production.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }
