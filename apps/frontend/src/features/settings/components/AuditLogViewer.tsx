@@ -25,7 +25,8 @@ export const AuditLogViewer: React.FC = () => {
     queryKey: ['auditLogs', page],
     queryFn: async () => {
       const res = await axiosClient.get(`/settings/audit-logs?page=${page}&limit=15`);
-      return (res as any).data;
+      const payload = res as unknown as { data: { items: AuditLogEntry[]; total: number } };
+      return payload.data;
     },
   });
 

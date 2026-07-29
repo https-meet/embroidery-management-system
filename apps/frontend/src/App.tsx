@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppProviders } from '@/app/providers';
 import { setupAxiosInterceptors } from '@/shared/api/interceptors';
+import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
 import { AppRoutes } from '@/routes/AppRoutes';
 
 export const App: React.FC = () => {
@@ -10,10 +11,12 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <AppProviders>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AppProviders>
+    <ErrorBoundary>
+      <AppProviders>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AppProviders>
+    </ErrorBoundary>
   );
 };

@@ -12,7 +12,10 @@ export function useCreateInvoice() {
     onSuccess: (data) => {
       toast.success(`Invoice '${data.invoice.invoiceNo}' generated successfully.`);
       queryClient.invalidateQueries({ queryKey: queryKeys.invoices.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }
@@ -22,14 +25,21 @@ export function useUpdateInvoice() {
 
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateInvoiceDto }) =>
-      updateInvoiceApi(id, dto),
+      updateJobInvoiceApi(id, dto),
     onSuccess: (data, { id }) => {
       toast.success(`Invoice '${data.invoice.invoiceNo}' updated successfully.`);
       queryClient.invalidateQueries({ queryKey: queryKeys.invoices.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.invoices.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
+}
+
+function updateJobInvoiceApi(id: string, dto: UpdateInvoiceDto) {
+  return updateInvoiceApi(id, dto);
 }
 
 export function useCancelInvoice() {
@@ -41,7 +51,10 @@ export function useCancelInvoice() {
       toast.success(`Invoice '${data.invoice.invoiceNo}' cancelled.`);
       queryClient.invalidateQueries({ queryKey: queryKeys.invoices.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.invoices.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['customer360'] });
     },
   });
 }

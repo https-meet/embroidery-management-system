@@ -58,7 +58,7 @@ export const SystemHealthCard: React.FC = () => {
           <div>
             <p className="text-xs text-muted-foreground font-semibold">Server Uptime</p>
             <p className="text-base font-bold font-mono text-foreground mt-0.5">
-              {formatUptime(health.systemUptimeSeconds)}
+              {formatUptime(health.systemUptimeSeconds || health.system?.uptimeSeconds || 0)}
             </p>
           </div>
           <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
@@ -70,7 +70,7 @@ export const SystemHealthCard: React.FC = () => {
           <div>
             <p className="text-xs text-muted-foreground font-semibold">Environment</p>
             <p className="text-base font-bold font-mono text-foreground uppercase mt-0.5">
-              {health.environment}
+              {health.environment || health.system?.environment || 'PRODUCTION'}
             </p>
           </div>
           <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/40 bg-muted/30 text-muted-foreground">
@@ -86,23 +86,23 @@ export const SystemHealthCard: React.FC = () => {
         </h4>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-5 text-center">
           <div className="rounded-md border border-border/50 bg-muted/30 p-3">
-            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.customers}</p>
+            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts?.customers ?? 0}</p>
             <p className="text-[11px] text-muted-foreground font-medium">Customers</p>
           </div>
           <div className="rounded-md border border-border/50 bg-muted/30 p-3">
-            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.jobs}</p>
+            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts?.jobs ?? 0}</p>
             <p className="text-[11px] text-muted-foreground font-medium">Job Orders</p>
           </div>
           <div className="rounded-md border border-border/50 bg-muted/30 p-3">
-            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.invoices}</p>
+            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts?.invoices ?? 0}</p>
             <p className="text-[11px] text-muted-foreground font-medium">Invoices</p>
           </div>
           <div className="rounded-md border border-border/50 bg-muted/30 p-3">
-            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.payments}</p>
+            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts?.payments ?? 0}</p>
             <p className="text-[11px] text-muted-foreground font-medium">Payments</p>
           </div>
           <div className="rounded-md border border-border/50 bg-muted/30 p-3">
-            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts.designs}</p>
+            <p className="text-xl font-bold font-mono text-foreground">{health.recordCounts?.designs ?? 0}</p>
             <p className="text-[11px] text-muted-foreground font-medium">Designs</p>
           </div>
         </div>

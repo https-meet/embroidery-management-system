@@ -105,12 +105,12 @@ export const SystemBackupCard: React.FC = () => {
     }
   };
 
-  const totalRecords = health
-    ? health.recordCounts.customers +
-      health.recordCounts.jobs +
-      health.recordCounts.invoices +
-      health.recordCounts.payments +
-      health.recordCounts.designs
+  const totalRecords = health?.recordCounts
+    ? (health.recordCounts.customers || 0) +
+      (health.recordCounts.jobs || 0) +
+      (health.recordCounts.invoices || 0) +
+      (health.recordCounts.payments || 0) +
+      (health.recordCounts.designs || 0)
     : 0;
 
   return (

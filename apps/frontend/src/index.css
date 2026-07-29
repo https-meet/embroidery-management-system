@@ -88,19 +88,31 @@
   }
 }
 
+/* Professional A4 GST Tax Invoice Print Optimization */
 @media print {
-  body {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html, body {
     background: #ffffff !important;
     color: #000000 !important;
+    font-size: 12pt !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  header, nav, aside, button, .print\:hidden {
+
+  header, nav, sidebar, footer, button, .no-print, .print\:hidden {
     display: none !important;
   }
+
   main {
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
   }
+
   .print-sheet {
     border: none !important;
     box-shadow: none !important;
@@ -109,6 +121,15 @@
     width: 100% !important;
     color: #000000 !important;
     background: #ffffff !important;
+    page-break-after: avoid;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border-color: #cbd5e1 !important;
   }
 }
-

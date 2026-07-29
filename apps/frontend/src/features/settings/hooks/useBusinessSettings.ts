@@ -1,46 +1,59 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { axiosClient } from '@/shared/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { axiosClient } from '@/shared/api';
 
 export interface BusinessConfig {
   companyName: string;
-  logoUrl?: string | null;
-  gstin?: string | null;
-  pan?: string | null;
-  address?: string | null;
-  mobile?: string | null;
-  email?: string | null;
-  website?: string | null;
-  bankName?: string | null;
-  accountNo?: string | null;
-  ifscCode?: string | null;
-  upiId?: string | null;
-  upiQrUrl?: string | null;
-  invoiceFooter?: string | null;
-  jobPrefix: string;
+  gstin?: string;
+  pan?: string;
+  website?: string;
+  address?: string;
+  mobile?: string;
+  email?: string;
+  taxRatePercent: number;
+  defaultTaxRatePercentage?: number;
+  currencySymbol: string;
   invoicePrefix: string;
-  paymentPrefix: string;
-  defaultTaxRatePercentage: number;
-  defaultPaymentTermsDays: number;
+  jobPrefix: string;
+  paymentPrefix?: string;
+  bankName?: string;
+  accountNo?: string;
+  ifscCode?: string;
+  upiId?: string;
+  defaultPaymentTermsDays?: number;
+  invoiceFooter?: string;
 }
 
 export interface SystemHealthData {
-  appVersion: string;
-  environment: string;
+  status: 'OPTIMAL' | 'DEGRADED' | 'CRITICAL';
+  appVersion?: string;
+  systemUptimeSeconds?: number;
+  environment?: string;
   database: {
-    status: 'HEALTHY' | 'DEGRADED';
+    status: 'CONNECTED' | 'DISCONNECTED';
     latencyMs: number;
-    provider: string;
   };
-  systemUptimeSeconds: number;
-  recordCounts: {
+  storage: {
+    backupsAvailable: number;
+    lastBackupTimestamp: string | null;
+  };
+  system: {
+    nodeVersion: string;
+    environment: string;
+    uptimeSeconds: number;
+    memoryUsageMb: number;
+  };
+  recordCounts?: {
     customers: number;
     jobs: number;
+    designs: number;
     invoices: number;
     payments: number;
-    designs: number;
   };
-  backupStatus: string;
+}
+
+interface ApiDataWrapper<T> {
+  data: T;
 }
 
 export function useBusinessSettings() {
@@ -48,7 +61,8 @@ export function useBusinessSettings() {
     queryKey: ['businessConfig'],
     queryFn: async () => {
       const res = await axiosClient.get('/settings/business');
-      return (res as any).data;
+      const payload = res as unknown as ApiDataWrapper<{ config: BusinessConfig }>;
+      return payload.data;
     },
   });
 }
@@ -59,7 +73,8 @@ export function useUpdateBusinessSettings() {
   return useMutation({
     mutationFn: async (dto: Partial<BusinessConfig>) => {
       const res = await axiosClient.put('/settings/business', dto);
-      return (res as any).data;
+      const payload = res as unknown as ApiDataWrapper<{ config: BusinessConfig }>;
+      return payload.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['businessConfig'] });
@@ -76,7 +91,8 @@ export function useSystemHealth() {
     queryKey: ['systemHealth'],
     queryFn: async () => {
       const res = await axiosClient.get('/settings/health');
-      return (res as any).data;
+      const payload = res as unknown as ApiDataWrapper<SystemHealthData>;
+      return payload.data;
     },
     refetchInterval: 30000,
   });

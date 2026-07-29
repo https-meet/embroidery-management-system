@@ -58,12 +58,17 @@ export interface Customer360Response {
   }>;
 }
 
+interface ApiDataWrapper<T> {
+  data: T;
+}
+
 export function useCustomer360(customerId: string) {
   return useQuery<Customer360Response>({
     queryKey: ['customer360', customerId],
     queryFn: async () => {
       const res = await axiosClient.get(`/customers/${customerId}/360`);
-      return (res as any).data;
+      const payload = res as unknown as ApiDataWrapper<Customer360Response>;
+      return payload.data;
     },
     enabled: Boolean(customerId),
   });
