@@ -17,7 +17,7 @@ export const DashboardPage: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="h-20 w-full animate-pulse rounded-lg bg-muted/60" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
@@ -42,13 +42,13 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Professional Page Header */}
+      {/* Welcome Header */}
       <WelcomeHeader />
 
-      {/* Primary Operational KPI Strip */}
+      {/* Primary Operational KPI Strip (Style Guide §8.2: 4 cards) */}
       <SummaryCards summary={data.summary} />
 
-      {/* Rule-Based Recommended Next Steps & Business Health Summary */}
+      {/* Recommended Next Steps */}
       <RecommendedNextSteps
         summary={data.summary}
         recommendedActions={data.recommendedActions || []}
@@ -57,20 +57,16 @@ export const DashboardPage: React.FC = () => {
       {/* Quick Actions Bar */}
       <QuickActions />
 
-      {/* Main Grid: Work Queue (65%) & Payment Follow-up (35%) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-7">
-          <WorkQueue items={data.workQueue} />
-        </div>
-        <div className="lg:col-span-5">
-          <PaymentFollowup items={data.paymentFollowUp} />
-        </div>
+      {/* Twin Production & Collections Queues (Style Guide §8.2: grid lg:grid-cols-2 gap-4) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <WorkQueue items={data.workQueue} />
+        <PaymentFollowup items={data.paymentFollowUp} />
       </div>
 
       {/* Secondary Business Overview */}
       <SecondaryBusinessOverview summary={data.summary} />
 
-      {/* Recent Business Activity & Audit Log Stream */}
+      {/* Recent Activity Feed (Style Guide §8.2: full-width card) */}
       <RecentActivityTimeline activities={data.recentActivity || []} />
     </div>
   );
