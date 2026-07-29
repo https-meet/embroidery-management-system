@@ -54,9 +54,9 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-border/70 bg-card shadow-xs">
-      <table className="w-full text-left text-xs border-collapse">
-        <thead className="border-b border-border/60 bg-muted/40 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+    <div className="w-full overflow-x-auto rounded-lg border border-border bg-card overflow-hidden">
+      <table className="w-full text-left text-sm border-collapse">
+        <thead className="h-10 border-b border-border bg-muted/40 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           <tr>
             {columns.map((col) => {
               const isSorted = sortBy === col.key;
@@ -71,7 +71,7 @@ export function DataTable<T>({
                 <th
                   key={col.key}
                   style={col.width ? { width: col.width } : undefined}
-                  className={`px-3.5 py-2.5 ${alignmentClass} ${
+                  className={`px-4 py-2.5 ${alignmentClass} ${
                     col.sortable ? 'cursor-pointer select-none hover:text-foreground' : ''
                   }`}
                   onClick={() => col.sortable && onSort && onSort(col.key)}
@@ -101,13 +101,13 @@ export function DataTable<T>({
             })}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/40">
+        <tbody className="divide-y divide-border">
           {data.map((item) => (
             <tr
               key={keyExtractor(item)}
               onClick={() => onRowClick && onRowClick(item)}
               className={`transition-colors duration-150 ${
-                onRowClick ? 'cursor-pointer hover:bg-muted/40' : 'hover:bg-muted/20'
+                onRowClick ? 'cursor-pointer hover:bg-muted/40' : 'hover:bg-muted/30'
               }`}
             >
               {columns.map((col) => {
@@ -115,11 +115,11 @@ export function DataTable<T>({
                   col.align === 'center'
                     ? 'text-center'
                     : col.align === 'right'
-                    ? 'text-right'
+                    ? 'text-right tabular-nums'
                     : 'text-left';
 
                 return (
-                  <td key={col.key} className={`px-3.5 py-2.5 ${alignmentClass}`}>
+                  <td key={col.key} className={`px-4 py-3 ${alignmentClass}`}>
                     {col.accessor
                       ? col.accessor(item)
                       : (item as Record<string, unknown>)[col.key] !== undefined
@@ -135,4 +135,3 @@ export function DataTable<T>({
     </div>
   );
 }
-

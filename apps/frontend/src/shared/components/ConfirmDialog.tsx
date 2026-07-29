@@ -57,14 +57,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-description"
     >
-      {/* Backdrop */}
+      {/* Overlay Backdrop (Style Guide §6.6) */}
       <div
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-150"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-150"
         onClick={onCancel}
       />
 
-      {/* Modal Card */}
-      <div className="relative w-full max-w-md rounded-lg border border-border/80 bg-card p-5 shadow-lg space-y-4">
+      {/* Modal Card Panel (Style Guide §6.6) */}
+      <div className="relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl shadow-slate-900/10 space-y-4">
         <div className="flex items-start space-x-3.5">
           <div
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border ${
@@ -89,8 +89,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end space-x-2 pt-2 border-t border-border/50">
-          <Button variant="outline" size="sm" onClick={onCancel} disabled={isLoading} className="h-8 text-xs font-semibold">
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+          <Button variant="outline" size="sm" onClick={onCancel} disabled={isLoading}>
             {cancelText}
           </Button>
           <Button
@@ -98,7 +98,6 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             size="sm"
             onClick={onConfirm}
             isLoading={isLoading}
-            className="h-8 text-xs font-semibold"
           >
             {confirmText}
           </Button>
@@ -107,4 +106,3 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     </div>
   );
 };
-

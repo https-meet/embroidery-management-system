@@ -13,12 +13,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed }) => {
   return (
     <aside
       className={cn(
-        'hidden border-r border-border/70 bg-card transition-all duration-150 ease-out lg:flex lg:flex-col select-none',
-        isCollapsed ? 'w-16' : 'w-64'
+        'hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-150 ease-out lg:flex lg:flex-col select-none shrink-0',
+        isCollapsed ? 'w-16' : 'w-60'
       )}
     >
-      {/* Brand Header */}
-      <div className="flex h-14 items-center border-b border-border/60 px-4">
+      {/* Brand Header (Style Guide §7) */}
+      <div className="flex h-14 items-center border-b border-sidebar-border px-4">
         <Link to="/dashboard" className="flex items-center space-x-3 overflow-hidden">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground text-sm shadow-xs">
             E
@@ -32,12 +32,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed }) => {
         </Link>
       </div>
 
-      {/* Navigation Groups */}
-      <nav aria-label="Sidebar Navigation" className="flex-1 overflow-y-auto p-3 space-y-5">
+      {/* Navigation Groups (Style Guide §7: OPERATIONS, SALES, ADMIN) */}
+      <nav aria-label="Sidebar Navigation" className="flex-1 overflow-y-auto p-3 space-y-4">
         {navGroups.map((group) => (
           <div key={group.label} className="space-y-1">
             {!isCollapsed && (
-              <h3 className="px-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 {group.label}
               </h3>
             )}
@@ -54,11 +54,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed }) => {
                   to={item.href}
                   title={isCollapsed ? item.title : undefined}
                   className={cn(
-                    'flex items-center rounded-md px-3 py-2 text-xs font-medium transition-all duration-150 ease-out',
+                    'flex items-center rounded-md px-3 py-2 text-xs font-medium transition-colors duration-150 ease-out',
                     isActive
-                      ? 'bg-primary/10 text-primary font-semibold border-l-2 border-primary pl-2.5'
-                      : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
-                    isCollapsed && 'justify-center px-0 border-l-0'
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
+                      : 'text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
+                    isCollapsed && 'justify-center px-0'
                   )}
                 >
                   <Icon className={cn('h-4 w-4 shrink-0', !isCollapsed && 'mr-2.5', isActive && 'text-primary')} />
@@ -72,11 +72,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed }) => {
 
       {/* Footer Version Info */}
       {!isCollapsed && (
-        <div className="border-t border-border/60 p-3 text-center text-[10px] text-muted-foreground font-mono">
+        <div className="border-t border-sidebar-border p-3 text-center text-[10px] text-muted-foreground font-mono">
           EBMS Commercial v1.0
         </div>
       )}
     </aside>
   );
 };
-

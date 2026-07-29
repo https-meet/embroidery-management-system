@@ -59,7 +59,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-border/70 bg-card px-4 shadow-xs sm:px-6 select-none">
+      {/* Topbar (Style Guide §7: h-14 border-b border-border bg-background/80 backdrop-blur sticky top-0 z-30) */}
+      <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-border bg-background/80 backdrop-blur px-4 sm:px-6 select-none">
         <div className="flex items-center space-x-3">
           {/* Mobile menu trigger */}
           <Button
@@ -94,11 +95,11 @@ export const Header: React.FC<HeaderProps> = ({
             EBMS
           </span>
 
-          {/* Global Search Trigger Bar */}
+          {/* Global Search Trigger Bar (Style Guide §7) */}
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className="flex items-center space-x-2 rounded-md border border-input bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground transition-all duration-150 hover:bg-muted hover:text-foreground w-44 sm:w-60 md:w-72"
+            className="flex items-center space-x-2 rounded-md border border-input bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground transition-all duration-150 hover:bg-muted hover:text-foreground w-44 sm:w-60 md:w-72"
           >
             <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <span className="truncate text-[11px]">Search Customers, Jobs (#JOB-...)...</span>
@@ -140,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <UserIcon className="h-3.5 w-3.5" />
               </div>
 
-              <span className="hidden rounded bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground md:inline-block border border-border/60">
+              <span className="hidden rounded bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground md:inline-block border border-border">
                 {user.role}
               </span>
             </div>
@@ -164,4 +165,3 @@ export const Header: React.FC<HeaderProps> = ({
     </>
   );
 };
-
