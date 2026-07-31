@@ -74,11 +74,11 @@ export function setupAxiosInterceptors() {
       const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
       const url = originalRequest?.url || '';
-      // Auth endpoints must NEVER trigger token refresh mechanism (Issue 1 fix)
-      const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/refresh');
+      // Auth endpoints (/auth/login, /auth/refresh, /auth/me) must NEVER trigger silent token refresh loops
+      const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/me');
 
-      // If refresh token endpoint itself returned 401, immediately trigger logout flow
-      if (url.includes('/auth/refresh') && error.response?.status === 401) {
+      // If refresh token or auth endpoint itself returned 401, immediately trigger logout flow without retrying
+      if (isAuthEndpoint && error.response?.status === 401) {
         if (onUnauthorized) {
           onUnauthorized();
         }

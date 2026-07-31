@@ -1,8 +1,12 @@
 import { z } from 'zod';
 
+const dateStringSchema = z
+  .string()
+  .refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid ISO or YYYY-MM-DD date format.' });
+
 export const reportFilterSchema = z.object({
-  startDate: z.string().datetime({ offset: true }).optional(),
-  endDate: z.string().datetime({ offset: true }).optional(),
+  startDate: dateStringSchema.optional(),
+  endDate: dateStringSchema.optional(),
   search: z.string().optional(),
   page: z
     .string()

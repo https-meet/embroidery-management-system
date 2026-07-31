@@ -13,9 +13,23 @@ import type {
 export class ReportService {
   private getDateRangeWhere(filter: ReportFilterDto): { gte?: Date; lte?: Date } | undefined {
     if (!filter.startDate && !filter.endDate) return undefined;
+
+    let startDateObj: Date | undefined;
+    let endDateObj: Date | undefined;
+
+    if (filter.startDate) {
+      startDateObj = new Date(filter.startDate);
+    }
+    if (filter.endDate) {
+      endDateObj = new Date(filter.endDate);
+      if (filter.endDate.length === 10) {
+        endDateObj.setHours(23, 59, 59, 999);
+      }
+    }
+
     return {
-      ...(filter.startDate && { gte: new Date(filter.startDate) }),
-      ...(filter.endDate && { lte: new Date(filter.endDate) }),
+      ...(startDateObj && { gte: startDateObj }),
+      ...(endDateObj && { lte: endDateObj }),
     };
   }
 
