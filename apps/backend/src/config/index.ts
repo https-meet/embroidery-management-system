@@ -22,6 +22,7 @@ const rawEnv = validateEnv();
 export interface AppConfig {
   port: number;
   nodeEnv: 'development' | 'production' | 'test';
+  isDemoMode: boolean;
   databaseUrl: string;
   jwt: {
     accessSecret: string;
@@ -38,6 +39,7 @@ export interface AppConfig {
 export const config: AppConfig = {
   port: rawEnv.PORT,
   nodeEnv: rawEnv.NODE_ENV,
+  isDemoMode: rawEnv.IS_DEMO_MODE ?? false,
   databaseUrl: rawEnv.DATABASE_URL,
   jwt: {
     accessSecret: rawEnv.JWT_ACCESS_SECRET,

@@ -58,3 +58,12 @@ temp/
 *.temp
 *.bak
 
+# Security, Credentials & Backup Exclusions
+*.pem
+*.key
+*.crt
+backups/
+*.sql
+*.tar.gz
+
+

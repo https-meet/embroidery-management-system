@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
+import { registerServiceWorker } from './registerSW';
 import './index.css';
 
 // Filter out third-party browser extension messaging errors (e.g. Chrome Extension background port disconnects)
@@ -16,6 +17,8 @@ if (typeof window !== 'undefined') {
     }
   });
 }
+
+registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

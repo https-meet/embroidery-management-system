@@ -1,0 +1,18 @@
+{
+  "name": "EBMS - Embroidery Business System",
+  "short_name": "EBMS",
+  "description": "Enterprise Embroidery Business Management & Production ERP System",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

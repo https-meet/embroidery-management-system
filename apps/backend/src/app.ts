@@ -29,6 +29,34 @@ export function createApp(): express.Application {
   // ── Request logging ───────────────────────────────────────────────────────
   app.use(requestLogger);
 
+  // ── Health Endpoint (Unauthenticated Deployment Health Check) ─────────────
+  const healthHandler = async (_req: express.Request, res: express.Response): Promise<void> => {
+    try {
+      const { prisma } = await import('./lib/prisma');
+      await prisma.$queryRaw`SELECT 1`;
+      res.status(200).json({
+        status: 'UP',
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+        environment: config.nodeEnv,
+        isDemoMode: config.isDemoMode,
+        database: 'CONNECTED',
+        uptimeSeconds: Math.floor(process.uptime()),
+      });
+    } catch {
+      res.status(503).json({
+        status: 'DOWN',
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+        database: 'DISCONNECTED',
+        error: 'Database connection check failed',
+      });
+    }
+  };
+
+  app.get('/health', healthHandler);
+  app.get('/api/v1/health', healthHandler);
+
   // ── API routes ────────────────────────────────────────────────────────────
   app.use('/api/v1', router);
 

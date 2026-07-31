@@ -117,7 +117,7 @@ export const LoginPage: React.FC = () => {
           <Input
             id="email"
             type="email"
-            placeholder="admin@ebms.local"
+            placeholder="name@domain.com"
             autoComplete="email"
             error={Boolean(errors.email)}
             {...register('email')}

@@ -1,37 +1,58 @@
 import { z } from 'zod';
 
-export const envSchema = z.object({
-  PORT: z
-    .string()
-    .default('3000')
-    .transform((val) => parseInt(val, 10))
-    .pipe(z.number().positive()),
+export const envSchema = z
+  .object({
+    PORT: z
+      .string()
+      .default('3000')
+      .transform((val) => parseInt(val, 10))
+      .pipe(z.number().positive()),
 
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+    IS_DEMO_MODE: z
+      .string()
+      .optional()
+      .transform((val) => val === 'true'),
 
-  JWT_ACCESS_SECRET: z
-    .string()
-    .min(16, 'JWT_ACCESS_SECRET must be at least 16 characters long')
-    .default('default-ebms-access-secret-key-change-in-production'),
+    DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
 
-  JWT_REFRESH_SECRET: z
-    .string()
-    .min(16, 'JWT_REFRESH_SECRET must be at least 16 characters long')
-    .default('default-ebms-refresh-secret-key-change-in-production'),
+    JWT_ACCESS_SECRET: z
+      .string()
+      .min(16, 'JWT_ACCESS_SECRET must be at least 16 characters long')
+      .default('default-ebms-access-secret-key-change-in-production'),
 
-  JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+    JWT_REFRESH_SECRET: z
+      .string()
+      .min(16, 'JWT_REFRESH_SECRET must be at least 16 characters long')
+      .default('default-ebms-refresh-secret-key-change-in-production'),
 
-  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+    JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
 
-  CORS_ORIGIN: z.string().default('http://localhost:5173'),
+    JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
-  BCRYPT_SALT_ROUNDS: z
-    .string()
-    .default('10')
-    .transform((val) => parseInt(val, 10))
-    .pipe(z.number().min(4).max(15)),
-});
+    CORS_ORIGIN: z.string().default('http://localhost:5173'),
+
+    BCRYPT_SALT_ROUNDS: z
+      .string()
+      .default('10')
+      .transform((val) => parseInt(val, 10))
+      .pipe(z.number().min(4).max(15)),
+  })
+  .refine(
+    (data) => {
+      if (data.NODE_ENV === 'production' && !data.IS_DEMO_MODE) {
+        return (
+          data.JWT_ACCESS_SECRET !== 'default-ebms-access-secret-key-change-in-production' &&
+          data.JWT_REFRESH_SECRET !== 'default-ebms-refresh-secret-key-change-in-production'
+        );
+      }
+      return true;
+    },
+    {
+      message: 'In production mode, custom JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be set via environment variables.',
+      path: ['JWT_ACCESS_SECRET'],
+    }
+  );
 
 export type Env = z.infer<typeof envSchema>;

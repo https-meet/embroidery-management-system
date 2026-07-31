@@ -3,11 +3,22 @@ import { passwordService } from '../src/modules/auth/password.service';
 
 const prisma = new PrismaClient();
 
+const demoEmail = process.env.DEMO_EMAIL || 'demo@ebms.com';
+const demoPassword = process.env.DEMO_PASSWORD || 'demo123';
+const adminEmail = process.env.PROD_OWNER_EMAIL || 'admin@ebms.local';
+const adminPassword = process.env.PROD_OWNER_PASSWORD || 'Admin@2026!';
+
 const seedUsers = [
   {
     name: 'EBMS Admin',
-    email: 'admin@ebms.local',
-    password: 'Admin@2026!',
+    email: adminEmail,
+    password: adminPassword,
+    role: Role.ADMIN,
+  },
+  {
+    name: 'EBMS Public Demo User',
+    email: demoEmail,
+    password: demoPassword,
     role: Role.ADMIN,
   },
   {
@@ -22,7 +33,7 @@ const seedUsers = [
     password: 'Operator@2026!',
     role: Role.OPERATOR,
   },
-] as const;
+];
 
 async function main(): Promise<void> {
   for (const user of seedUsers) {
