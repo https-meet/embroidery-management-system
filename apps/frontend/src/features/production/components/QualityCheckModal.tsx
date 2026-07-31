@@ -58,31 +58,42 @@ export const QualityCheckModal: React.FC<QualityCheckModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormField label="Quality Check Result" htmlFor="passed" required>
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center space-x-2 text-xs font-medium text-foreground cursor-pointer">
-                <input
-                  type="radio"
-                  name="qc_passed"
-                  checked={passed === true}
-                  onChange={() => setPassed(true)}
-                  className="text-primary focus:ring-primary"
-                />
-                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                  PASSED — Meets Quality Standard
-                </span>
-              </label>
-              <label className="flex items-center space-x-2 text-xs font-medium text-foreground cursor-pointer">
-                <input
-                  type="radio"
-                  name="qc_passed"
-                  checked={passed === false}
-                  onChange={() => setPassed(false)}
-                  className="text-primary focus:ring-primary"
-                />
-                <span className="text-rose-600 dark:text-rose-400 font-semibold">
-                  FAILED — Defect Detected
-                </span>
-              </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setPassed(true)}
+                className={`flex items-center space-x-3 rounded-lg border p-3 text-left transition-all cursor-pointer ${
+                  passed === true
+                    ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20'
+                    : 'border-input bg-card hover:bg-muted text-muted-foreground'
+                }`}
+              >
+                <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${passed === true ? 'border-emerald-600 bg-emerald-600' : 'border-input'}`}>
+                  {passed === true && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                </div>
+                <div>
+                  <span className="block text-xs font-bold text-emerald-600 dark:text-emerald-400">PASSED</span>
+                  <span className="block text-[11px] text-muted-foreground">Meets Quality Standard</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPassed(false)}
+                className={`flex items-center space-x-3 rounded-lg border p-3 text-left transition-all cursor-pointer ${
+                  passed === false
+                    ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 ring-2 ring-rose-500/20'
+                    : 'border-input bg-card hover:bg-muted text-muted-foreground'
+                }`}
+              >
+                <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${passed === false ? 'border-rose-600 bg-rose-600' : 'border-input'}`}>
+                  {passed === false && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                </div>
+                <div>
+                  <span className="block text-xs font-bold text-rose-600 dark:text-rose-400">FAILED</span>
+                  <span className="block text-[11px] text-muted-foreground">Defect Detected (Re-work)</span>
+                </div>
+              </button>
             </div>
           </FormField>
 

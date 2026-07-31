@@ -162,7 +162,7 @@ export class ProductionService {
     }
 
     const inspector = inspectorEmail || 'system';
-    const updated = await this.repo.recordQualityCheck(dto.jobId, dto.passed, inspector);
+    const updated = await this.repo.recordQualityCheck(dto.jobId, dto.passed, inspector, dto.notes);
     return this.mapToDto(updated);
   }
 

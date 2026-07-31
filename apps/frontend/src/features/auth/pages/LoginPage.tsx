@@ -23,6 +23,16 @@ export const LoginPage: React.FC = () => {
   // Where to redirect after login (default: /dashboard)
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || ROUTES.DASHBOARD;
 
+  const savedEmail = (() => {
+    try {
+      return localStorage.getItem('ebms_remembered_email') || '';
+    } catch {
+      return '';
+    }
+  })();
+
+  const [rememberMe, setRememberMe] = useState<boolean>(Boolean(savedEmail));
+
   const {
     register,
     handleSubmit,
@@ -31,7 +41,7 @@ export const LoginPage: React.FC = () => {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      email: savedEmail,
       password: '',
     },
   });
@@ -41,6 +51,16 @@ export const LoginPage: React.FC = () => {
     setGeneralError(null);
 
     try {
+      if (rememberMe) {
+        try {
+          localStorage.setItem('ebms_remembered_email', values.email);
+        } catch {}
+      } else {
+        try {
+          localStorage.removeItem('ebms_remembered_email');
+        } catch {}
+      }
+
       await login(values);
       toast.success('Logged in successfully.');
       navigate(from, { replace: true });
@@ -140,7 +160,9 @@ export const LoginPage: React.FC = () => {
           <label className="flex items-center space-x-2 cursor-pointer select-none text-muted-foreground hover:text-foreground">
             <input
               type="checkbox"
-              className="h-3.5 w-3.5 rounded border-input text-primary focus:ring-ring/20 accent-primary"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-input text-primary focus:ring-ring/20 accent-primary cursor-pointer"
             />
             <span>Remember Me</span>
           </label>

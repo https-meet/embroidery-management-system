@@ -216,14 +216,19 @@ export const ProductionWorkspace: React.FC<ProductionWorkspaceProps> = ({
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">QC Status:</span>
-                {job.qualityCheckedAt ? (
+                {job.qualityCheckedBy?.includes('(FAILED)') ? (
+                  <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span>
+                    FAILED (Re-work)
+                  </span>
+                ) : job.qualityCheckedAt ? (
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">PASSED</span>
                 ) : (
                   <span className="italic text-muted-foreground">Pending Inspection</span>
                 )}
               </div>
               {job.qualityCheckedBy && (
-                <p className="text-[11px] text-muted-foreground">Inspected by: {job.qualityCheckedBy}</p>
+                <p className="text-[11px] text-muted-foreground">Inspector: {job.qualityCheckedBy}</p>
               )}
             </div>
           </div>

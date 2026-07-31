@@ -120,15 +120,30 @@
 
 /* Professional A4 GST Tax Invoice Print Optimization (Style Guide §6.4 & §9) */
 @media print {
+  :root, .dark {
+    --background: 0 0% 100% !important;
+    --foreground: 222 84% 5% !important;
+    --card: 0 0% 100% !important;
+    --card-foreground: 222 84% 5% !important;
+    --popover: 0 0% 100% !important;
+    --popover-foreground: 222 84% 5% !important;
+    --muted: 210 40% 96% !important;
+    --muted-foreground: 215 16% 44% !important;
+    --border: 214 32% 91% !important;
+    --input: 214 32% 91% !important;
+    --primary: 222 47% 11% !important;
+    --primary-foreground: 210 40% 98% !important;
+  }
+
   @page {
     size: A4 portrait;
-    margin: 10mm;
+    margin: 8mm;
   }
 
   html, body {
     background: #ffffff !important;
-    color: #000000 !important;
-    font-size: 12pt !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -149,9 +164,14 @@
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
-    color: #000000 !important;
+    color: #0f172a !important;
     background: #ffffff !important;
     page-break-after: avoid;
+  }
+
+  .print-sheet * {
+    color-scheme: light !important;
+    border-color: #cbd5e1 !important;
   }
 
   table {
@@ -161,5 +181,6 @@
 
   th, td {
     border-color: #cbd5e1 !important;
+    color: #0f172a !important;
   }
 }

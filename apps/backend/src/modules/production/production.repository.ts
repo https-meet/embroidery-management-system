@@ -87,13 +87,23 @@ export class ProductionRepository {
     jobId: string,
     passed: boolean,
     inspector: string,
+    notes?: string,
   ): Promise<FullJob> {
     const now = new Date();
+    const existingJob = await prisma.job.findUnique({ where: { id: jobId } });
+    const updatedNotes = notes
+      ? (existingJob?.notes ? `${existingJob.notes}\n[QC ${passed ? 'PASSED' : 'DEFECT'}]: ${notes}` : `[QC ${passed ? 'PASSED' : 'DEFECT'}]: ${notes}`)
+      : existingJob?.notes;
+
+    const resultTag = passed ? ' (PASSED)' : ' (FAILED)';
+    const cleanInspector = inspector.replace(/\s*\((PASSED|FAILED)\)/gi, '');
+
     return prisma.job.update({
       where: { id: jobId },
       data: {
         qualityCheckedAt: now,
-        qualityCheckedBy: inspector,
+        qualityCheckedBy: `${cleanInspector}${resultTag}`,
+        notes: updatedNotes,
         ...(passed ? {} : { status: 'IN_PROGRESS' }),
       },
       include: {
