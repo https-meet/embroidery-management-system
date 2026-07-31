@@ -106,7 +106,7 @@ export const DesignWorkspace: React.FC<DesignWorkspaceProps> = ({
                 <p className="text-[11px] font-medium text-muted-foreground">Dimensions (W × H)</p>
                 <p className="text-xs font-semibold text-foreground">
                   {design.widthMm && design.heightMm
-                    ? `${design.widthMm}mm × ${design.heightMm}mm`
+                    ? `${(design.widthMm / 25.4).toFixed(2)}" × ${(design.heightMm / 25.4).toFixed(2)}" (${design.widthMm}mm × ${design.heightMm}mm)`
                     : '—'}
                 </p>
               </div>

@@ -112,8 +112,11 @@ export const DesignTable: React.FC<DesignTableProps> = ({
       header: 'Dimensions (W × H)',
       accessor: (item) =>
         item.widthMm !== null && item.heightMm !== null ? (
-          <span className="text-xs text-muted-foreground">
-            {item.widthMm}mm × {item.heightMm}mm
+          <span className="text-xs font-mono font-medium text-foreground">
+            {(item.widthMm / 25.4).toFixed(2)}" × {(item.heightMm / 25.4).toFixed(2)}"
+            <span className="text-[11px] text-muted-foreground ml-1 font-sans">
+              ({item.widthMm}mm × {item.heightMm}mm)
+            </span>
           </span>
         ) : (
           <span className="text-muted-foreground">—</span>

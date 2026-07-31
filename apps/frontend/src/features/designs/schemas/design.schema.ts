@@ -7,24 +7,10 @@ export const designSchema = z.object({
   previewUrl: z.string().url('Invalid URL format').optional().or(z.literal('')),
   primaryFileUrl: z.string().url('Invalid URL format').optional().or(z.literal('')),
   primaryFileType: z.string().max(20).optional().or(z.literal('')),
-  stitchCount: z
-    .number()
-    .int('Stitch count must be an integer')
-    .nonnegative('Stitch count must be non-negative')
-    .optional(),
-  widthMm: z
-    .number()
-    .nonnegative('Width must be non-negative')
-    .optional(),
-  heightMm: z
-    .number()
-    .nonnegative('Height must be non-negative')
-    .optional(),
-  colorCount: z
-    .number()
-    .int('Color count must be an integer')
-    .nonnegative('Color count must be non-negative')
-    .optional(),
+  stitchCount: z.number().int('Stitch count must be an integer').nonnegative('Value must be non-negative').optional(),
+  widthMm: z.number().nonnegative('Value must be non-negative').optional(),
+  heightMm: z.number().nonnegative('Value must be non-negative').optional(),
+  colorCount: z.number().int('Color count must be an integer').nonnegative('Value must be non-negative').optional(),
   notes: z.string().max(500).optional().or(z.literal('')),
   isActive: z.boolean().optional(),
 });

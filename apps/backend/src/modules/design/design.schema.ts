@@ -1,31 +1,41 @@
 import { z } from 'zod';
 
+const optionalNum = z.preprocess(
+  (val) => (val === '' || val === null || (typeof val === 'number' && Number.isNaN(val)) ? undefined : Number(val)),
+  z.number().nonnegative().optional()
+);
+
+const optionalIntNum = z.preprocess(
+  (val) => (val === '' || val === null || (typeof val === 'number' && Number.isNaN(val)) ? undefined : Number(val)),
+  z.number().int().nonnegative().optional()
+);
+
 export const createDesignSchema = z.object({
   name: z.string().min(1, 'Design name is required.').max(100),
-  description: z.string().max(1000).optional(),
-  category: z.string().max(50).optional(),
+  description: z.string().max(1000).optional().or(z.literal('')),
+  category: z.string().max(50).optional().or(z.literal('')),
   previewUrl: z.string().url('Invalid preview URL format.').optional().or(z.literal('')),
   primaryFileUrl: z.string().url('Invalid file URL format.').optional().or(z.literal('')),
-  primaryFileType: z.enum(['DST', 'EMB', 'PES', 'PNG', 'JPG', 'JPEG', 'PDF']).optional(),
-  stitchCount: z.number().int().nonnegative().optional(),
-  widthMm: z.number().positive().optional(),
-  heightMm: z.number().positive().optional(),
-  colorCount: z.number().int().positive().optional(),
-  notes: z.string().max(1000).optional(),
+  primaryFileType: z.enum(['DST', 'EMB', 'PES', 'PNG', 'JPG', 'JPEG', 'PDF']).optional().or(z.literal('')),
+  stitchCount: optionalIntNum,
+  widthMm: optionalNum,
+  heightMm: optionalNum,
+  colorCount: optionalIntNum,
+  notes: z.string().max(1000).optional().or(z.literal('')),
 });
 
 export const updateDesignSchema = z.object({
   name: z.string().min(1, 'Design name cannot be empty.').max(100).optional(),
-  description: z.string().max(1000).optional(),
-  category: z.string().max(50).optional(),
+  description: z.string().max(1000).optional().or(z.literal('')),
+  category: z.string().max(50).optional().or(z.literal('')),
   previewUrl: z.string().url('Invalid preview URL format.').optional().or(z.literal('')),
   primaryFileUrl: z.string().url('Invalid file URL format.').optional().or(z.literal('')),
-  primaryFileType: z.enum(['DST', 'EMB', 'PES', 'PNG', 'JPG', 'JPEG', 'PDF']).optional(),
-  stitchCount: z.number().int().nonnegative().optional(),
-  widthMm: z.number().positive().optional(),
-  heightMm: z.number().positive().optional(),
-  colorCount: z.number().int().positive().optional(),
-  notes: z.string().max(1000).optional(),
+  primaryFileType: z.enum(['DST', 'EMB', 'PES', 'PNG', 'JPG', 'JPEG', 'PDF']).optional().or(z.literal('')),
+  stitchCount: optionalIntNum,
+  widthMm: optionalNum,
+  heightMm: optionalNum,
+  colorCount: optionalIntNum,
+  notes: z.string().max(1000).optional().or(z.literal('')),
   isActive: z.boolean().optional(),
 });
 
