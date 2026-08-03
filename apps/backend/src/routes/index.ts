@@ -10,12 +10,14 @@ import productionRouter from '../modules/production/production.router';
 import reportRouter from '../modules/report/report.router';
 import searchRouter from '../modules/search/search.router';
 import settingsRouter from '../modules/settings/settings.router';
+import userRouter from '../modules/users/users.router';
 import healthRouter from './health';
 
 const router: IRouter = Router();
 
 router.use('/health', healthRouter);
 router.use('/auth', authRouter);
+router.use('/users', userRouter);
 router.use('/customers', customerRouter);
 router.use('/designs', designRouter);
 router.use('/jobs', jobRouter);
