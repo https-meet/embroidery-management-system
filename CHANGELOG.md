@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [1.1.0] - 2026-08-03
+
+### 🛡️ Backend Data Integrity & Stabilization (Sprint 1)
+
+#### Changed
+- **Atomic Payment Recording (`PaymentService.recordPayment`)**:
+  - Refactored payment creation and invoice balance updates to execute inside an interactive `prisma.$transaction(async (tx) => ...)` block.
+  - Guarantees atomic all-or-nothing rollback across `Payment`, `PaymentAllocation`, and `Invoice` entities if any allocation write fails.
+  - Extended `PaymentRepository` and `InvoiceRepository` methods with optional `tx?: Prisma.TransactionClient` parameter for transaction client re-use.
+
+---
+
 ## [1.0.0] - 2026-07-31
 
 ### 🚀 Initial Production Release & Public Demo Architecture

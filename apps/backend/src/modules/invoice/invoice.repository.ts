@@ -8,8 +8,9 @@ export type FullInvoice = Invoice & {
 };
 
 export class InvoiceRepository {
-  public async findById(id: string): Promise<FullInvoice | null> {
-    return prisma.invoice.findFirst({
+  public async findById(id: string, tx?: Prisma.TransactionClient): Promise<FullInvoice | null> {
+    const client = tx || prisma;
+    return client.invoice.findFirst({
       where: { id },
       include: {
         customer: true,
@@ -18,8 +19,9 @@ export class InvoiceRepository {
     });
   }
 
-  public async findByInvoiceNo(invoiceNo: string): Promise<FullInvoice | null> {
-    return prisma.invoice.findFirst({
+  public async findByInvoiceNo(invoiceNo: string, tx?: Prisma.TransactionClient): Promise<FullInvoice | null> {
+    const client = tx || prisma;
+    return client.invoice.findFirst({
       where: { invoiceNo },
       include: {
         customer: true,
@@ -28,11 +30,12 @@ export class InvoiceRepository {
     });
   }
 
-  public async countTotalForYear(year: number): Promise<number> {
+  public async countTotalForYear(year: number, tx?: Prisma.TransactionClient): Promise<number> {
+    const client = tx || prisma;
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
 
-    return prisma.invoice.count({
+    return client.invoice.count({
       where: {
         createdAt: {
           gte: startDate,
@@ -42,22 +45,26 @@ export class InvoiceRepository {
     });
   }
 
-  public async create(data: {
-    invoiceNo: string;
-    customerId: string;
-    invoiceDate?: Date;
-    dueDate?: Date | null;
-    discountType?: DiscountType | null;
-    discountValue?: number | null;
-    discountAmount: number;
-    subtotal: number;
-    grandTotal: number;
-    totalPaid: number;
-    outstandingBalance: number;
-    notes?: string | null;
-    items: CreateInvoiceItemDto[];
-  }): Promise<FullInvoice> {
-    return prisma.invoice.create({
+  public async create(
+    data: {
+      invoiceNo: string;
+      customerId: string;
+      invoiceDate?: Date;
+      dueDate?: Date | null;
+      discountType?: DiscountType | null;
+      discountValue?: number | null;
+      discountAmount: number;
+      subtotal: number;
+      grandTotal: number;
+      totalPaid: number;
+      outstandingBalance: number;
+      notes?: string | null;
+      items: CreateInvoiceItemDto[];
+    },
+    tx?: Prisma.TransactionClient,
+  ): Promise<FullInvoice> {
+    const client = tx || prisma;
+    return client.invoice.create({
       data: {
         invoiceNo: data.invoiceNo,
         customerId: data.customerId,
@@ -89,8 +96,13 @@ export class InvoiceRepository {
     });
   }
 
-  public async update(id: string, data: Prisma.InvoiceUpdateInput): Promise<FullInvoice> {
-    return prisma.invoice.update({
+  public async update(
+    id: string,
+    data: Prisma.InvoiceUpdateInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<FullInvoice> {
+    const client = tx || prisma;
+    return client.invoice.update({
       where: { id },
       data,
       include: {

@@ -1,3 +1,4 @@
+import { prisma } from '../../lib/prisma';
 import { AppError, BadRequestError } from '../../utils/errors';
 import { customerRepository } from '../customer/customer.repository';
 import { invoiceCalculationService } from '../invoice/invoice-calculation.service';
@@ -118,39 +119,52 @@ export class PaymentService {
     }
 
     const paymentNo = await this.generatePaymentNo();
-    const payment = await this.repo.create({
-      paymentNo,
-      customerId: dto.customerId,
-      paymentDate: dto.paymentDate ? new Date(dto.paymentDate) : new Date(),
-      paymentMethod: dto.paymentMethod,
-      referenceNo: dto.referenceNo,
-      amount: dto.amount,
-      notes: dto.notes,
-      allocations,
-    });
 
-    // Apply allocations to invoices
-    for (const alloc of allocations) {
-      const invoice = await invoiceRepository.findById(alloc.invoiceId);
-      if (invoice) {
-        const newTotalPaid = Math.round((invoice.totalPaid + alloc.allocatedAmount) * 100) / 100;
-        const newOutstanding = Math.max(
-          0,
-          Math.round((invoice.grandTotal - newTotalPaid) * 100) / 100,
-        );
-        const newStatus = invoiceCalculationService.determineStatus(
-          invoice.status,
-          invoice.grandTotal,
-          newTotalPaid,
-        );
+    // Execute payment record creation and invoice updates atomically in an interactive transaction
+    const payment = await prisma.$transaction(async (tx) => {
+      const createdPayment = await this.repo.create(
+        {
+          paymentNo,
+          customerId: dto.customerId,
+          paymentDate: dto.paymentDate ? new Date(dto.paymentDate) : new Date(),
+          paymentMethod: dto.paymentMethod,
+          referenceNo: dto.referenceNo,
+          amount: dto.amount,
+          notes: dto.notes,
+          allocations,
+        },
+        tx,
+      );
 
-        await invoiceRepository.update(invoice.id, {
-          totalPaid: newTotalPaid,
-          outstandingBalance: newOutstanding,
-          status: newStatus,
-        });
+      // Apply allocations to invoices within the same atomic transaction
+      for (const alloc of allocations) {
+        const invoice = await invoiceRepository.findById(alloc.invoiceId, tx);
+        if (invoice) {
+          const newTotalPaid = Math.round((invoice.totalPaid + alloc.allocatedAmount) * 100) / 100;
+          const newOutstanding = Math.max(
+            0,
+            Math.round((invoice.grandTotal - newTotalPaid) * 100) / 100,
+          );
+          const newStatus = invoiceCalculationService.determineStatus(
+            invoice.status,
+            invoice.grandTotal,
+            newTotalPaid,
+          );
+
+          await invoiceRepository.update(
+            invoice.id,
+            {
+              totalPaid: newTotalPaid,
+              outstandingBalance: newOutstanding,
+              status: newStatus,
+            },
+            tx,
+          );
+        }
       }
-    }
+
+      return createdPayment;
+    });
 
     return this.mapToDto(payment);
   }

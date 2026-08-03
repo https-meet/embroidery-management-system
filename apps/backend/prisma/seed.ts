@@ -4,7 +4,7 @@ import { passwordService } from '../src/modules/auth/password.service';
 const prisma = new PrismaClient();
 
 const demoEmail = process.env.DEMO_EMAIL || 'demo@ebms.com';
-const demoPassword = process.env.DEMO_PASSWORD || 'demo123';
+const demoPassword = process.env.DEMO_PASSWORD || 'Demo@2026!';
 const adminEmail = process.env.PROD_OWNER_EMAIL || 'admin@ebms.local';
 const adminPassword = process.env.PROD_OWNER_PASSWORD || 'Admin@2026!';
 
@@ -19,6 +19,12 @@ const seedUsers = [
     name: 'EBMS Public Demo User',
     email: demoEmail,
     password: demoPassword,
+    role: Role.ADMIN,
+  },
+  {
+    name: 'EBMS Demo Local',
+    email: 'demo@ebms.local',
+    password: 'Demo@2026!',
     role: Role.ADMIN,
   },
   {
@@ -37,27 +43,17 @@ const seedUsers = [
 
 async function main(): Promise<void> {
   for (const user of seedUsers) {
-    const existingUser = await prisma.user.findUnique({
-      where: { email: user.email },
-    });
-
-    if (existingUser) {
-      await prisma.user.update({
-        where: { email: user.email },
-        data: {
-          name: user.name,
-          role: user.role,
-          isActive: true,
-        },
-      });
-
-      continue;
-    }
-
     const passwordHash = await passwordService.hash(user.password);
 
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {
+        name: user.name,
+        role: user.role,
+        passwordHash,
+        isActive: true,
+      },
+      create: {
         name: user.name,
         email: user.email,
         passwordHash,
@@ -67,7 +63,7 @@ async function main(): Promise<void> {
     });
   }
 
-  console.log(`✅ Seeded ${seedUsers.length} local development users.`);
+  console.log(`✅ Seeded ${seedUsers.length} local development & demo users.`);
 }
 
 main()

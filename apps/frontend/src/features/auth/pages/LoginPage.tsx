@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Lock, AlertCircle, Shield } from 'lucide-react';
+import { Eye, EyeOff, Lock, AlertCircle, Shield, Mail, ArrowRight, Monitor } from 'lucide-react';
 import { ROUTES } from '@/shared/constants/routes';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { FormField } from '@/shared/components/FormField';
@@ -23,6 +23,7 @@ export const LoginPage: React.FC = () => {
   // Where to redirect after login (default: /dashboard)
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || ROUTES.DASHBOARD;
 
+  // Properly check if an email was saved in localStorage from a previous Remember Me
   const savedEmail = (() => {
     try {
       return localStorage.getItem('ebms_remembered_email') || '';
@@ -31,20 +32,28 @@ export const LoginPage: React.FC = () => {
     }
   })();
 
+  // Checked state is true ONLY if a saved email actually exists in localStorage
   const [rememberMe, setRememberMe] = useState<boolean>(Boolean(savedEmail));
 
   const {
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: savedEmail,
-      password: '',
+      email: savedEmail || 'demo@ebms.local',
+      password: 'Demo@2026!',
     },
   });
+
+  const handleDemoFill = () => {
+    setValue('email', 'demo@ebms.local', { shouldValidate: true });
+    setValue('password', 'Demo@2026!', { shouldValidate: true });
+    toast.info('Loaded demo account credentials into login fields.');
+  };
 
   const onSubmit = async (values: LoginFormValues) => {
     setIsSubmitting(true);
@@ -87,10 +96,10 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Info (Style Guide §8.1) */}
+    <div className="space-y-6 select-none">
+      {/* Header Info */}
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground font-serif">
           Sign in to EBMS
         </h1>
         <p className="text-xs text-muted-foreground">
@@ -114,14 +123,18 @@ export const LoginPage: React.FC = () => {
           required
           error={errors.email?.message}
         >
-          <Input
-            id="email"
-            type="email"
-            placeholder="name@domain.com"
-            autoComplete="email"
-            error={Boolean(errors.email)}
-            {...register('email')}
-          />
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="demo@ebms.local"
+              autoComplete="email"
+              error={Boolean(errors.email)}
+              className="pl-9"
+              {...register('email')}
+            />
+          </div>
         </FormField>
 
         <FormField
@@ -131,13 +144,14 @@ export const LoginPage: React.FC = () => {
           error={errors.password?.message}
         >
           <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
               autoComplete="current-password"
               error={Boolean(errors.password)}
-              className="pr-10"
+              className="pl-9 pr-10"
               {...register('password')}
             />
             <button
@@ -166,21 +180,44 @@ export const LoginPage: React.FC = () => {
             />
             <span>Remember Me</span>
           </label>
-          <span className="text-muted-foreground text-xs">
+          <span className="text-muted-foreground text-xs hover:underline cursor-pointer" onClick={() => toast.info('Contact system admin to reset password.')}>
             Forgot password? Contact admin
           </span>
         </div>
 
-        {/* Submit Action (Style Guide §8.1: Primary submit w-full h-10) */}
+        {/* Submit Action */}
         <Button
           type="submit"
           className="w-full h-10 text-sm font-semibold flex items-center justify-center space-x-2"
           isLoading={isSubmitting}
         >
-          <Lock className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4" />
           <span>Sign In to EBMS</span>
         </Button>
       </form>
+
+      {/* Interactive Quick Demo Callout Box */}
+      <div
+        onClick={handleDemoFill}
+        className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 flex items-center justify-between cursor-pointer hover:bg-amber-500/20 transition-all duration-150 select-none group"
+      >
+        <div className="flex items-center space-x-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-300">
+            <Monitor className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="font-bold text-xs text-foreground group-hover:text-amber-800 dark:group-hover:text-amber-300">
+              Demo Account Quick-Fill
+            </p>
+            <p className="text-[10px] text-muted-foreground">Click to load demo credentials</p>
+          </div>
+        </div>
+
+        <div className="text-right text-[10px] font-mono space-y-0.5 border-l border-amber-500/20 pl-3">
+          <p className="text-muted-foreground"><span className="font-semibold text-foreground">Email:</span> demo@ebms.local</p>
+          <p className="text-muted-foreground"><span className="font-semibold text-foreground">Password:</span> Demo@2026!</p>
+        </div>
+      </div>
 
       {/* Trust Footer */}
       <div className="flex items-center justify-center space-x-1.5 text-xs text-muted-foreground border-t border-border pt-4">

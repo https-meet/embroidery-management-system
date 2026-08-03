@@ -8,8 +8,9 @@ export type FullPayment = Payment & {
 };
 
 export class PaymentRepository {
-  public async findById(id: string): Promise<FullPayment | null> {
-    return prisma.payment.findFirst({
+  public async findById(id: string, tx?: Prisma.TransactionClient): Promise<FullPayment | null> {
+    const client = tx || prisma;
+    return client.payment.findFirst({
       where: { id },
       include: {
         customer: true,
@@ -18,8 +19,9 @@ export class PaymentRepository {
     });
   }
 
-  public async findByPaymentNo(paymentNo: string): Promise<FullPayment | null> {
-    return prisma.payment.findFirst({
+  public async findByPaymentNo(paymentNo: string, tx?: Prisma.TransactionClient): Promise<FullPayment | null> {
+    const client = tx || prisma;
+    return client.payment.findFirst({
       where: { paymentNo },
       include: {
         customer: true,
@@ -28,11 +30,12 @@ export class PaymentRepository {
     });
   }
 
-  public async countTotalForYear(year: number): Promise<number> {
+  public async countTotalForYear(year: number, tx?: Prisma.TransactionClient): Promise<number> {
+    const client = tx || prisma;
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
 
-    return prisma.payment.count({
+    return client.payment.count({
       where: {
         createdAt: {
           gte: startDate,
@@ -42,17 +45,21 @@ export class PaymentRepository {
     });
   }
 
-  public async create(data: {
-    paymentNo: string;
-    customerId: string;
-    paymentDate?: Date;
-    paymentMethod: PaymentMethod;
-    referenceNo?: string | null;
-    amount: number;
-    notes?: string | null;
-    allocations: CreatePaymentAllocationDto[];
-  }): Promise<FullPayment> {
-    return prisma.payment.create({
+  public async create(
+    data: {
+      paymentNo: string;
+      customerId: string;
+      paymentDate?: Date;
+      paymentMethod: PaymentMethod;
+      referenceNo?: string | null;
+      amount: number;
+      notes?: string | null;
+      allocations: CreatePaymentAllocationDto[];
+    },
+    tx?: Prisma.TransactionClient,
+  ): Promise<FullPayment> {
+    const client = tx || prisma;
+    return client.payment.create({
       data: {
         paymentNo: data.paymentNo,
         customerId: data.customerId,
