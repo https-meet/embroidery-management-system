@@ -1,6 +1,8 @@
 import { AppError, BadRequestError } from '../../utils/errors';
 import { customerRepository } from '../customer/customer.repository';
 import { jobRepository } from '../job/job.repository';
+import { documentSequenceService } from '../sequence/document-sequence.service';
+import { DocumentType } from '../sequence/document-sequence.types';
 import {
   invoiceCalculationService,
   type InvoiceCalculationService,
@@ -20,17 +22,6 @@ export class InvoiceService {
     private readonly repo: InvoiceRepository = invoiceRepository,
     private readonly calculationService: InvoiceCalculationService = invoiceCalculationService,
   ) {}
-
-  /**
-   * Generates invoice number format INV-YYYY-NNNNNN (e.g. INV-2026-000145)
-   */
-  private async generateInvoiceNo(): Promise<string> {
-    const currentYear = new Date().getFullYear();
-    const count = await this.repo.countTotalForYear(currentYear);
-    const nextNumber = count + 1;
-    const padded = String(nextNumber).padStart(6, '0');
-    return `INV-${currentYear}-${padded}`;
-  }
 
   private mapToDto(invoice: FullInvoice): InvoiceResponseDto {
     const items = (invoice.items || []).map((item) => ({
@@ -137,7 +128,9 @@ export class InvoiceService {
       );
     }
 
-    const invoiceNo = await this.generateInvoiceNo();
+    const invoiceNo = await documentSequenceService.generateNextNumber(DocumentType.INV, {
+      date: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
+    });
     const invoice = await this.repo.create({
       invoiceNo,
       customerId: dto.customerId,

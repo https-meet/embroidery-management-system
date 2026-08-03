@@ -45,7 +45,7 @@ coverage/
 .nyc_output/
 
 # Prisma
-prisma/migrations/
+# Version-controlled migrations tracked for production deployment (npx prisma migrate deploy)
 *.db
 *.db-journal
 
@@ -63,7 +63,6 @@ temp/
 *.key
 *.crt
 backups/
-*.sql
 *.tar.gz
 
 

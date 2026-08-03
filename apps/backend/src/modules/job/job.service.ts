@@ -1,6 +1,8 @@
 import { AppError, BadRequestError } from '../../utils/errors';
 import { customerRepository } from '../customer/customer.repository';
 import { designRepository } from '../design/design.repository';
+import { documentSequenceService } from '../sequence/document-sequence.service';
+import { DocumentType } from '../sequence/document-sequence.types';
 import { jobRepository, type FullJob, type JobRepository } from './job.repository';
 import type {
   CreateJobDto,
@@ -12,17 +14,6 @@ import type {
 
 export class JobService {
   constructor(private readonly repo: JobRepository = jobRepository) {}
-
-  /**
-   * Generates job number format JOB-YYYY-NNNNNN (e.g. JOB-2026-000125)
-   */
-  private async generateJobNo(): Promise<string> {
-    const currentYear = new Date().getFullYear();
-    const count = await this.repo.countTotalForYear(currentYear);
-    const nextNumber = count + 1;
-    const padded = String(nextNumber).padStart(6, '0');
-    return `JOB-${currentYear}-${padded}`;
-  }
 
   private mapToDto(job: FullJob): JobResponseDto {
     const items = (job.items || []).map((item) => ({
@@ -118,7 +109,9 @@ export class JobService {
       }
     }
 
-    const jobNo = await this.generateJobNo();
+    const jobNo = await documentSequenceService.generateNextNumber(DocumentType.JOB, {
+      date: dto.jobDate ? new Date(dto.jobDate) : undefined,
+    });
     const job = await this.repo.create({ ...dto, jobNo, createdBy: userEmail });
 
     return this.mapToDto(job);

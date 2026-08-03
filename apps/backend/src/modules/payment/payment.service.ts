@@ -3,6 +3,8 @@ import { AppError, BadRequestError } from '../../utils/errors';
 import { customerRepository } from '../customer/customer.repository';
 import { invoiceCalculationService } from '../invoice/invoice-calculation.service';
 import { invoiceRepository } from '../invoice/invoice.repository';
+import { documentSequenceService } from '../sequence/document-sequence.service';
+import { DocumentType } from '../sequence/document-sequence.types';
 import { paymentRepository, type FullPayment, type PaymentRepository } from './payment.repository';
 import type {
   CreatePaymentDto,
@@ -13,14 +15,6 @@ import type {
 
 export class PaymentService {
   constructor(private readonly repo: PaymentRepository = paymentRepository) {}
-
-  private async generatePaymentNo(): Promise<string> {
-    const currentYear = new Date().getFullYear();
-    const count = await this.repo.countTotalForYear(currentYear);
-    const nextNumber = count + 1;
-    const padded = String(nextNumber).padStart(6, '0');
-    return `PAY-${currentYear}-${padded}`;
-  }
 
   private mapToDto(payment: FullPayment): PaymentResponseDto {
     const allocations = (payment.allocations || []).map((alloc) => ({
@@ -118,15 +112,20 @@ export class PaymentService {
       );
     }
 
-    const paymentNo = await this.generatePaymentNo();
+    const paymentDate = dto.paymentDate ? new Date(dto.paymentDate) : new Date();
 
-    // Execute payment record creation and invoice updates atomically in an interactive transaction
+    // Execute sequence generation, payment record creation, and invoice updates atomically in an interactive transaction
     const payment = await prisma.$transaction(async (tx) => {
+      const paymentNo = await documentSequenceService.generateNextNumber(DocumentType.PAY, {
+        date: paymentDate,
+        tx,
+      });
+
       const createdPayment = await this.repo.create(
         {
           paymentNo,
           customerId: dto.customerId,
-          paymentDate: dto.paymentDate ? new Date(dto.paymentDate) : new Date(),
+          paymentDate,
           paymentMethod: dto.paymentMethod,
           referenceNo: dto.referenceNo,
           amount: dto.amount,

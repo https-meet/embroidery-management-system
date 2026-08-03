@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [1.2.0] - 2026-08-03
+
+### 🛡️ Concurrency-Safe Document Sequence Engine (Milestone 2)
+
+#### Added
+- **Centralized Document Counter Table (`document_counters`)**:
+  - Added Prisma model `DocumentCounter` with primary key `(entityType, year)`.
+  - Added `DocumentCounterRepository` with concurrency-safe PostgreSQL atomic `UPSERT` + `RETURNING` query (`INSERT ... ON CONFLICT DO UPDATE SET last_sequence = last_sequence + 1 RETURNING last_sequence`).
+  - Added `DocumentSequenceService` with strongly-typed `DocumentType` enum (`JOB`, `INV`, `PAY`, `EST`, `QUO`, `PO`, `DN`).
+  - Supports optional transaction client parameter (`tx?: Prisma.TransactionClient`).
+
+#### Changed
+- **Decoupled Business Services**:
+  - Refactored `JobService`, `InvoiceService`, and `PaymentService` to delegate document number generation to `DocumentSequenceService.generateNextNumber(...)`.
+  - Eliminated vulnerable read-then-count pattern (`countTotalForYear + 1`), preventing duplicate number collisions under concurrent usage.
+
+---
+
 ## [1.1.0] - 2026-08-03
 
 ### 🛡️ Backend Data Integrity & Stabilization (Sprint 1)

@@ -323,3 +323,13 @@ model AuditLog {
   @@index([timestamp])
   @@map("audit_logs")
 }
+
+model DocumentCounter {
+  entityType   String   @map("entity_type")
+  year         Int
+  lastSequence Int      @default(0) @map("last_sequence")
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@id([entityType, year])
+  @@map("document_counters")
+}

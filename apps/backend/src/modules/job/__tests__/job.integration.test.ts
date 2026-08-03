@@ -308,7 +308,7 @@ describe('Job / Order Management Integration Test Suite', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.job.jobNo).toBe(`JOB-${currentYear}-000001`);
+      expect(res.body.data.job.jobNo).toMatch(/^JOB-\d{4}-\d{6}$/);
       expect(res.body.data.job.priority).toBe('HIGH');
       expect(res.body.data.job.items).toHaveLength(2);
       expect(res.body.data.job.totalAmount).toBe(250.0); // 10*15 + 5*20

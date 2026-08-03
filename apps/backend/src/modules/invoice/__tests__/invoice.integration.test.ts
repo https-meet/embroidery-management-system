@@ -441,7 +441,7 @@ describe('Invoicing & Payments Integration Test Suite', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.invoice.invoiceNo).toMatch(/^INV-\d{4}-000001$/);
+      expect(res.body.data.invoice.invoiceNo).toMatch(/^INV-\d{4}-\d{6}$/);
       expect(res.body.data.invoice.subtotal).toBe(1500);
       expect(res.body.data.invoice.grandTotal).toBe(1500);
     });
@@ -525,7 +525,7 @@ describe('Invoicing & Payments Integration Test Suite', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.payment.paymentNo).toMatch(/^PAY-\d{4}-000001$/);
+      expect(res.body.data.payment.paymentNo).toMatch(/^PAY-\d{4}-\d{6}$/);
 
       // Verify updated invoice status
       const invRes = await request
