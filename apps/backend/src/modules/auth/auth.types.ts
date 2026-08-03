@@ -6,15 +6,11 @@ export interface UserResponseDto {
   email: string;
   role: Role;
   isActive: boolean;
+  mustChangePassword: boolean;
+  lastLoginAt?: Date | null;
+  createdBy?: string | null;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface RegisterDto {
-  name: string;
-  email: string;
-  password: string;
-  role?: Role;
 }
 
 export interface LoginDto {
@@ -24,6 +20,11 @@ export interface LoginDto {
 
 export interface RefreshTokenDto {
   refreshToken: string;
+}
+
+export interface ChangePasswordDto {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface AuthTokensDto {
@@ -37,6 +38,19 @@ export interface LoginResponseDto {
     name: string;
     email: string;
     role: Role;
+    mustChangePassword: boolean;
   };
   tokens: AuthTokensDto;
+}
+
+export interface CreateUserFoundationDto {
+  name: string;
+  email: string;
+  role?: Role;
+  createdByAdminId: string;
+}
+
+export interface CreatedUserFoundationResult {
+  user: UserResponseDto;
+  temporaryPassword: string;
 }

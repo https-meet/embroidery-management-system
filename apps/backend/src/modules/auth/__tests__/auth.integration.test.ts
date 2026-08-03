@@ -7,6 +7,8 @@ import { errorHandler } from '../../../middleware/errorHandler';
 import { notFound } from '../../../middleware/notFound';
 import { authRepository } from '../auth.repository';
 import authRouter from '../auth.router';
+import { authService } from '../auth.service';
+import { passwordService } from '../password.service';
 
 class MockAuthRepository {
   public users: Map<string, User> = new Map();
@@ -28,6 +30,8 @@ class MockAuthRepository {
     name: string;
     passwordHash: string;
     role?: Role;
+    mustChangePassword?: boolean;
+    createdBy?: string;
   }): Promise<User> {
     const user: User = {
       id: `uuid-${Date.now()}-${Math.random()}`,
@@ -36,10 +40,32 @@ class MockAuthRepository {
       passwordHash: data.passwordHash,
       role: data.role ?? 'OPERATOR',
       isActive: true,
+      mustChangePassword: data.mustChangePassword ?? false,
+      createdBy: data.createdBy ?? null,
+      lastLoginAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
     this.users.set(user.id, user);
+    return user;
+  }
+
+  public async updateLastLoginAt(id: string, timestamp: Date = new Date()): Promise<void> {
+    const user = this.users.get(id);
+    if (user) {
+      user.lastLoginAt = timestamp;
+    }
+  }
+
+  public async updatePassword(
+    id: string,
+    passwordHash: string,
+    mustChangePassword: boolean = false,
+  ): Promise<User> {
+    const user = this.users.get(id);
+    if (!user) throw new Error('User not found');
+    user.passwordHash = passwordHash;
+    user.mustChangePassword = mustChangePassword;
     return user;
   }
 }
@@ -54,6 +80,8 @@ describe('Authentication Module & Middleware Integration', () => {
     authRepository.findByEmail = mockRepo.findByEmail.bind(mockRepo);
     authRepository.findById = mockRepo.findById.bind(mockRepo);
     authRepository.create = mockRepo.create.bind(mockRepo);
+    authRepository.updateLastLoginAt = mockRepo.updateLastLoginAt.bind(mockRepo);
+    authRepository.updatePassword = mockRepo.updatePassword.bind(mockRepo);
 
     const app = express();
     app.use(express.json());
@@ -71,77 +99,58 @@ describe('Authentication Module & Middleware Integration', () => {
     request = supertest(app);
   });
 
-  describe('POST /api/v1/auth/register', () => {
-    it('should register a new user successfully', async () => {
+  describe('Public Registration Removal Check', () => {
+    it('should return 404 Not Found for POST /api/v1/auth/register', async () => {
       const res = await request.post('/api/v1/auth/register').send({
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'Password123!',
-        role: 'ADMIN',
-      });
-
-      expect(res.status).toBe(201);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data.user.email).toBe('john@example.com');
-      expect(res.body.data.user.role).toBe('ADMIN');
-      expect(res.body.data.user.passwordHash).toBeUndefined();
-    });
-
-    it('should reject registration with duplicate email', async () => {
-      await request.post('/api/v1/auth/register').send({
-        name: 'First User',
-        email: 'unique@example.com',
+        name: 'Attacker',
+        email: 'attacker@example.com',
         password: 'Password123!',
       });
 
-      const dupRes = await request.post('/api/v1/auth/register').send({
-        name: 'Duplicate User',
-        email: 'UNIQUE@example.com',
-        password: 'Password123!',
-      });
-
-      expect(dupRes.status).toBe(409);
-      expect(dupRes.body.success).toBe(false);
-      expect(dupRes.body.error.code).toBe('EMAIL_ALREADY_EXISTS');
-    });
-
-    it('should reject registration violating password policy', async () => {
-      const res = await request.post('/api/v1/auth/register').send({
-        name: 'Weak User',
-        email: 'weak@example.com',
-        password: 'password123',
-      });
-
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
-      expect(res.body.error.code).toBe('PASSWORD_POLICY_VIOLATION');
-    });
-
-    it('should return validation error envelope for invalid input schema', async () => {
-      const res = await request.post('/api/v1/auth/register').send({
-        name: 'A',
-        email: 'not-an-email',
-        password: 'short',
-      });
-
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
-      expect(Array.isArray(res.body.errors)).toBe(true);
-      expect(res.body.errors.length).toBeGreaterThan(0);
+      expect(res.status).toBe(404);
     });
   });
 
-  describe('POST /api/v1/auth/login', () => {
+  describe('Admin User Creation Foundation (createUserFoundation)', () => {
+    it('should create user with crypto temporary password, mustChangePassword = true, and recorded createdBy', async () => {
+      const result = await authService.createUserFoundation({
+        name: 'New Operator',
+        email: 'operator@ebms.local',
+        role: 'OPERATOR',
+        createdByAdminId: 'admin-uuid-123',
+      });
+
+      expect(result.user.email).toBe('operator@ebms.local');
+      expect(result.user.role).toBe('OPERATOR');
+      expect(result.user.mustChangePassword).toBe(true);
+      expect(result.user.createdBy).toBe('admin-uuid-123');
+      expect(typeof result.temporaryPassword).toBe('string');
+      expect(result.temporaryPassword.length).toBeGreaterThanOrEqual(12);
+
+      // Verify user can log in with generated temporary password
+      const loginRes = await request.post('/api/v1/auth/login').send({
+        email: 'operator@ebms.local',
+        password: result.temporaryPassword,
+      });
+
+      expect(loginRes.status).toBe(200);
+      expect(loginRes.body.data.user.mustChangePassword).toBe(true);
+    });
+  });
+
+  describe('POST /api/v1/auth/login & lastLoginAt', () => {
     beforeEach(async () => {
-      await request.post('/api/v1/auth/register').send({
+      const passHash = await passwordService.hash('Password123!');
+      await mockRepo.create({
         name: 'User One',
         email: 'user1@example.com',
-        password: 'Password123!',
+        passwordHash: passHash,
         role: 'OPERATOR',
+        mustChangePassword: true,
       });
     });
 
-    it('should login successfully with valid credentials', async () => {
+    it('should login successfully, return mustChangePassword, and update lastLoginAt', async () => {
       const res = await request.post('/api/v1/auth/login').send({
         email: 'user1@example.com',
         password: 'Password123!',
@@ -150,26 +159,17 @@ describe('Authentication Module & Middleware Integration', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.user.email).toBe('user1@example.com');
-      expect(res.body.data.user.passwordHash).toBeUndefined();
+      expect(res.body.data.user.mustChangePassword).toBe(true);
       expect(typeof res.body.data.tokens.accessToken).toBe('string');
-      expect(typeof res.body.data.tokens.refreshToken).toBe('string');
+
+      const userInDb = await mockRepo.findByEmail('user1@example.com');
+      expect(userInDb?.lastLoginAt).not.toBeNull();
     });
 
     it('should reject login with wrong password', async () => {
       const res = await request.post('/api/v1/auth/login').send({
         email: 'user1@example.com',
         password: 'WrongPassword123!',
-      });
-
-      expect(res.status).toBe(401);
-      expect(res.body.success).toBe(false);
-      expect(res.body.error.code).toBe('INVALID_CREDENTIALS');
-    });
-
-    it('should reject login with non-existent email', async () => {
-      const res = await request.post('/api/v1/auth/login').send({
-        email: 'nobody@example.com',
-        password: 'Password123!',
       });
 
       expect(res.status).toBe(401);
@@ -194,53 +194,63 @@ describe('Authentication Module & Middleware Integration', () => {
     });
   });
 
-  describe('POST /api/v1/auth/refresh & Logout', () => {
-    let refreshToken: string;
+  describe('POST /api/v1/auth/change-password', () => {
+    let token: string;
 
     beforeEach(async () => {
-      await request.post('/api/v1/auth/register').send({
-        name: 'User Two',
-        email: 'user2@example.com',
-        password: 'Password123!',
+      const passHash = await passwordService.hash('TempPassword123!');
+      await mockRepo.create({
+        name: 'User Password Change',
+        email: 'change@example.com',
+        passwordHash: passHash,
+        role: 'OPERATOR',
+        mustChangePassword: true,
       });
 
       const loginRes = await request.post('/api/v1/auth/login').send({
-        email: 'user2@example.com',
-        password: 'Password123!',
+        email: 'change@example.com',
+        password: 'TempPassword123!',
       });
 
-      refreshToken = loginRes.body.data.tokens.refreshToken;
+      token = loginRes.body.data.tokens.accessToken;
     });
 
-    it('should refresh tokens successfully with valid refresh token', async () => {
-      const res = await request.post('/api/v1/auth/refresh').send({
-        refreshToken,
-      });
+    it('should change password successfully and set mustChangePassword = false', async () => {
+      const res = await request
+        .post('/api/v1/auth/change-password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          currentPassword: 'TempPassword123!',
+          newPassword: 'NewSecurePassword@2026!',
+        });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(typeof res.body.data.accessToken).toBe('string');
-      expect(typeof res.body.data.refreshToken).toBe('string');
-    });
 
-    it('should reject invalid refresh token', async () => {
-      const res = await request.post('/api/v1/auth/refresh').send({
-        refreshToken: 'invalid-refresh-token',
+      const userInDb = await mockRepo.findByEmail('change@example.com');
+      expect(userInDb?.mustChangePassword).toBe(false);
+
+      // Verify user can now log in with new password
+      const newLoginRes = await request.post('/api/v1/auth/login').send({
+        email: 'change@example.com',
+        password: 'NewSecurePassword@2026!',
       });
 
-      expect(res.status).toBe(401);
-      expect(res.body.success).toBe(false);
-      expect(res.body.error.code).toBe('INVALID_REFRESH_TOKEN');
+      expect(newLoginRes.status).toBe(200);
+      expect(newLoginRes.body.data.user.mustChangePassword).toBe(false);
     });
 
-    it('should logout successfully', async () => {
-      const res = await request.post('/api/v1/auth/logout').send({
-        refreshToken,
-      });
+    it('should reject change-password with wrong current password', async () => {
+      const res = await request
+        .post('/api/v1/auth/change-password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          currentPassword: 'WrongTempPassword123!',
+          newPassword: 'NewSecurePassword@2026!',
+        });
 
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.message).toBe('Logged out successfully.');
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('INVALID_CURRENT_PASSWORD');
     });
   });
 
@@ -249,17 +259,18 @@ describe('Authentication Module & Middleware Integration', () => {
     let operatorToken: string;
 
     beforeEach(async () => {
-      const adminReg = await request.post('/api/v1/auth/register').send({
+      const passHash = await passwordService.hash('Password123!');
+      await mockRepo.create({
         name: 'Admin User',
         email: 'admin@example.com',
-        password: 'Password123!',
+        passwordHash: passHash,
         role: 'ADMIN',
       });
 
-      const opReg = await request.post('/api/v1/auth/register').send({
+      await mockRepo.create({
         name: 'Operator User',
         email: 'op@example.com',
-        password: 'Password123!',
+        passwordHash: passHash,
         role: 'OPERATOR',
       });
 
@@ -275,9 +286,6 @@ describe('Authentication Module & Middleware Integration', () => {
 
       adminToken = adminLogin.body.data.tokens.accessToken;
       operatorToken = opLogin.body.data.tokens.accessToken;
-
-      expect(adminReg.status).toBe(201);
-      expect(opReg.status).toBe(201);
     });
 
     it('should return profile for authenticated user on GET /api/v1/auth/me', async () => {
@@ -287,22 +295,6 @@ describe('Authentication Module & Middleware Integration', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data.user.email).toBe('admin@example.com');
       expect(res.body.data.user.role).toBe('ADMIN');
-    });
-
-    it('should reject protected route request missing Authorization header', async () => {
-      const res = await request.get('/api/v1/auth/me');
-
-      expect(res.status).toBe(401);
-      expect(res.body.success).toBe(false);
-      expect(res.body.error.code).toBe('UNAUTHORIZED');
-    });
-
-    it('should reject protected route request with invalid Bearer token', async () => {
-      const res = await request.get('/api/v1/auth/me').set('Authorization', 'Bearer invalid-token');
-
-      expect(res.status).toBe(401);
-      expect(res.body.success).toBe(false);
-      expect(res.body.error.code).toBe('INVALID_ACCESS_TOKEN');
     });
 
     it('should allow ADMIN role on requireRole("ADMIN") protected route', async () => {

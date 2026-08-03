@@ -7,12 +7,14 @@ export interface UserTokenPayload {
   id: string;
   email: string;
   role: Role;
+  mustChangePassword?: boolean;
 }
 
 export interface AccessTokenPayload {
   userId: string;
   email: string;
   role: Role;
+  mustChangePassword?: boolean;
   type: 'access';
 }
 
@@ -25,7 +27,7 @@ export class JwtService {
   /**
    * Generates a short-lived Access Token for the user.
    *
-   * @param user User payload containing id, email, and role
+   * @param user User payload containing id, email, role, and mustChangePassword
    * @returns Signed JWT access token string
    */
   public generateAccessToken(user: UserTokenPayload): string {
@@ -33,6 +35,7 @@ export class JwtService {
       userId: user.id,
       email: user.email,
       role: user.role,
+      mustChangePassword: user.mustChangePassword ?? false,
       type: 'access',
     };
 
