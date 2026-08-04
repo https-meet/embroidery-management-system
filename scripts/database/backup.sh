@@ -2,19 +2,64 @@
 
 # ==============================================================================
 # EBMS Enterprise Database Backup Engine (Linux / Bash)
-# Milestone 4.1 - Sprint 1
+# Milestone 4.1 - Sprint 3 (Refined Operational Polish)
 # ==============================================================================
 
 set -u
 
-# Resolve Backup Directory
+# Exit Code Constants
+EXIT_SUCCESS=0
+EXIT_ERR_GENERAL=1
+EXIT_ERR_MISSING_TOOLS=2
+EXIT_ERR_DB_UNREACHABLE=3
+EXIT_ERR_PERMISSIONS=4
+
 BACKUP_DIR="${BACKUP_DIR:-$(pwd)/backups}"
-VERIFIED_DIR="${BACKUP_DIR}/verified"
+DESTINATION_DIR=""
+PREFIX="ebms"
+SINGLE_ATTEMPT=0
+
+# Parse Arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --destination)
+      DESTINATION_DIR="$2"
+      shift 2
+      ;;
+    --prefix)
+      PREFIX="$2"
+      shift 2
+      ;;
+    --single-attempt)
+      SINGLE_ATTEMPT=1
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+if [ -n "${DESTINATION_DIR}" ]; then
+  VERIFIED_DIR="${DESTINATION_DIR}"
+else
+  VERIFIED_DIR="${BACKUP_DIR}/verified"
+fi
+
 QUARANTINE_DIR="${BACKUP_DIR}/quarantine"
 TEMP_DIR="${BACKUP_DIR}/temp"
 
 # Ensure target directories exist
-mkdir -p "${VERIFIED_DIR}" "${QUARANTINE_DIR}" "${TEMP_DIR}"
+mkdir -p "${VERIFIED_DIR}" "${QUARANTINE_DIR}" "${TEMP_DIR}" 2>/dev/null || {
+  echo "[$(date -u +"%Y-%m-%d %H:%M:%S UTC")] [ERROR] Permission failure creating backup directories."
+  exit ${EXIT_ERR_PERMISSIONS}
+}
+
+# Verify pg_dump Tool Availability
+if ! command -v pg_dump >/dev/null 2>&1; then
+  echo "[$(date -u +"%Y-%m-%d %H:%M:%S UTC")] [ERROR] CRITICAL: pg_dump command-line tool is not installed or not found in PATH."
+  exit ${EXIT_ERR_MISSING_TOOLS}
+fi
 
 # Resolve Database Connection String
 if [ -z "${DATABASE_URL:-}" ]; then
@@ -35,6 +80,10 @@ log_message() {
 }
 
 MAX_ATTEMPTS=3
+if [ "${SINGLE_ATTEMPT}" -eq 1 ]; then
+  MAX_ATTEMPTS=1
+fi
+
 SUCCESS=0
 
 log_message "INFO" "Starting EBMS PostgreSQL Backup Engine (Max attempts: ${MAX_ATTEMPTS})..."
@@ -42,7 +91,7 @@ log_message "INFO" "Starting EBMS PostgreSQL Backup Engine (Max attempts: ${MAX_
 for ((attempt=1; attempt<=MAX_ATTEMPTS; attempt++)); do
   START_TIME=$(date +%s)
   TIMESTAMP_STR=$(date -u +"%Y-%m-%d_%H-%M-%S")
-  BASE_NAME="ebms_${TIMESTAMP_STR}"
+  BASE_NAME="${PREFIX}_${TIMESTAMP_STR}"
 
   TEMP_DUMP_FILE="${TEMP_DIR}/${BASE_NAME}.dump"
   VERIFIED_DUMP_FILE="${VERIFIED_DIR}/${BASE_NAME}.dump"
@@ -90,7 +139,7 @@ for ((attempt=1; attempt<=MAX_ATTEMPTS; attempt++)); do
 
     echo "${SHA256_HASH}  ${BASE_NAME}.dump" > "${VERIFIED_SHA_FILE}"
 
-    # Move dump to verified directory
+    # Move dump to target verified directory
     mv "${TEMP_DUMP_FILE}" "${VERIFIED_DUMP_FILE}"
 
     # Retrieve PostgreSQL Server Version
@@ -126,8 +175,8 @@ EOF
       log_message "WARN" "Corrupt dump quarantined to ${QUARANTINE_DUMP_FILE}"
     fi
 
-    # Apply Retry Delays
-    if [ "${attempt}" -lt "${MAX_ATTEMPTS}" ]; then
+    # Apply Retry Delays (only if SINGLE_ATTEMPT is false)
+    if [ "${SINGLE_ATTEMPT}" -ne 1 ] && [ "${attempt}" -lt "${MAX_ATTEMPTS}" ]; then
       DELAY_SECONDS=30
       if [ "${attempt}" -eq 2 ]; then
         DELAY_SECONDS=60
@@ -142,8 +191,8 @@ done
 rm -rf "${TEMP_DIR}"
 
 if [ "${SUCCESS}" -ne 1 ]; then
-  log_message "ERROR" "CRITICAL: All ${MAX_ATTEMPTS} backup attempts failed. Backup process exiting with code 1."
-  exit 1
+  log_message "ERROR" "CRITICAL: Backup process failed all attempt(s). Exiting with code ${EXIT_ERR_DB_UNREACHABLE}."
+  exit ${EXIT_ERR_DB_UNREACHABLE}
 fi
 
-exit 0
+exit ${EXIT_SUCCESS}

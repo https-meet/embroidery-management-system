@@ -1,36 +1,55 @@
 # ==============================================================================
 # EBMS Enterprise Database Backup Engine (Windows PowerShell)
-# Milestone 4.1 - Sprint 1
+# Milestone 4.1 - Sprint 3 (Refined Operational Polish)
 # ==============================================================================
 
 [CmdletBinding()]
 param (
     [string]$BackupDir = $env:BACKUP_DIR,
-    [string]$DatabaseUrl = $env:DATABASE_URL
+    [string]$DatabaseUrl = $env:DATABASE_URL,
+    [string]$DestinationDir,
+    [string]$Prefix = "ebms",
+    [switch]$SingleAttempt
 )
 
 $ErrorActionPreference = "Stop"
 
-# Set default backup directory if omitted
+# Exit Code Constants
+$EXIT_SUCCESS = 0
+$EXIT_ERR_GENERAL = 1
+$EXIT_ERR_MISSING_TOOLS = 2
+$EXIT_ERR_DB_UNREACHABLE = 3
+$EXIT_ERR_PERMISSIONS = 4
+
+# Set default backup root directory if omitted
 if ([string]::IsNullOrWhiteSpace($BackupDir)) {
     $BackupDir = Join-Path (Get-Location) "backups"
 }
 
 # Resolve directory paths
-$VerifiedDir = Join-Path $BackupDir "verified"
+if ([string]::IsNullOrWhiteSpace($DestinationDir)) {
+    $VerifiedDir = Join-Path $BackupDir "verified"
+} else {
+    $VerifiedDir = $DestinationDir
+}
 $QuarantineDir = Join-Path $BackupDir "quarantine"
 $TempDir = Join-Path $BackupDir "temp"
 
 # Ensure target directories exist
-New-Item -ItemType Directory -Force -Path $VerifiedDir | Out-Null
-New-Item -ItemType Directory -Force -Path $QuarantineDir | Out-Null
-New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
+try {
+    New-Item -ItemType Directory -Force -Path $VerifiedDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $QuarantineDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
+} catch {
+    Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] [ERROR] Permission failure creating backup directories: $_"
+    exit $EXIT_ERR_PERMISSIONS
+}
 
 # Helper to locate PostgreSQL CLI binaries (pg_dump, pg_restore)
 function Find-PgBinary {
     param ([string]$BinaryName)
 
-    # 1. Check if binary is in system PATH
+    # 1. Check system PATH
     $cmd = Get-Command $BinaryName -ErrorAction SilentlyContinue
     if ($cmd) { return $cmd.Source }
 
@@ -51,6 +70,12 @@ function Find-PgBinary {
 $pgDumpExe = Find-PgBinary "pg_dump"
 $pgRestoreExe = Find-PgBinary "pg_restore"
 
+# Check tool availability
+if (-not (Get-Command $pgDumpExe -ErrorAction SilentlyContinue) -and -not (Test-Path $pgDumpExe)) {
+    Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] [ERROR] CRITICAL: pg_dump command-line tool is not installed or not found in PATH."
+    exit $EXIT_ERR_MISSING_TOOLS
+}
+
 # Resolve Database Connection String
 if ([string]::IsNullOrWhiteSpace($DatabaseUrl)) {
     $pgHost = if ($env:PGHOST) { $env:PGHOST } else { "localhost" }
@@ -67,17 +92,15 @@ function Log-Message {
     Write-Host "[$ts] [$Level] $Message"
 }
 
-$MaxAttempts = 3
+$MaxAttempts = if ($SingleAttempt) { 1 } else { 3 }
 $Success = $false
 
 Log-Message "INFO" "Starting EBMS PostgreSQL Backup Engine (Max attempts: $MaxAttempts)..."
-Log-Message "INFO" "Using pg_dump executable: $pgDumpExe"
-Log-Message "INFO" "Using pg_restore executable: $pgRestoreExe"
 
 for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
     $startTime = Get-Date
     $timestampStr = $startTime.ToString("yyyy-MM-dd_HH-mm-ss")
-    $baseName = "ebms_$timestampStr"
+    $baseName = "${Prefix}_${timestampStr}"
     
     $tempDumpFile = Join-Path $TempDir "${baseName}.dump"
     $verifiedDumpFile = Join-Path $VerifiedDir "${baseName}.dump"
@@ -128,7 +151,7 @@ for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
         $sha256Hash = (Get-FileHash -Path $tempDumpFile -Algorithm SHA256).Hash.ToLower()
         Set-Content -Path $verifiedShaFile -Value "$sha256Hash  ${baseName}.dump"
 
-        # Move dump to verified directory
+        # Move dump to target verified directory
         Move-Item -Path $tempDumpFile -Destination $verifiedDumpFile -Force
 
         # Retrieve PostgreSQL Server Version
@@ -167,8 +190,8 @@ for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
             Log-Message "WARN" "Corrupt dump quarantined to $quarantineDumpFile"
         }
 
-        # Apply Retry Delays
-        if ($attempt -lt $MaxAttempts) {
+        # Apply Retry Delays (only if SingleAttempt is false)
+        if (-not $SingleAttempt -and $attempt -lt $MaxAttempts) {
             $delaySeconds = if ($attempt -eq 1) { 30 } else { 60 }
             Log-Message "WARN" "Waiting $delaySeconds seconds before retry attempt $($attempt + 1)..."
             Start-Sleep -Seconds $delaySeconds
@@ -182,8 +205,8 @@ if (Test-Path $TempDir) {
 }
 
 if (-not $Success) {
-    Log-Message "ERROR" "CRITICAL: All $MaxAttempts backup attempts failed. Backup process exiting with code 1."
-    exit 1
+    Log-Message "ERROR" "CRITICAL: Backup process failed all attempt(s). Exiting with code $EXIT_ERR_DB_UNREACHABLE."
+    exit $EXIT_ERR_DB_UNREACHABLE
 }
 
-exit 0
+exit $EXIT_SUCCESS
