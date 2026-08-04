@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import helmet from 'helmet';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
@@ -13,6 +14,46 @@ import router from './routes';
  */
 export function createApp(): express.Application {
   const app = express();
+
+  // ── Disable Express Fingerprinting ───────────────────────────────────────
+  app.disable('x-powered-by');
+
+  // ── HTTP Security Hardening (Helmet) ──────────────────────────────────────
+  const isProduction = config.nodeEnv === 'production';
+
+  app.use(
+    helmet({
+      // Disable X-Powered-By header
+      hidePoweredBy: true,
+
+      // X-Content-Type-Options: nosniff
+      noSniff: true,
+
+      // Clickjacking Protection: X-Frame-Options: DENY
+      frameguard: { action: 'deny' },
+
+      // Referrer Policy: strict-origin-when-cross-origin
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+
+      // Cross-Origin Resource Policy: Allow cross-origin requests from SPA frontend
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+
+      // Cross-Origin Embedder Policy: Disabled to avoid blocking cross-origin asset loading
+      crossOriginEmbedderPolicy: false,
+
+      // HTTP Strict Transport Security (HSTS): Enabled in production only
+      hsts: isProduction
+        ? {
+            maxAge: 31536000,
+            includeSubDomains: true,
+            preload: true,
+          }
+        : false,
+
+      // Content Security Policy: Disabled for pure JSON REST API backend
+      contentSecurityPolicy: false,
+    }),
+  );
 
   // ── CORS ──────────────────────────────────────────────────────────────────
   app.use(
