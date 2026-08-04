@@ -9,7 +9,9 @@ export class AuthController {
   public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as LoginDto;
-      const data = await this.service.login(dto);
+      const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip;
+      const userAgent = req.headers['user-agent'];
+      const data = await this.service.login(dto, ipAddress, userAgent);
 
       res.status(200).json({
         success: true,
@@ -28,7 +30,8 @@ export class AuthController {
       }
 
       const dto = req.body as ChangePasswordDto;
-      await this.service.changePassword(req.user.userId, dto);
+      const currentRefreshToken = req.body.refreshToken as string | undefined;
+      await this.service.changePassword(req.user.userId, dto, currentRefreshToken);
 
       res.status(200).json({
         success: true,
@@ -42,7 +45,8 @@ export class AuthController {
   public refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as RefreshTokenDto;
-      const tokens = await this.service.refreshToken(dto);
+      const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip;
+      const tokens = await this.service.refreshToken(dto, ipAddress);
 
       res.status(200).json({
         success: true,
@@ -77,9 +81,10 @@ export class AuthController {
     }
   };
 
-  public logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await this.service.logout();
+      const dto = req.body as RefreshTokenDto;
+      await this.service.logout(dto);
 
       res.status(200).json({
         success: true,

@@ -4,6 +4,8 @@ import {
   ForbiddenError,
   UnauthorizedError,
 } from '../../utils/errors';
+import { sessionService } from '../session/session.service';
+import { settingsService } from '../settings/settings.service';
 import { authRepository, type AuthRepository } from './auth.repository';
 import type {
   AuthTokensDto,
@@ -75,7 +77,11 @@ export class AuthService {
     };
   }
 
-  public async login(dto: LoginDto): Promise<LoginResponseDto> {
+  public async login(
+    dto: LoginDto,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<LoginResponseDto> {
     const user = await this.repo.findByEmail(dto.email);
     if (!user) {
       throw new UnauthorizedError('INVALID_CREDENTIALS', 'Invalid email or password.');
@@ -101,7 +107,32 @@ export class AuthService {
     };
 
     const accessToken = jwtService.generateAccessToken(userPayload);
-    const refreshToken = jwtService.generateRefreshToken(userPayload);
+    
+    // Create server-side revocable session
+    const tempSid = crypto.randomUUID();
+    const initialRefreshToken = jwtService.generateRefreshToken(userPayload, tempSid);
+    const session = await sessionService.createSession(
+      user.id,
+      user.email,
+      initialRefreshToken,
+      ipAddress,
+      userAgent,
+    );
+
+    // Re-sign refreshToken with actual session.id
+    const finalRefreshToken = jwtService.generateRefreshToken(userPayload, session.id);
+    if (finalRefreshToken !== initialRefreshToken) {
+      await sessionService.verifyAndRotateSession(session.id, initialRefreshToken, finalRefreshToken, ipAddress);
+    }
+
+    await settingsService.logAuditAction({
+      userId: user.id,
+      userName: user.email,
+      action: 'LOGIN_SUCCESS',
+      entityType: 'AUTH',
+      entityId: session.id,
+      reason: 'User authenticated successfully and session created.',
+    });
 
     return {
       user: {
@@ -113,7 +144,7 @@ export class AuthService {
       },
       tokens: {
         accessToken,
-        refreshToken,
+        refreshToken: finalRefreshToken,
       },
     };
   }
@@ -121,6 +152,7 @@ export class AuthService {
   public async changePassword(
     userId: string,
     dto: ChangePasswordDto,
+    currentRefreshToken?: string,
   ): Promise<void> {
     const user = await this.repo.findById(userId);
     if (!user || !user.isActive) {
@@ -139,11 +171,29 @@ export class AuthService {
 
     const newPasswordHash = await passwordService.hash(dto.newPassword);
     await this.repo.updatePassword(userId, newPasswordHash, false);
+
+    let currentSessionId: string | undefined;
+    if (currentRefreshToken) {
+      const payload = jwtService.verifyRefreshToken(currentRefreshToken);
+      if (payload?.sid) currentSessionId = payload.sid;
+    }
+
+    // Revoke all other active sessions for user, keeping current session alive
+    await sessionService.revokeAllUserSessions(userId, 'PASSWORD_CHANGED', currentSessionId);
+
+    await settingsService.logAuditAction({
+      userId,
+      userName: user.email,
+      action: 'PASSWORD_CHANGED',
+      entityType: 'USER',
+      entityId: userId,
+      reason: 'Password updated. Revoked all other active sessions.',
+    });
   }
 
-  public async refreshToken(dto: RefreshTokenDto): Promise<AuthTokensDto> {
+  public async refreshToken(dto: RefreshTokenDto, ipAddress?: string): Promise<AuthTokensDto> {
     const payload = jwtService.verifyRefreshToken(dto.refreshToken);
-    if (!payload) {
+    if (!payload || !payload.sid) {
       throw new UnauthorizedError('INVALID_REFRESH_TOKEN', 'Invalid or expired refresh token.');
     }
 
@@ -162,8 +212,26 @@ export class AuthService {
       mustChangePassword: user.mustChangePassword,
     };
 
+    const newRefreshToken = jwtService.generateRefreshToken(userPayload, payload.sid);
+
+    // Verify session and rotate refresh token hash
+    await sessionService.verifyAndRotateSession(
+      payload.sid,
+      dto.refreshToken,
+      newRefreshToken,
+      ipAddress,
+    );
+
     const accessToken = jwtService.generateAccessToken(userPayload);
-    const newRefreshToken = jwtService.generateRefreshToken(userPayload);
+
+    await settingsService.logAuditAction({
+      userId: user.id,
+      userName: user.email,
+      action: 'TOKEN_REFRESH',
+      entityType: 'AUTH',
+      entityId: payload.sid,
+      reason: 'Refresh token rotated and new access token issued.',
+    });
 
     return {
       accessToken,
@@ -191,8 +259,21 @@ export class AuthService {
     };
   }
 
-  public async logout(_dto?: RefreshTokenDto): Promise<void> {
-    return Promise.resolve();
+  public async logout(dto?: RefreshTokenDto): Promise<void> {
+    if (dto?.refreshToken) {
+      const payload = jwtService.verifyRefreshToken(dto.refreshToken);
+      if (payload?.sid) {
+        await sessionService.revokeSession(payload.sid, 'USER_LOGOUT');
+        await settingsService.logAuditAction({
+          userId: payload.userId,
+          userName: payload.userId,
+          action: 'USER_LOGOUT',
+          entityType: 'SESSION',
+          entityId: payload.sid,
+          reason: 'User logged out and active session was revoked.',
+        });
+      }
+    }
   }
 }
 

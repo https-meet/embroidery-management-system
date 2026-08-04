@@ -1,5 +1,5 @@
-// Embroidery Business Management System (EBMS)
-// Prisma Schema — Baseline Database Design (Developer Kit v1.0)
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -19,17 +19,21 @@ enum Role {
 enum CustomerType {
   INDIVIDUAL
   COMPANY
+  WHOLESALER
 }
 
 enum Priority {
   LOW
   NORMAL
   HIGH
+  URGENT
 }
 
 enum JobStatus {
   DRAFT
+  PENDING
   IN_PROGRESS
+  QUALITY_CHECK
   COMPLETED
   DELIVERED
   CANCELLED
@@ -37,10 +41,12 @@ enum JobStatus {
 
 enum JobItemProductionStatus {
   DRAFT
-  PENDING_PRODUCTION
-  IN_PRODUCTION
-  COMPLETED
-  CANCELLED
+  QUEUED
+  EMBROIDERING
+  CLEANING
+  PASSED_QC
+  REJECTED_QC
+  REWORK
 }
 
 enum InvoiceStatus {
@@ -48,25 +54,30 @@ enum InvoiceStatus {
   ISSUED
   PARTIALLY_PAID
   PAID
-  CANCELLED
+  VOID
+  OVERDUE
+}
+
+enum PaymentStatus {
+  DRAFT
+  RECORDED
+  PARTIALLY_ALLOCATED
+  FULLY_ALLOCATED
+  VOID
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  UPI
+  CHEQUE
+  CREDIT_CARD
+  OTHER
 }
 
 enum DiscountType {
   PERCENTAGE
   FIXED_AMOUNT
-}
-
-enum PaymentMethod {
-  CASH
-  UPI
-  BANK_TRANSFER
-  CHEQUE
-}
-
-enum PaymentStatus {
-  DRAFT
-  CONFIRMED
-  CANCELLED
 }
 
 model User {
@@ -83,11 +94,31 @@ model User {
   lastLoginAt        DateTime? @map("last_login_at") @db.Timestamptz
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  sessions           Session[]
 
   @@index([email])
   @@index([role])
   @@index([isActive])
   @@map("users")
+}
+
+model Session {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String    @map("refresh_token_hash")
+  lastIpAddress    String?   @map("last_ip_address")
+  userAgent        String?   @map("user_agent")
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz
+  revokedReason    String?   @map("revoked_reason")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz
+  lastUsedAt       DateTime  @default(now()) @map("last_used_at") @db.Timestamptz
+
+  @@index([userId])
+  @@index([refreshTokenHash])
+  @@map("sessions")
 }
 
 model Customer {

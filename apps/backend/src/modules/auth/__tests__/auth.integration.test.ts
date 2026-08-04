@@ -1,67 +1,80 @@
-import type { Role, User } from '@prisma/client';
 import express from 'express';
 import supertest from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { authenticate, requireRole } from '../../../middleware/auth';
 import { errorHandler } from '../../../middleware/errorHandler';
 import { notFound } from '../../../middleware/notFound';
-import { authRepository } from '../auth.repository';
 import authRouter from '../auth.router';
+import { authRepository } from '../auth.repository';
 import { authService } from '../auth.service';
+import type { UserResponseDto } from '../auth.types';
 import { passwordService } from '../password.service';
+import { sessionService } from '../../session/session.service';
+import { settingsService } from '../../settings/settings.service';
 
 class MockAuthRepository {
-  public users: Map<string, User> = new Map();
+  public users = new Map<string, {
+    id: string;
+    email: string;
+    name: string;
+    passwordHash: string;
+    role: 'ADMIN' | 'MANAGER' | 'OPERATOR';
+    isActive: boolean;
+    mustChangePassword: boolean;
+    createdBy: string | null;
+    lastLoginAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }>();
 
-  public async findByEmail(email: string): Promise<User | null> {
-    const lower = email.toLowerCase();
+  public async findByEmail(email: string) {
     for (const u of this.users.values()) {
-      if (u.email === lower) return u;
+      if (u.email.toLowerCase() === email.toLowerCase()) {
+        return u;
+      }
     }
     return null;
   }
 
-  public async findById(id: string): Promise<User | null> {
-    return this.users.get(id) ?? null;
+  public async findById(id: string) {
+    const u = this.users.get(id);
+    return u || null;
   }
 
   public async create(data: {
     email: string;
     name: string;
     passwordHash: string;
-    role?: Role;
+    role?: 'ADMIN' | 'MANAGER' | 'OPERATOR';
     mustChangePassword?: boolean;
     createdBy?: string;
-  }): Promise<User> {
-    const user: User = {
-      id: `uuid-${Date.now()}-${Math.random()}`,
-      email: data.email.toLowerCase(),
+  }) {
+    const id = `user-${this.users.size + 1}`;
+    const user = {
+      id,
+      email: data.email,
       name: data.name,
       passwordHash: data.passwordHash,
-      role: data.role ?? 'OPERATOR',
+      role: data.role || 'OPERATOR',
       isActive: true,
       mustChangePassword: data.mustChangePassword ?? false,
-      createdBy: data.createdBy ?? null,
+      createdBy: data.createdBy || null,
       lastLoginAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    this.users.set(user.id, user);
+    this.users.set(id, user);
     return user;
   }
 
-  public async updateLastLoginAt(id: string, timestamp: Date = new Date()): Promise<void> {
+  public async updateLastLoginAt(id: string) {
     const user = this.users.get(id);
-    if (user) {
-      user.lastLoginAt = timestamp;
-    }
+    if (!user) throw new Error('User not found');
+    user.lastLoginAt = new Date();
+    return user;
   }
 
-  public async updatePassword(
-    id: string,
-    passwordHash: string,
-    mustChangePassword: boolean = false,
-  ): Promise<User> {
+  public async updatePassword(id: string, passwordHash: string, mustChangePassword = false) {
     const user = this.users.get(id);
     if (!user) throw new Error('User not found');
     user.passwordHash = passwordHash;
@@ -82,6 +95,50 @@ describe('Authentication Module & Middleware Integration', () => {
     authRepository.create = mockRepo.create.bind(mockRepo);
     authRepository.updateLastLoginAt = mockRepo.updateLastLoginAt.bind(mockRepo);
     authRepository.updatePassword = mockRepo.updatePassword.bind(mockRepo);
+
+    settingsService.logAuditAction = async (entry: any) => ({
+      id: 'mock-audit-id',
+      userId: entry.userId || null,
+      userName: entry.userName,
+      action: entry.action,
+      entityType: entry.entityType,
+      timestamp: new Date(),
+    });
+
+    sessionService.createSession = async (userId: string) => {
+      const now = new Date();
+      return {
+        id: 'mock-session-id',
+        userId,
+        refreshTokenHash: 'hash',
+        lastIpAddress: '127.0.0.1',
+        userAgent: 'test',
+        revokedAt: null,
+        revokedReason: null,
+        createdAt: now,
+        updatedAt: now,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        lastUsedAt: now,
+      };
+    };
+    sessionService.verifyAndRotateSession = async (sid: string) => {
+      const now = new Date();
+      return {
+        id: sid,
+        userId: 'mock-user',
+        refreshTokenHash: 'new-hash',
+        lastIpAddress: '127.0.0.1',
+        userAgent: 'test',
+        revokedAt: null,
+        revokedReason: null,
+        createdAt: now,
+        updatedAt: now,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        lastUsedAt: now,
+      };
+    };
+    sessionService.revokeSession = async () => null;
+    sessionService.revokeAllUserSessions = async () => 0;
 
     const app = express();
     app.use(express.json());

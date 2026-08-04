@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import type { Role } from '@prisma/client';
 import type { SignOptions } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
@@ -20,6 +21,8 @@ export interface AccessTokenPayload {
 
 export interface RefreshTokenPayload {
   userId: string;
+  sid: string;
+  nonce?: string;
   type: 'refresh';
 }
 
@@ -47,14 +50,17 @@ export class JwtService {
   }
 
   /**
-   * Generates a longer-lived Refresh Token for the user.
+   * Generates a longer-lived Refresh Token containing Session ID (sid) and unique nonce.
    *
    * @param user User payload containing id
+   * @param sid Session ID UUID
    * @returns Signed JWT refresh token string
    */
-  public generateRefreshToken(user: Pick<UserTokenPayload, 'id'>): string {
+  public generateRefreshToken(user: Pick<UserTokenPayload, 'id'>, sid?: string): string {
     const payload: RefreshTokenPayload = {
       userId: user.id,
+      sid: sid || user.id,
+      nonce: crypto.randomBytes(16).toString('hex'),
       type: 'refresh',
     };
 
@@ -89,7 +95,7 @@ export class JwtService {
   }
 
   /**
-   * Verifies a Refresh Token and returns its decoded payload.
+   * Verifies a Refresh Token and returns its decoded payload containing sid.
    * Safely returns null if the token is expired, tampered with, or invalid type.
    *
    * @param token JWT refresh token string

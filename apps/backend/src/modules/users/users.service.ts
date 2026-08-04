@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import type { AccessTokenPayload } from '../auth/jwt.service';
 import { passwordService } from '../auth/password.service';
+import { sessionService } from '../session/session.service';
 import { settingsService } from '../settings/settings.service';
 import { AppError, BadRequestError } from '../../utils/errors';
 import { userRepository, type UserRepository } from './users.repository';
@@ -195,8 +196,13 @@ export class UserService {
 
     const updated = await this.repo.updateStatus(id, dto.isActive);
 
+    if (!dto.isActive) {
+      // Immediately revoke all active sessions for deactivated user
+      await sessionService.revokeAllUserSessions(id, 'USER_DEACTIVATED');
+    }
+
     // Record audit event
-    const action = dto.isActive ? 'ACCOUNT_ACTIVATED' : 'ACCOUNT_DEACTIVATED';
+    const action = dto.isActive ? 'ACCOUNT_ACTIVATED' : 'USER_DEACTIVATED';
     await settingsService.logAuditAction({
       userId: adminUser.userId,
       userName: adminUser.email,
@@ -205,6 +211,7 @@ export class UserService {
       entityId: updated.id,
       previousValue: JSON.stringify({ isActive: existing.isActive }),
       newValue: JSON.stringify({ isActive: updated.isActive }),
+      reason: !dto.isActive ? 'User account deactivated. Revoked all active sessions.' : undefined,
     });
 
     return this.mapToDto(updated);
@@ -231,14 +238,17 @@ export class UserService {
     const passwordHash = await passwordService.hash(temporaryPassword);
     await this.repo.updatePassword(id, passwordHash, true);
 
+    // Revoke all active sessions for target user
+    await sessionService.revokeAllUserSessions(id, 'ADMIN_PASSWORD_RESET');
+
     // Record audit event
     await settingsService.logAuditAction({
       userId: adminUser.userId,
       userName: adminUser.email,
-      action: 'PASSWORD_RESET',
+      action: 'ADMIN_PASSWORD_RESET',
       entityType: 'USER',
       entityId: existing.id,
-      reason: 'Administrator triggered password reset',
+      reason: 'Administrator triggered password reset. Revoked all active sessions.',
     });
 
     return {
