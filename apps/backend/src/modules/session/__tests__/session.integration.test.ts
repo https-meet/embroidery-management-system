@@ -398,7 +398,7 @@ describe('Milestone 6.0 - Revocable Session Engine Integration Test Suite', () =
       const sid6 = jwtService.verifyRefreshToken(login6.body.data.tokens.refreshToken)!.sid;
 
       // Oldest session (sids[0]) must be revoked with SESSION_LIMIT_EXCEEDED
-      const oldestSession = await sessionRepository.findById(sids[0]);
+      const oldestSession = await sessionRepository.findById(sids[0]!);
       expect(oldestSession?.revokedAt).not.toBeNull();
       expect(oldestSession?.revokedReason).toBe('SESSION_LIMIT_EXCEEDED');
 

@@ -83,6 +83,38 @@ const ProductionWorkspacePage = safeLazy(() =>
   import('@/features/production').then((m) => ({ default: m.ProductionWorkspacePage }))
 );
 
+const MaterialsListPage = safeLazy(() =>
+  import('@/features/materials').then((m) => ({ default: m.MaterialsListPage }))
+);
+
+const SuppliersListPage = safeLazy(() =>
+  import('@/features/suppliers').then((m) => ({ default: m.SuppliersListPage }))
+);
+
+const PurchasesListPage = safeLazy(() =>
+  import('@/features/purchases').then((m) => ({ default: m.PurchasesListPage }))
+);
+const CreatePurchasePage = safeLazy(() =>
+  import('@/features/purchases').then((m) => ({ default: m.CreatePurchasePage }))
+);
+const PurchaseDetailPage = safeLazy(() =>
+  import('@/features/purchases').then((m) => ({ default: m.PurchaseDetailPage }))
+);
+
+// Print Pages
+const GstInvoicePrintPage = safeLazy(() =>
+  import('@/features/printing').then((m) => ({ default: m.GstInvoicePrintPage }))
+);
+const DeliveryChallanPrintPage = safeLazy(() =>
+  import('@/features/printing').then((m) => ({ default: m.DeliveryChallanPrintPage }))
+);
+const JobCardPrintPage = safeLazy(() =>
+  import('@/features/printing').then((m) => ({ default: m.JobCardPrintPage }))
+);
+const PurchasePrintPage = safeLazy(() =>
+  import('@/features/printing').then((m) => ({ default: m.PurchasePrintPage }))
+);
+
 const InvoicesListPage = safeLazy(() =>
   import('@/features/invoices').then((m) => ({ default: m.InvoicesListPage }))
 );
@@ -152,16 +184,27 @@ export const AppRoutes: React.FC = () => {
             <Route path={ROUTES.JOBS.CREATE} element={<CreateJobPage />} />
             <Route path="/jobs/:id" element={<JobDetailPage />} />
             <Route path="/jobs/:id/edit" element={<EditJobPage />} />
+            <Route path="/jobs/:id/print" element={<JobCardPrintPage />} />
+            <Route path="/jobs/:id/challan" element={<DeliveryChallanPrintPage />} />
 
             {/* Production Module */}
             <Route path={ROUTES.PRODUCTION.LIST} element={<ProductionQueuePage />} />
             <Route path="/production/:id" element={<ProductionWorkspacePage />} />
+
+            {/* Inventory & Purchasing Modules */}
+            <Route path={ROUTES.MATERIALS.LIST} element={<MaterialsListPage />} />
+            <Route path={ROUTES.SUPPLIERS.LIST} element={<SuppliersListPage />} />
+            <Route path={ROUTES.PURCHASES.LIST} element={<PurchasesListPage />} />
+            <Route path={ROUTES.PURCHASES.CREATE} element={<CreatePurchasePage />} />
+            <Route path="/purchases/:id" element={<PurchaseDetailPage />} />
+            <Route path="/purchases/:id/print" element={<PurchasePrintPage />} />
 
             {/* Invoices Module */}
             <Route path={ROUTES.INVOICES.LIST} element={<InvoicesListPage />} />
             <Route path={ROUTES.INVOICES.CREATE} element={<CreateInvoicePage />} />
             <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
             <Route path="/invoices/:id/edit" element={<EditInvoicePage />} />
+            <Route path="/invoices/:id/print" element={<GstInvoicePrintPage />} />
 
             {/* Payments Module */}
             <Route path={ROUTES.PAYMENTS.LIST} element={<PaymentsListPage />} />

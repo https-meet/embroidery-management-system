@@ -20,6 +20,8 @@ export const ROUTES = {
     LIST: '/jobs',
     CREATE: '/jobs/new',
     DETAIL: (id: string) => `/jobs/${id}`,
+    PRINT_CARD: (id: string) => `/jobs/${id}/print`,
+    PRINT_CHALLAN: (id: string) => `/jobs/${id}/challan`,
   },
   PRODUCTION: {
     LIST: '/production',
@@ -29,11 +31,24 @@ export const ROUTES = {
     LIST: '/invoices',
     CREATE: '/invoices/new',
     DETAIL: (id: string) => `/invoices/${id}`,
+    PRINT: (id: string) => `/invoices/${id}/print`,
   },
   PAYMENTS: {
     LIST: '/payments',
     CREATE: '/payments/new',
     DETAIL: (id: string) => `/payments/${id}`,
+  },
+  MATERIALS: {
+    LIST: '/materials',
+  },
+  SUPPLIERS: {
+    LIST: '/suppliers',
+  },
+  PURCHASES: {
+    LIST: '/purchases',
+    CREATE: '/purchases/new',
+    DETAIL: (id: string) => `/purchases/${id}`,
+    PRINT: (id: string) => `/purchases/${id}/print`,
   },
   REPORTS: {
     ROOT: '/reports',

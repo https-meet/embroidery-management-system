@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Briefcase, User, Edit2, Archive, CheckCircle2, Play } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Briefcase, User, Edit2, Archive, CheckCircle2, Play, Printer, Truck } from 'lucide-react';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { StatusBadge } from '@/shared/components/StatusBadge';
@@ -40,6 +40,8 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
   onArchiveClick,
   isUpdatingStatus,
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
@@ -64,6 +66,27 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
 
         {/* Action Controls & Lifecycle State Transition Buttons */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Print Action Buttons */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(ROUTES.JOBS.PRINT_CARD(job.id))}
+            className="flex items-center space-x-1.5 h-8 text-xs font-semibold"
+          >
+            <Printer className="h-3.5 w-3.5" />
+            <span>Job Ticket</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(ROUTES.JOBS.PRINT_CHALLAN(job.id))}
+            className="flex items-center space-x-1.5 h-8 text-xs font-semibold"
+          >
+            <Truck className="h-3.5 w-3.5" />
+            <span>Delivery Challan</span>
+          </Button>
+
           {job.status === 'DRAFT' && (
             <Button
               size="sm"

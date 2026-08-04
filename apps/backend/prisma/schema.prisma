@@ -80,6 +80,29 @@ enum DiscountType {
   FIXED_AMOUNT
 }
 
+enum MaterialCategory {
+  THREAD
+  FABRIC
+  BACKING
+  NEEDLE
+  PACKAGING
+  ACCESSORY
+  OTHER
+}
+
+enum MaterialUnit {
+  PCS
+  KG
+  GRAM
+  METER
+  ROLL
+  CONE
+  BOX
+  PACKET
+  LITER
+  OTHER
+}
+
 model User {
   id                 String    @id @default(uuid()) @db.Uuid
   email              String    @unique
@@ -119,6 +142,102 @@ model Session {
   @@index([userId])
   @@index([refreshTokenHash])
   @@map("sessions")
+}
+
+model Material {
+  id            String           @id @default(uuid()) @db.Uuid
+  name          String           @unique
+  sku           String?
+  brand         String?
+  colorName     String?          @map("color_name")
+  colorCode     String?          @map("color_code")
+  category      MaterialCategory @default(OTHER)
+  unit          MaterialUnit     @default(PCS)
+  purchasePrice Decimal          @default(0.00) @map("purchase_price") @db.Decimal(12, 2)
+  sellingPrice  Decimal?         @map("selling_price") @db.Decimal(12, 2)
+  minimumStock  Float            @default(0.0) @map("minimum_stock")
+  currentStock  Float            @default(0.0) @map("current_stock")
+  description   String?
+  isActive      Boolean          @default(true) @map("is_active")
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  purchaseItems PurchaseItem[]
+
+  @@index([name])
+  @@index([sku])
+  @@index([brand])
+  @@index([category])
+  @@index([isActive])
+  @@map("materials")
+}
+
+model Supplier {
+  id            String     @id @default(uuid()) @db.Uuid
+  name          String     @unique
+  contactPerson String?    @map("contact_person")
+  phone         String?
+  email         String?
+  gstNumber     String?    @map("gst_number")
+  address       String?
+  city          String?
+  state         String?
+  country       String?    @default("India")
+  postalCode    String?    @map("postal_code")
+  notes         String?
+  isActive      Boolean    @default(true) @map("is_active")
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+  purchases     Purchase[]
+
+  @@index([name])
+  @@index([phone])
+  @@index([email])
+  @@index([gstNumber])
+  @@index([city])
+  @@index([isActive])
+  @@map("suppliers")
+}
+
+model Purchase {
+  id               String         @id @default(uuid()) @db.Uuid
+  purchaseNumber   String         @unique @map("purchase_number")
+  supplierId       String         @map("supplier_id") @db.Uuid
+  supplier         Supplier       @relation(fields: [supplierId], references: [id])
+  purchaseDate     DateTime       @default(now()) @map("purchase_date") @db.Timestamptz
+  invoiceNumber    String?        @map("invoice_number")
+  invoiceDate      DateTime?      @map("invoice_date") @db.Timestamptz
+  subtotal         Decimal        @default(0.00) @db.Decimal(12, 2)
+  discount         Decimal        @default(0.00) @db.Decimal(12, 2)
+  tax              Decimal        @default(0.00) @db.Decimal(12, 2)
+  total            Decimal        @default(0.00) @db.Decimal(12, 2)
+  notes            String?
+  inventoryUpdated Boolean        @default(false) @map("inventory_updated")
+  createdBy        String?        @map("created_by")
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  items            PurchaseItem[]
+
+  @@index([purchaseNumber])
+  @@index([supplierId])
+  @@index([purchaseDate])
+  @@index([invoiceNumber])
+  @@index([inventoryUpdated])
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  purchaseId String   @map("purchase_id") @db.Uuid
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  materialId String   @map("material_id") @db.Uuid
+  material   Material @relation(fields: [materialId], references: [id])
+  quantity   Float
+  unitPrice  Decimal  @map("unit_price") @db.Decimal(12, 2)
+  lineTotal  Decimal  @map("line_total") @db.Decimal(12, 2)
+
+  @@index([purchaseId])
+  @@index([materialId])
+  @@map("purchase_items")
 }
 
 model Customer {

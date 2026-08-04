@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Printer, Archive, DollarSign } from 'lucide-react';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
@@ -18,12 +18,9 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
   invoice,
   onCancelClick,
 }) => {
+  const navigate = useNavigate();
   const { data: configData } = useBusinessSettings();
   const config = configData?.config;
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   return (
     <div className="space-y-6">
@@ -49,12 +46,11 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
-            variant="outline"
-            onClick={handlePrint}
-            className="flex items-center space-x-1.5 h-8 text-xs font-semibold"
+            onClick={() => navigate(ROUTES.INVOICES.PRINT(invoice.id))}
+            className="flex items-center space-x-1.5 h-8 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
           >
             <Printer className="h-3.5 w-3.5" />
-            <span>Print / Download PDF</span>
+            <span>Print GST Invoice</span>
           </Button>
 
           {invoice.outstandingBalance > 0 && invoice.status !== 'CANCELLED' && (
@@ -110,9 +106,8 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
         </div>
       </div>
 
-      {/* Main Printable GST Tax Invoice Sheet (Style Guide §6.4 & §9) */}
+      {/* Main Printable GST Tax Invoice Sheet */}
       <div className="print-sheet rounded-lg border border-border bg-card p-8 shadow-xs space-y-6">
-        {/* Invoice Header (Database Configured) */}
         <div className="flex items-start justify-between border-b border-border pb-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-primary">

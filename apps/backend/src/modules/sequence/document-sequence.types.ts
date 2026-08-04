@@ -11,6 +11,7 @@ export enum DocumentType {
   QUO = 'QUO',
   PO = 'PO',
   DN = 'DN',
+  PUR = 'PUR',
 }
 
 /**
@@ -24,6 +25,7 @@ export const DOCUMENT_PREFIX_MAP: Record<DocumentType, string> = {
   [DocumentType.QUO]: 'QUO',
   [DocumentType.PO]: 'PO',
   [DocumentType.DN]: 'DN',
+  [DocumentType.PUR]: 'PUR',
 };
 
 export interface SequenceGenerationOptions {
