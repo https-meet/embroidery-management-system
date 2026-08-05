@@ -102,6 +102,15 @@ export const DesignForm: React.FC<DesignFormProps> = ({
         const buffer = await file.arrayBuffer();
         const meta = parseDstFile(buffer);
 
+        // Convert file to Data URL for primaryFileUrl storage
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            setValue('primaryFileUrl', reader.result);
+          }
+        };
+        reader.readAsDataURL(file);
+
         // Auto-populate form fields
         if (!watch('name')) {
           const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');

@@ -147,6 +147,21 @@ export class JobRepository {
         ...(data.priority && { priority: data.priority }),
         ...(data.status && { status: data.status }),
         ...(data.notes !== undefined && { notes: data.notes || null }),
+        ...(data.items && {
+          items: {
+            deleteMany: {},
+            create: data.items.map((item) => ({
+              designId: item.designId || null,
+              position: item.position,
+              quantity: item.quantity,
+              rate: item.rate,
+              lineTotal: item.quantity * item.rate,
+              threadColor: item.threadColor || null,
+              dimensions: item.dimensions || null,
+              remarks: item.remarks || null,
+            })),
+          },
+        }),
       },
       include: {
         customer: true,

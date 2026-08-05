@@ -22,10 +22,10 @@ export const PurchasePrintPage: React.FC = () => {
         setIsLoading(true);
         const [purRes, setRes]: [any, any] = await Promise.all([
           purchasesApi.getById(id),
-          axiosClient.get('/settings'),
+          axiosClient.get('/settings/business'),
         ]);
         setPurchase(purRes);
-        setSettings(setRes.data?.settings || setRes.data);
+        setSettings(setRes.data?.config || setRes.data?.settings || setRes.data);
       } catch {
         toast.error('Failed to load purchase receipt details.');
       } finally {

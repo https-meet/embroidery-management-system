@@ -131,6 +131,24 @@ class MockJobRepository {
       ...(data.priority && { priority: data.priority }),
       ...(data.status && { status: data.status }),
       ...(data.notes !== undefined && { notes: data.notes || null }),
+      ...(data.items && {
+        items: data.items.map((item, idx) => ({
+          id: `item-${Date.now()}-${idx}`,
+          jobId: id,
+          designId: item.designId ?? null,
+          design: item.designId ? (this.designs.get(item.designId) ?? null) : null,
+          position: item.position,
+          quantity: item.quantity,
+          rate: item.rate,
+          lineTotal: item.quantity * item.rate,
+          threadColor: item.threadColor ?? null,
+          dimensions: item.dimensions ?? null,
+          remarks: item.remarks ?? null,
+          productionStatus: 'DRAFT',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })),
+      }),
       updatedAt: new Date(),
     };
     this.jobs.set(id, updated);
@@ -445,6 +463,22 @@ describe('Job / Order Management Integration Test Suite', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.job.status).toBe('IN_PROGRESS');
+    });
+
+    it('should update job items and recalculate total amount when items are provided', async () => {
+      const res = await request
+        .put(`/api/v1/jobs/${jobId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          items: [
+            { position: 'Chest', quantity: 2, rate: 100 },
+            { position: 'Sleeve', quantity: 5, rate: 50 },
+          ],
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.job.items).toHaveLength(2);
+      expect(res.body.data.job.totalAmount).toBe(450);
     });
 
     it('should prevent DELIVERED job from returning to DRAFT (400 Bad Request)', async () => {

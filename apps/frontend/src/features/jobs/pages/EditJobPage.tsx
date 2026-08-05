@@ -23,10 +23,20 @@ export const EditJobPage: React.FC = () => {
       await updateMutation.mutateAsync({
         id,
         dto: {
+          customerId: values.customerId,
           jobDate: values.jobDate || undefined,
           expectedDeliveryDate: values.expectedDeliveryDate || undefined,
           priority: values.priority,
           notes: values.notes?.trim() || undefined,
+          items: values.items.map((i) => ({
+            designId: i.designId || undefined,
+            position: i.position,
+            quantity: i.quantity,
+            rate: i.rate,
+            threadColor: i.threadColor || undefined,
+            dimensions: i.dimensions || undefined,
+            remarks: i.remarks || undefined,
+          })),
         },
       });
 

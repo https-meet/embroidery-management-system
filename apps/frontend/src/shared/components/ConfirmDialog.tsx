@@ -57,14 +57,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-description"
     >
-      {/* Overlay Backdrop (Style Guide §6.6) */}
+      {/* Overlay Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-150"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-150 animate-in fade-in"
         onClick={onCancel}
       />
 
-      {/* Modal Card Panel (Style Guide §6.6) */}
-      <div className="relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl shadow-slate-900/10 space-y-4">
+      {/* Modal Card Panel */}
+      <div className="relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl shadow-slate-900/10 space-y-4 animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-start space-x-3.5">
           <div
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border ${

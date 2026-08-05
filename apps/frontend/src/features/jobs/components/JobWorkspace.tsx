@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Briefcase, User, Edit2, Archive, CheckCircle2, Play, Printer, Truck } from 'lucide-react';
+import { Briefcase, User, Edit2, Archive, CheckCircle2, Play, Printer, ChevronDown, FileText, Truck } from 'lucide-react';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { StatusBadge } from '@/shared/components/StatusBadge';
@@ -41,6 +41,29 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
   isUpdatingStatus,
 }) => {
   const navigate = useNavigate();
+  const [isPrintOpen, setIsPrintOpen] = useState(false);
+  const printDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click or Escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (printDropdownRef.current && !printDropdownRef.current.contains(event.target as Node)) {
+        setIsPrintOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsPrintOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -66,26 +89,70 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
 
         {/* Action Controls & Lifecycle State Transition Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Print Action Buttons */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(ROUTES.JOBS.PRINT_CARD(job.id))}
-            className="flex items-center space-x-1.5 h-8 text-xs font-semibold"
-          >
-            <Printer className="h-3.5 w-3.5" />
-            <span>Job Ticket</span>
-          </Button>
+          {/* Professional Print Dropdown (Task 1) */}
+          <div className="relative" ref={printDropdownRef}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPrintOpen((prev) => !prev)}
+              aria-haspopup="true"
+              aria-expanded={isPrintOpen}
+              className="flex items-center space-x-1.5 h-8 text-xs font-semibold"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              <span>Print</span>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-150 ${isPrintOpen ? 'rotate-180' : ''}`} />
+            </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(ROUTES.JOBS.PRINT_CHALLAN(job.id))}
-            className="flex items-center space-x-1.5 h-8 text-xs font-semibold"
-          >
-            <Truck className="h-3.5 w-3.5" />
-            <span>Delivery Challan</span>
-          </Button>
+            {isPrintOpen && (
+              <div
+                className="absolute right-0 mt-1.5 w-48 rounded-md border border-border bg-card p-1 shadow-lg z-50 animate-in fade-in zoom-in-95 duration-100"
+                role="menu"
+                aria-orientation="vertical"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPrintOpen(false);
+                    navigate(ROUTES.JOBS.PRINT_CARD(job.id));
+                  }}
+                  className="w-full flex items-center space-x-2 rounded-sm px-2.5 py-1.5 text-xs text-foreground hover:bg-muted text-left"
+                  role="menuitem"
+                >
+                  <Printer className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Job Card Ticket</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPrintOpen(false);
+                    navigate(ROUTES.JOBS.PRINT_CHALLAN(job.id));
+                  }}
+                  className="w-full flex items-center space-x-2 rounded-sm px-2.5 py-1.5 text-xs text-foreground hover:bg-muted text-left"
+                  role="menuitem"
+                >
+                  <Truck className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Delivery Challan</span>
+                </button>
+
+                {(job as any).invoiceId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsPrintOpen(false);
+                      navigate(ROUTES.INVOICES.PRINT((job as any).invoiceId));
+                    }}
+                    className="w-full flex items-center space-x-2 rounded-sm px-2.5 py-1.5 text-xs text-foreground hover:bg-muted text-left border-t border-border mt-1 pt-1.5"
+                    role="menuitem"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>GST Tax Invoice</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
 
           {job.status === 'DRAFT' && (
             <Button

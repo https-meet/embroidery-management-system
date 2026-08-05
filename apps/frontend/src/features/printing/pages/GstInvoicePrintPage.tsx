@@ -22,10 +22,10 @@ export const GstInvoicePrintPage: React.FC = () => {
         setIsLoading(true);
         const [invRes, setRes]: [any, any] = await Promise.all([
           axiosClient.get(`/invoices/${id}`),
-          axiosClient.get('/settings'),
+          axiosClient.get('/settings/business'),
         ]);
         setInvoice(invRes.data?.invoice || invRes.data);
-        setSettings(setRes.data?.settings || setRes.data);
+        setSettings(setRes.data?.config || setRes.data?.settings || setRes.data);
       } catch {
         toast.error('Failed to load invoice or business settings.');
       } finally {

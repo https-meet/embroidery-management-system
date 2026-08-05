@@ -24,14 +24,18 @@ export const CompanySettingsCard: React.FC<CompanySettingsCardProps> = ({
     }
   }, [config]);
 
+  const handleReset = () => {
+    if (config) setForm(config);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSave(form);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex items-center space-x-3 border-b pb-3">
+    <form onSubmit={handleSubmit} className="space-y-6 pb-16 relative">
+      <div className="flex items-center space-x-3 border-b border-border pb-3">
         <Building2 className="h-5 w-5 text-primary" />
         <div>
           <h3 className="text-base font-bold text-foreground">Company & Brand Profile</h3>
@@ -104,9 +108,13 @@ export const CompanySettingsCard: React.FC<CompanySettingsCardProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-end border-t pt-4">
+      {/* Sticky Bottom Action Bar (Task 2) */}
+      <div className="sticky bottom-0 -mx-5 -mb-5 z-20 bg-card/95 backdrop-blur-xs border-t border-border p-4 rounded-b-lg flex justify-end items-center space-x-3 shadow-md">
+        <Button type="button" variant="outline" size="sm" onClick={handleReset} disabled={isLoading}>
+          Cancel
+        </Button>
         <Button type="submit" size="sm" isLoading={isLoading}>
-          Save Company Details
+          Save Settings
         </Button>
       </div>
     </form>

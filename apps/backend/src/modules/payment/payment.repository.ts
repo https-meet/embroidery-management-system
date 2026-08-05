@@ -67,7 +67,7 @@ export class PaymentRepository {
         paymentMethod: data.paymentMethod,
         referenceNo: data.referenceNo ?? null,
         amount: data.amount,
-        status: 'CONFIRMED',
+        status: 'RECORDED',
         notes: data.notes ?? null,
         allocations: {
           create: data.allocations.map((alloc) => ({

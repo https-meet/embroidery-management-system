@@ -183,7 +183,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           >
             <textarea
               id="address"
-              rows={3}
+              rows={4}
               placeholder="Full business or delivery address"
               className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               {...register('address')}

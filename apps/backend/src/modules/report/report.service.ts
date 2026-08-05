@@ -58,7 +58,7 @@ export class ReportService {
         include: {
           jobs: { where: { deletedAt: null } },
           invoices: true,
-          payments: { where: { status: 'CONFIRMED' } },
+          payments: { where: { status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] } } },
         },
       }),
       prisma.customer.count({ where }),
@@ -279,7 +279,7 @@ export class ReportService {
       prisma.payment.aggregate({
         _sum: { amount: true },
         where: {
-          status: 'CONFIRMED',
+          status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] },
           ...(dateRange && { createdAt: dateRange }),
         },
       }),
@@ -287,7 +287,7 @@ export class ReportService {
         by: ['paymentMethod'],
         _sum: { amount: true },
         where: {
-          status: 'CONFIRMED',
+          status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] },
           ...(dateRange && { createdAt: dateRange }),
         },
       }),

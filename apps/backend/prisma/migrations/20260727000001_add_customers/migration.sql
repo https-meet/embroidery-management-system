@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "CustomerType" AS ENUM ('INDIVIDUAL', 'COMPANY');
+CREATE TYPE "CustomerType" AS ENUM ('INDIVIDUAL', 'COMPANY', 'WHOLESALER');
 
 -- CreateTable
 CREATE TABLE "customers" (

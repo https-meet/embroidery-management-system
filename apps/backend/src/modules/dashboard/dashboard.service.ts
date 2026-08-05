@@ -65,7 +65,7 @@ export class DashboardService {
       prisma.payment.aggregate({
         _sum: { amount: true },
         where: {
-          status: 'CONFIRMED',
+          status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] },
           createdAt: { gte: startOfMonth },
         },
       }),
@@ -88,7 +88,7 @@ export class DashboardService {
         include: { customer: true },
       }),
       prisma.payment.findMany({
-        where: { status: 'CONFIRMED' },
+        where: { status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] } },
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: { customer: true },

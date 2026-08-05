@@ -91,7 +91,7 @@ export class CustomerService {
         take: 20,
       }),
       prisma.payment.findMany({
-        where: { customerId: id, status: 'CONFIRMED' },
+        where: { customerId: id, status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] } },
         orderBy: { createdAt: 'desc' },
         take: 20,
       }),
@@ -101,7 +101,7 @@ export class CustomerService {
       }),
       prisma.payment.aggregate({
         _sum: { amount: true },
-        where: { customerId: id, status: 'CONFIRMED' },
+        where: { customerId: id, status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] } },
       }),
     ]);
 

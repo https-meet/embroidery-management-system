@@ -12,8 +12,8 @@ export const Breadcrumbs: React.FC = () => {
   }
 
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center text-xs text-muted-foreground">
-      <ol className="flex items-center space-x-1.5">
+    <nav aria-label="Breadcrumb" className="flex items-center text-xs text-muted-foreground overflow-hidden max-w-full">
+      <ol className="flex flex-wrap items-center gap-1.5 max-w-full">
         <li>
           <Link
             to={ROUTES.DASHBOARD}

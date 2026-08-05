@@ -227,7 +227,7 @@ class MockPaymentRepository {
       paymentMethod: data.paymentMethod,
       referenceNo: data.referenceNo ?? null,
       amount: data.amount,
-      status: 'CONFIRMED',
+      status: 'FULLY_ALLOCATED',
       notes: data.notes ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),

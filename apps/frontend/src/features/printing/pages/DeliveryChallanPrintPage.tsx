@@ -21,10 +21,10 @@ export const DeliveryChallanPrintPage: React.FC = () => {
         setIsLoading(true);
         const [jobRes, setRes]: [any, any] = await Promise.all([
           axiosClient.get(`/jobs/${id}`),
-          axiosClient.get('/settings'),
+          axiosClient.get('/settings/business'),
         ]);
         setJob(jobRes.data?.job || jobRes.data);
-        setSettings(setRes.data?.settings || setRes.data);
+        setSettings(setRes.data?.config || setRes.data?.settings || setRes.data);
       } catch {
         toast.error('Failed to load job details or business settings.');
       } finally {

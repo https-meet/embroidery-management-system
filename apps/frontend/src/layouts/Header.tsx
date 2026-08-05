@@ -99,10 +99,10 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className="flex items-center space-x-2 rounded-md border border-input bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground transition-all duration-150 hover:bg-muted hover:text-foreground w-44 sm:w-60 md:w-72"
+            className="flex items-center space-x-2 rounded-md border border-input bg-muted/40 px-2.5 py-1.5 text-xs text-muted-foreground transition-all duration-150 hover:bg-muted hover:text-foreground w-28 xs:w-36 sm:w-60 md:w-72"
           >
             <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <span className="truncate text-[11px]">Search Customers, Jobs (#JOB-...)...</span>
+            <span className="truncate text-[11px]">Search...</span>
             <kbd className="hidden sm:inline-flex items-center rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-mono font-medium ml-auto">
               Ctrl + K
             </kbd>

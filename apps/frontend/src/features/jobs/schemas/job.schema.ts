@@ -20,11 +20,13 @@ export const createJobSchema = z.object({
 });
 
 export const updateJobSchema = z.object({
+  customerId: z.string().min(1, 'Customer selection is required').optional(),
   jobDate: z.string().optional().or(z.literal('')),
   expectedDeliveryDate: z.string().optional().or(z.literal('')),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']),
-  status: z.enum(['DRAFT', 'PENDING_PRODUCTION', 'IN_PRODUCTION', 'COMPLETED', 'CANCELLED']).optional(),
+  status: z.enum(['DRAFT', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED', 'CANCELLED']).optional(),
   notes: z.string().max(500).optional().or(z.literal('')),
+  items: z.array(jobItemSchema).min(1, 'At least one job item is required').optional(),
 });
 
 export type CreateJobFormValues = z.infer<typeof createJobSchema>;
