@@ -1,5 +1,5 @@
-import type { Customer, Payment, PaymentAllocation, PaymentMethod, Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Customer, Payment, PaymentAllocation, PaymentMethod, Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { CreatePaymentAllocationDto, PaymentQueryFilter } from './payment.types';
 
 export type FullPayment = Payment & {
@@ -8,8 +8,10 @@ export type FullPayment = Payment & {
 };
 
 export class PaymentRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string, tx?: Prisma.TransactionClient): Promise<FullPayment | null> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     return client.payment.findFirst({
       where: { id },
       include: {
@@ -20,7 +22,7 @@ export class PaymentRepository {
   }
 
   public async findByPaymentNo(paymentNo: string, tx?: Prisma.TransactionClient): Promise<FullPayment | null> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     return client.payment.findFirst({
       where: { paymentNo },
       include: {
@@ -31,7 +33,7 @@ export class PaymentRepository {
   }
 
   public async countTotalForYear(year: number, tx?: Prisma.TransactionClient): Promise<number> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
 
@@ -58,7 +60,7 @@ export class PaymentRepository {
     },
     tx?: Prisma.TransactionClient,
   ): Promise<FullPayment> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     return client.payment.create({
       data: {
         paymentNo: data.paymentNo,
@@ -109,7 +111,7 @@ export class PaymentRepository {
     };
 
     const [payments, total] = await Promise.all([
-      prisma.payment.findMany({
+      this.prisma.payment.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
@@ -119,7 +121,7 @@ export class PaymentRepository {
           allocations: true,
         },
       }),
-      prisma.payment.count({ where }),
+      this.prisma.payment.count({ where }),
     ]);
 
     return { payments, total };

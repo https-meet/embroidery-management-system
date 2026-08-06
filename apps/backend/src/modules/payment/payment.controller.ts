@@ -1,14 +1,22 @@
 import type { NextFunction, Request, Response } from 'express';
-import { paymentService, type PaymentService } from './payment.service';
+import { PaymentService, paymentService } from './payment.service';
 import type { CreatePaymentDto, PaymentQueryFilter } from './payment.types';
 
 export class PaymentController {
   constructor(private readonly service: PaymentService = paymentService) {}
 
+  private getService(req: Request): PaymentService {
+    if (req.database?.prisma) {
+      return new PaymentService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as CreatePaymentDto;
-      const payment = await this.service.recordPayment(dto);
+      const service = this.getService(req);
+      const payment = await service.recordPayment(dto);
 
       res.status(201).json({
         success: true,
@@ -23,7 +31,8 @@ export class PaymentController {
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params.id as string;
-      const payment = await this.service.getPaymentById(id);
+      const service = this.getService(req);
+      const payment = await service.getPaymentById(id);
 
       res.status(200).json({
         success: true,
@@ -37,7 +46,8 @@ export class PaymentController {
   public list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as unknown as PaymentQueryFilter;
-      const result = await this.service.listPayments(filter);
+      const service = this.getService(req);
+      const result = await service.listPayments(filter);
 
       res.status(200).json({
         success: true,

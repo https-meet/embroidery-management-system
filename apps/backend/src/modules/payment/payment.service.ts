@@ -1,11 +1,12 @@
-import { prisma } from '../../lib/prisma';
+import type { PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import { AppError, BadRequestError } from '../../utils/errors';
-import { customerRepository } from '../customer/customer.repository';
+import { CustomerRepository, customerRepository } from '../customer/customer.repository';
 import { invoiceCalculationService } from '../invoice/invoice-calculation.service';
-import { invoiceRepository } from '../invoice/invoice.repository';
-import { documentSequenceService } from '../sequence/document-sequence.service';
+import { InvoiceRepository, invoiceRepository } from '../invoice/invoice.repository';
+import { DocumentSequenceService, documentSequenceService } from '../sequence/document-sequence.service';
 import { DocumentType } from '../sequence/document-sequence.types';
-import { paymentRepository, type FullPayment, type PaymentRepository } from './payment.repository';
+import { PaymentRepository, paymentRepository, type FullPayment } from './payment.repository';
 import type {
   CreatePaymentDto,
   PaginatedPaymentsResponseDto,
@@ -14,7 +15,31 @@ import type {
 } from './payment.types';
 
 export class PaymentService {
-  constructor(private readonly repo: PaymentRepository = paymentRepository) {}
+  private readonly repo: PaymentRepository;
+  private readonly customerRepo: CustomerRepository;
+  private readonly invoiceRepo: InvoiceRepository;
+  private readonly seqService: DocumentSequenceService;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: PaymentRepository | PrismaClient) {
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+      this.customerRepo = customerRepository;
+      this.invoiceRepo = invoiceRepository;
+      this.seqService = documentSequenceService;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new PaymentRepository(this.prismaClient);
+      this.customerRepo = new CustomerRepository(this.prismaClient);
+      this.invoiceRepo = new InvoiceRepository(this.prismaClient);
+      this.seqService = new DocumentSequenceService(this.prismaClient);
+    } else {
+      this.repo = paymentRepository;
+      this.customerRepo = customerRepository;
+      this.invoiceRepo = invoiceRepository;
+      this.seqService = documentSequenceService;
+    }
+  }
 
   private mapToDto(payment: FullPayment): PaymentResponseDto {
     const allocations = (payment.allocations || []).map((alloc) => ({
@@ -60,7 +85,7 @@ export class PaymentService {
   }
 
   public async recordPayment(dto: CreatePaymentDto): Promise<PaymentResponseDto> {
-    const customer = await customerRepository.findById(dto.customerId);
+    const customer = await this.customerRepo.findById(dto.customerId);
     if (!customer) {
       throw new BadRequestError('INVALID_CUSTOMER', 'Target customer does not exist.');
     }
@@ -76,7 +101,7 @@ export class PaymentService {
     let totalAllocated = 0;
 
     for (const alloc of allocations) {
-      const invoice = await invoiceRepository.findById(alloc.invoiceId);
+      const invoice = await this.invoiceRepo.findById(alloc.invoiceId);
       if (!invoice) {
         throw new BadRequestError('INVALID_INVOICE', `Invoice ${alloc.invoiceId} does not exist.`);
       }
@@ -113,10 +138,11 @@ export class PaymentService {
     }
 
     const paymentDate = dto.paymentDate ? new Date(dto.paymentDate) : new Date();
+    const client = this.prismaClient || defaultPrisma;
 
     // Execute sequence generation, payment record creation, and invoice updates atomically in an interactive transaction
-    const payment = await prisma.$transaction(async (tx) => {
-      const paymentNo = await documentSequenceService.generateNextNumber(DocumentType.PAY, {
+    const payment = await client.$transaction(async (tx) => {
+      const paymentNo = await this.seqService.generateNextNumber(DocumentType.PAY, {
         date: paymentDate,
         tx,
       });
@@ -137,7 +163,7 @@ export class PaymentService {
 
       // Apply allocations to invoices within the same atomic transaction
       for (const alloc of allocations) {
-        const invoice = await invoiceRepository.findById(alloc.invoiceId, tx);
+        const invoice = await this.invoiceRepo.findById(alloc.invoiceId, tx);
         if (invoice) {
           const newTotalPaid = Math.round((invoice.totalPaid + alloc.allocatedAmount) * 100) / 100;
           const newOutstanding = Math.max(
@@ -150,7 +176,7 @@ export class PaymentService {
             newTotalPaid,
           );
 
-          await invoiceRepository.update(
+          await this.invoiceRepo.update(
             invoice.id,
             {
               totalPaid: newTotalPaid,
