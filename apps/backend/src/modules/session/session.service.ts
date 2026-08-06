@@ -1,13 +1,26 @@
+import type { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 import { settingsService } from '../settings/settings.service';
 import { UnauthorizedError } from '../../utils/errors';
-import { sessionRepository, type SessionRepository } from './session.repository';
+import { sessionRepository, SessionRepository } from './session.repository';
 import type { Session } from './session.types';
 
 export const MAX_ACTIVE_SESSIONS = parseInt(process.env.MAX_ACTIVE_SESSIONS || '5', 10);
 
 export class SessionService {
-  constructor(private readonly repo: SessionRepository = sessionRepository) {}
+  private readonly repo: SessionRepository;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: SessionRepository | PrismaClient) {
+    if (repoOrPrisma && 'countActiveUserSessions' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new SessionRepository(this.prismaClient);
+    } else {
+      this.repo = sessionRepository;
+    }
+  }
 
   public hashToken(token: string): string {
     return crypto.createHash('sha256').update(token).digest('hex');
@@ -28,13 +41,16 @@ export class SessionService {
       const activeCount = await this.repo.countActiveUserSessions(userId);
       if (activeCount >= MAX_ACTIVE_SESSIONS) {
         await this.repo.revokeOldestActiveSession(userId, 'SESSION_LIMIT_EXCEEDED');
-        await settingsService.logAuditAction({
-          userId,
-          userName: userEmail,
-          action: 'SESSION_LIMIT_EXCEEDED',
-          entityType: 'SESSION',
-          reason: `Exceeded MAX_ACTIVE_SESSIONS (${MAX_ACTIVE_SESSIONS}). Revoked oldest active session.`,
-        });
+        await settingsService.logAuditAction(
+          {
+            userId,
+            userName: userEmail,
+            action: 'SESSION_LIMIT_EXCEEDED',
+            entityType: 'SESSION',
+            reason: `Exceeded MAX_ACTIVE_SESSIONS (${MAX_ACTIVE_SESSIONS}). Revoked oldest active session.`,
+          },
+          this.prismaClient,
+        );
       }
 
       return await this.repo.create({

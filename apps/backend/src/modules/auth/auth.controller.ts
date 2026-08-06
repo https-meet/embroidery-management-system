@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { UnauthorizedError } from '../../utils/errors';
-import { authService, type AuthService } from './auth.service';
+import { AuthService, authService } from './auth.service';
 import type { ChangePasswordDto, LoginDto, RefreshTokenDto } from './auth.types';
 
 export class AuthController {
@@ -11,7 +11,9 @@ export class AuthController {
       const dto = req.body as LoginDto;
       const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip;
       const userAgent = req.headers['user-agent'];
-      const data = await this.service.login(dto, ipAddress, userAgent);
+      const activePrisma = req.database?.prisma;
+      const serviceToUse = activePrisma ? new AuthService(activePrisma) : this.service;
+      const data = await serviceToUse.login(dto, ipAddress, userAgent);
 
       res.status(200).json({
         success: true,

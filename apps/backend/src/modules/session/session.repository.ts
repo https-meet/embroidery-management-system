@@ -1,12 +1,14 @@
 import crypto from 'crypto';
-import type { Session } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { PrismaClient, Session } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { CreateSessionData, UpdateSessionData } from './session.types';
 
 export class SessionRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string): Promise<Session | null> {
     try {
-      return await prisma.session.findUnique({
+      return await this.prisma.session.findUnique({
         where: { id },
       });
     } catch {
@@ -17,7 +19,7 @@ export class SessionRepository {
   public async create(data: CreateSessionData): Promise<Session> {
     const now = new Date();
     try {
-      return await prisma.session.create({
+      return await this.prisma.session.create({
         data: {
           userId: data.userId,
           refreshTokenHash: data.refreshTokenHash,
@@ -47,7 +49,7 @@ export class SessionRepository {
   public async update(id: string, data: UpdateSessionData): Promise<Session> {
     const now = new Date();
     try {
-      return await prisma.session.update({
+      return await this.prisma.session.update({
         where: { id },
         data: {
           ...(data.refreshTokenHash && { refreshTokenHash: data.refreshTokenHash }),
@@ -76,7 +78,7 @@ export class SessionRepository {
   public async revokeSession(id: string, reason: string): Promise<Session> {
     const now = new Date();
     try {
-      return await prisma.session.update({
+      return await this.prisma.session.update({
         where: { id },
         data: {
           revokedAt: now,
@@ -106,7 +108,7 @@ export class SessionRepository {
     excludeSessionId?: string,
   ): Promise<number> {
     try {
-      const result = await prisma.session.updateMany({
+      const result = await this.prisma.session.updateMany({
         where: {
           userId,
           revokedAt: null,
@@ -125,7 +127,7 @@ export class SessionRepository {
 
   public async countActiveUserSessions(userId: string): Promise<number> {
     try {
-      return await prisma.session.count({
+      return await this.prisma.session.count({
         where: {
           userId,
           revokedAt: null,
@@ -139,7 +141,7 @@ export class SessionRepository {
 
   public async revokeOldestActiveSession(userId: string, reason: string): Promise<void> {
     try {
-      const oldest = await prisma.session.findFirst({
+      const oldest = await this.prisma.session.findFirst({
         where: {
           userId,
           revokedAt: null,
@@ -156,7 +158,7 @@ export class SessionRepository {
 
   public async cleanupExpiredSessions(retentionCutoff: Date): Promise<number> {
     try {
-      const result = await prisma.session.deleteMany({
+      const result = await this.prisma.session.deleteMany({
         where: {
           revokedAt: { not: null },
           expiresAt: { lt: retentionCutoff },

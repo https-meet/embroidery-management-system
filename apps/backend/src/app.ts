@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import { config } from './config';
+import { databaseContextMiddleware } from './middleware/databaseContext';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 import { requestLogger } from './middleware/requestLogger';
@@ -69,6 +70,9 @@ export function createApp(): express.Application {
 
   // ── Request logging ───────────────────────────────────────────────────────
   app.use(requestLogger);
+
+  // ── Database Context ───────────────────────────────────────────────────────
+  app.use(databaseContextMiddleware);
 
   // ── Health Endpoint (Unauthenticated Deployment Health Check) ─────────────
   const healthHandler = async (_req: express.Request, res: express.Response): Promise<void> => {

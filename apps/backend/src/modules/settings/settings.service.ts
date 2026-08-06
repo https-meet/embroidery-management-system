@@ -1,4 +1,5 @@
-import { prisma } from '../../lib/prisma';
+import type { PrismaClient } from '@prisma/client';
+import { prisma, prisma as defaultPrisma } from '../../lib/prisma';
 
 export interface BusinessConfigDto {
   companyName: string;
@@ -180,18 +181,21 @@ export class SettingsService {
     };
   }
 
-  public async logAuditAction(entry: {
-    userId?: string;
-    userName: string;
-    action: string;
-    entityType: string;
-    entityId?: string;
-    previousValue?: string;
-    newValue?: string;
-    reason?: string;
-  }): Promise<AuditLogItemDto> {
+  public async logAuditAction(
+    entry: {
+      userId?: string;
+      userName: string;
+      action: string;
+      entityType: string;
+      entityId?: string;
+      previousValue?: string;
+      newValue?: string;
+      reason?: string;
+    },
+    client: PrismaClient = defaultPrisma,
+  ): Promise<AuditLogItemDto> {
     try {
-      const created = await prisma.auditLog.create({
+      const created = await client.auditLog.create({
         data: {
           userId: entry.userId || null,
           userName: entry.userName,

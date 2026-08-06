@@ -1,5 +1,5 @@
-import type { Role, User } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { PrismaClient, Role, User } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 
 export interface CreateUserData {
   email: string;
@@ -11,20 +11,22 @@ export interface CreateUserData {
 }
 
 export class AuthRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findByEmail(email: string): Promise<User | null> {
-    return prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
   }
 
   public async findById(id: string): Promise<User | null> {
-    return prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id },
     });
   }
 
   public async create(data: CreateUserData): Promise<User> {
-    return prisma.user.create({
+    return this.prisma.user.create({
       data: {
         email: data.email.toLowerCase(),
         name: data.name,
@@ -37,7 +39,7 @@ export class AuthRepository {
   }
 
   public async updateLastLoginAt(id: string, timestamp: Date = new Date()): Promise<void> {
-    await prisma.user.update({
+    await this.prisma.user.update({
       where: { id },
       data: { lastLoginAt: timestamp },
     });
@@ -48,7 +50,7 @@ export class AuthRepository {
     passwordHash: string,
     mustChangePassword: boolean = false,
   ): Promise<User> {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: {
         passwordHash,

@@ -1,12 +1,13 @@
+import type { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 import {
   BadRequestError,
   ForbiddenError,
   UnauthorizedError,
 } from '../../utils/errors';
-import { sessionService } from '../session/session.service';
+import { SessionService, sessionService } from '../session/session.service';
 import { settingsService } from '../settings/settings.service';
-import { authRepository, type AuthRepository } from './auth.repository';
+import { AuthRepository, authRepository } from './auth.repository';
 import type {
   AuthTokensDto,
   ChangePasswordDto,
@@ -21,7 +22,23 @@ import { jwtService } from './jwt.service';
 import { passwordService } from './password.service';
 
 export class AuthService {
-  constructor(private readonly repo: AuthRepository = authRepository) {}
+  private readonly repo: AuthRepository;
+  private readonly sessionSvc: SessionService;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: AuthRepository | PrismaClient, sessionSvc?: SessionService) {
+    if (repoOrPrisma && 'findByEmail' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+      this.sessionSvc = sessionSvc || sessionService;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new AuthRepository(this.prismaClient);
+      this.sessionSvc = new SessionService(this.prismaClient);
+    } else {
+      this.repo = authRepository;
+      this.sessionSvc = sessionService;
+    }
+  }
 
   /**
    * Admin User Creation Foundation (Milestone 3.1 - Sprint 1)
@@ -111,7 +128,7 @@ export class AuthService {
     // Create server-side revocable session
     const tempSid = crypto.randomUUID();
     const initialRefreshToken = jwtService.generateRefreshToken(userPayload, tempSid);
-    const session = await sessionService.createSession(
+    const session = await this.sessionSvc.createSession(
       user.id,
       user.email,
       initialRefreshToken,
@@ -122,17 +139,20 @@ export class AuthService {
     // Re-sign refreshToken with actual session.id
     const finalRefreshToken = jwtService.generateRefreshToken(userPayload, session.id);
     if (finalRefreshToken !== initialRefreshToken) {
-      await sessionService.verifyAndRotateSession(session.id, initialRefreshToken, finalRefreshToken, ipAddress);
+      await this.sessionSvc.verifyAndRotateSession(session.id, initialRefreshToken, finalRefreshToken, ipAddress);
     }
 
-    await settingsService.logAuditAction({
-      userId: user.id,
-      userName: user.email,
-      action: 'LOGIN_SUCCESS',
-      entityType: 'AUTH',
-      entityId: session.id,
-      reason: 'User authenticated successfully and session created.',
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: user.id,
+        userName: user.email,
+        action: 'LOGIN_SUCCESS',
+        entityType: 'AUTH',
+        entityId: session.id,
+        reason: 'User authenticated successfully and session created.',
+      },
+      this.prismaClient,
+    );
 
     return {
       user: {
