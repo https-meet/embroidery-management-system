@@ -1,10 +1,19 @@
+import type { PrismaClient } from '@prisma/client';
 import { documentCounterRepository, DocumentCounterRepository } from './document-counter.repository';
 import { DOCUMENT_PREFIX_MAP, DocumentType, type SequenceGenerationOptions } from './document-sequence.types';
 
 export class DocumentSequenceService {
-  constructor(
-    private readonly counterRepo: DocumentCounterRepository = documentCounterRepository,
-  ) {}
+  private readonly counterRepo: DocumentCounterRepository;
+
+  constructor(repoOrPrisma?: DocumentCounterRepository | PrismaClient) {
+    if (repoOrPrisma && 'getNextSequenceValue' in repoOrPrisma) {
+      this.counterRepo = repoOrPrisma;
+    } else if (repoOrPrisma) {
+      this.counterRepo = new DocumentCounterRepository(repoOrPrisma as PrismaClient);
+    } else {
+      this.counterRepo = documentCounterRepository;
+    }
+  }
 
   /**
    * Generates a concurrency-safe, formatted document number.

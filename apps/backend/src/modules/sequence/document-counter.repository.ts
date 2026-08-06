@@ -1,7 +1,9 @@
-import type { Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 
 export class DocumentCounterRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   /**
    * Atomically increments and returns the next sequence integer for (entityType, year).
    * Guaranteed concurrency-safe using PostgreSQL atomic UPSERT with RETURNING.
@@ -11,7 +13,7 @@ export class DocumentCounterRepository {
     year: number,
     tx?: Prisma.TransactionClient,
   ): Promise<number> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
 
     const result = await client.$queryRaw<{ last_sequence: number }[]>`
       INSERT INTO "document_counters" ("entity_type", "year", "last_sequence", "updated_at")
