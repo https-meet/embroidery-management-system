@@ -1,16 +1,24 @@
 import type { NextFunction, Request, Response } from 'express';
-import { settingsService, type SettingsService } from './settings.service';
+import { SettingsService, settingsService } from './settings.service';
 
 export class SettingsController {
   constructor(private readonly service: SettingsService = settingsService) {}
 
+  private getService(req: Request): SettingsService {
+    if (req.database?.prisma) {
+      return new SettingsService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public getBusinessConfig = async (
-    _req: Request,
+    req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const config = await this.service.getBusinessConfig();
+      const service = this.getService(req);
+      const config = await service.getBusinessConfig();
       res.status(200).json({
         success: true,
         data: { config },
@@ -26,7 +34,8 @@ export class SettingsController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const config = await this.service.updateBusinessConfig(req.body);
+      const service = this.getService(req);
+      const config = await service.updateBusinessConfig(req.body);
       res.status(200).json({
         success: true,
         message: 'Business configuration updated successfully.',
@@ -38,12 +47,13 @@ export class SettingsController {
   };
 
   public getSystemHealth = async (
-    _req: Request,
+    req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const health = await this.service.getSystemHealth();
+      const service = this.getService(req);
+      const health = await service.getSystemHealth();
       res.status(200).json({
         success: true,
         data: health,
@@ -61,7 +71,8 @@ export class SettingsController {
     try {
       const page = Number(req.query['page']) || 1;
       const limit = Number(req.query['limit']) || 20;
-      const data = await this.service.listAuditLogs(page, limit);
+      const service = this.getService(req);
+      const data = await service.listAuditLogs(page, limit);
       res.status(200).json({
         success: true,
         data,
@@ -78,7 +89,8 @@ export class SettingsController {
   ): Promise<void> => {
     try {
       const user = req.user;
-      const entry = await this.service.logAuditAction({
+      const service = this.getService(req);
+      const entry = await service.logAuditAction({
         userId: user?.userId,
         userName: user?.email || 'System User',
         ...req.body,

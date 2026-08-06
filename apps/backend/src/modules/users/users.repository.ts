@@ -1,22 +1,24 @@
-import type { Prisma, Role, User } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Prisma, Role, User, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { UserQueryFilter } from './users.types';
 
 export class UserRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string): Promise<User | null> {
-    return prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id },
     });
   }
 
   public async findByEmail(email: string): Promise<User | null> {
-    return prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
   }
 
   public async countActiveAdmins(): Promise<number> {
-    return prisma.user.count({
+    return this.prisma.user.count({
       where: {
         role: 'ADMIN',
         isActive: true,
@@ -32,7 +34,7 @@ export class UserRepository {
     createdBy: string;
     mustChangePassword?: boolean;
   }): Promise<User> {
-    return prisma.user.create({
+    return this.prisma.user.create({
       data: {
         name: data.name,
         email: data.email.toLowerCase(),
@@ -53,7 +55,7 @@ export class UserRepository {
       role?: Role;
     },
   ): Promise<User> {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: {
         ...(data.name && { name: data.name }),
@@ -64,7 +66,7 @@ export class UserRepository {
   }
 
   public async updateStatus(id: string, isActive: boolean): Promise<User> {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: { isActive },
     });
@@ -75,7 +77,7 @@ export class UserRepository {
     passwordHash: string,
     mustChangePassword: boolean = true,
   ): Promise<User> {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: {
         passwordHash,
@@ -106,14 +108,16 @@ export class UserRepository {
       }),
     };
 
+    const skip = (pageNum - 1) * limitNum;
+
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
+      this.prisma.user.findMany({
         where,
-        skip: (pageNum - 1) * limitNum,
+        skip,
         take: limitNum,
         orderBy: { [sortBy]: sortOrder },
       }),
-      prisma.user.count({ where }),
+      this.prisma.user.count({ where }),
     ]);
 
     return { users, total };

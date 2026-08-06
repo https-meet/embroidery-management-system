@@ -1,10 +1,11 @@
+import type { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 import type { AccessTokenPayload } from '../auth/jwt.service';
 import { passwordService } from '../auth/password.service';
-import { sessionService } from '../session/session.service';
+import { SessionService, sessionService } from '../session/session.service';
 import { settingsService } from '../settings/settings.service';
 import { AppError, BadRequestError } from '../../utils/errors';
-import { userRepository, type UserRepository } from './users.repository';
+import { UserRepository, userRepository } from './users.repository';
 import type {
   CreateUserDto,
   CreateUserResponseDto,
@@ -17,7 +18,23 @@ import type {
 } from './users.types';
 
 export class UserService {
-  constructor(private readonly repo: UserRepository = userRepository) {}
+  private readonly repo: UserRepository;
+  private readonly prismaClient?: PrismaClient;
+  private readonly sessionSvc: SessionService;
+
+  constructor(repoOrPrisma?: UserRepository | PrismaClient) {
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+      this.sessionSvc = sessionService;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new UserRepository(this.prismaClient);
+      this.sessionSvc = new SessionService(this.prismaClient);
+    } else {
+      this.repo = userRepository;
+      this.sessionSvc = sessionService;
+    }
+  }
 
   private mapToDto(user: {
     id: string;
@@ -106,14 +123,17 @@ export class UserService {
     });
 
     // Record audit event
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action: 'USER_CREATED',
-      entityType: 'USER',
-      entityId: user.id,
-      newValue: JSON.stringify({ email: user.email, role: user.role }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action: 'USER_CREATED',
+        entityType: 'USER',
+        entityId: user.id,
+        newValue: JSON.stringify({ email: user.email, role: user.role }),
+      },
+      this.prismaClient,
+    );
 
     return {
       user: this.mapToDto(user),
@@ -152,15 +172,18 @@ export class UserService {
 
     // Record audit event
     const action = dto.role && dto.role !== existing.role ? 'ROLE_CHANGED' : 'USER_UPDATED';
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action,
-      entityType: 'USER',
-      entityId: updated.id,
-      previousValue: JSON.stringify({ name: existing.name, email: existing.email, role: existing.role }),
-      newValue: JSON.stringify({ name: updated.name, email: updated.email, role: updated.role }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action,
+        entityType: 'USER',
+        entityId: updated.id,
+        previousValue: JSON.stringify({ name: existing.name, email: existing.email, role: existing.role }),
+        newValue: JSON.stringify({ name: updated.name, email: updated.email, role: updated.role }),
+      },
+      this.prismaClient,
+    );
 
     return this.mapToDto(updated);
   }
@@ -198,21 +221,24 @@ export class UserService {
 
     if (!dto.isActive) {
       // Immediately revoke all active sessions for deactivated user
-      await sessionService.revokeAllUserSessions(id, 'USER_DEACTIVATED');
+      await this.sessionSvc.revokeAllUserSessions(id, 'USER_DEACTIVATED');
     }
 
     // Record audit event
     const action = dto.isActive ? 'ACCOUNT_ACTIVATED' : 'USER_DEACTIVATED';
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action,
-      entityType: 'USER',
-      entityId: updated.id,
-      previousValue: JSON.stringify({ isActive: existing.isActive }),
-      newValue: JSON.stringify({ isActive: updated.isActive }),
-      reason: !dto.isActive ? 'User account deactivated. Revoked all active sessions.' : undefined,
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action,
+        entityType: 'USER',
+        entityId: updated.id,
+        previousValue: JSON.stringify({ isActive: existing.isActive }),
+        newValue: JSON.stringify({ isActive: updated.isActive }),
+        reason: !dto.isActive ? 'User account deactivated. Revoked all active sessions.' : undefined,
+      },
+      this.prismaClient,
+    );
 
     return this.mapToDto(updated);
   }
@@ -239,17 +265,20 @@ export class UserService {
     await this.repo.updatePassword(id, passwordHash, true);
 
     // Revoke all active sessions for target user
-    await sessionService.revokeAllUserSessions(id, 'ADMIN_PASSWORD_RESET');
+    await this.sessionSvc.revokeAllUserSessions(id, 'ADMIN_PASSWORD_RESET');
 
     // Record audit event
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action: 'ADMIN_PASSWORD_RESET',
-      entityType: 'USER',
-      entityId: existing.id,
-      reason: 'Administrator triggered password reset. Revoked all active sessions.',
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action: 'PASSWORD_RESET_BY_ADMIN',
+        entityType: 'USER',
+        entityId: id,
+        reason: 'Temporary password generated by Administrator.',
+      },
+      this.prismaClient,
+    );
 
     return {
       temporaryPassword,

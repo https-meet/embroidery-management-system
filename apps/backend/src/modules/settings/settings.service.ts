@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-import { prisma, prisma as defaultPrisma } from '../../lib/prisma';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 
 export interface BusinessConfigDto {
   companyName: string;
@@ -37,6 +37,12 @@ export interface AuditLogItemDto {
 }
 
 export class SettingsService {
+  private readonly prisma: PrismaClient;
+
+  constructor(prisma?: PrismaClient) {
+    this.prisma = prisma || defaultPrisma;
+  }
+
   public async getBusinessConfig(): Promise<BusinessConfigDto> {
     const defaultConfig: BusinessConfigDto = {
       companyName: 'EBMS Commercial Enterprise',
@@ -61,9 +67,9 @@ export class SettingsService {
     };
 
     try {
-      let config = await prisma.businessConfig.findFirst();
+      let config = await this.prisma.businessConfig.findFirst();
       if (!config) {
-        config = await prisma.businessConfig.create({
+        config = await this.prisma.businessConfig.create({
           data: {},
         });
       }
@@ -95,15 +101,15 @@ export class SettingsService {
 
   public async updateBusinessConfig(dto: Partial<BusinessConfigDto>): Promise<BusinessConfigDto> {
     try {
-      const existing = await prisma.businessConfig.findFirst();
+      const existing = await this.prisma.businessConfig.findFirst();
       let updated;
       if (existing) {
-        updated = await prisma.businessConfig.update({
+        updated = await this.prisma.businessConfig.update({
           where: { id: existing.id },
           data: dto,
         });
       } else {
-        updated = await prisma.businessConfig.create({
+        updated = await this.prisma.businessConfig.create({
           data: dto,
         });
       }
@@ -137,7 +143,7 @@ export class SettingsService {
     const startTime = Date.now();
     let dbStatus = 'HEALTHY';
     try {
-      await prisma.$queryRaw`SELECT 1`;
+      await this.prisma.$queryRaw`SELECT 1`;
     } catch {
       dbStatus = 'DEGRADED';
     }
@@ -151,11 +157,11 @@ export class SettingsService {
 
     try {
       [customerCount, jobCount, invoiceCount, paymentCount, designCount] = await Promise.all([
-        prisma.customer.count({ where: { deletedAt: null } }),
-        prisma.job.count({ where: { deletedAt: null } }),
-        prisma.invoice.count(),
-        prisma.payment.count(),
-        prisma.design.count({ where: { deletedAt: null } }),
+        this.prisma.customer.count({ where: { deletedAt: null } }),
+        this.prisma.job.count({ where: { deletedAt: null } }),
+        this.prisma.invoice.count(),
+        this.prisma.payment.count(),
+        this.prisma.design.count({ where: { deletedAt: null } }),
       ]);
     } catch {
       // Safe fallback if counts are pending
@@ -192,7 +198,7 @@ export class SettingsService {
       newValue?: string;
       reason?: string;
     },
-    client: PrismaClient = defaultPrisma,
+    client: PrismaClient = this.prisma,
   ): Promise<AuditLogItemDto> {
     try {
       const created = await client.auditLog.create({
@@ -223,12 +229,12 @@ export class SettingsService {
     const skip = (page - 1) * limit;
     try {
       const [items, total] = await Promise.all([
-        prisma.auditLog.findMany({
+        this.prisma.auditLog.findMany({
           orderBy: { timestamp: 'desc' },
           skip,
           take: limit,
         }),
-        prisma.auditLog.count(),
+        this.prisma.auditLog.count(),
       ]);
 
       return { items, total };

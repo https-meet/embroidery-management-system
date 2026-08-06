@@ -1,15 +1,23 @@
 import type { NextFunction, Request, Response } from 'express';
 import { UnauthorizedError } from '../../utils/errors';
-import { userService, type UserService } from './users.service';
+import { UserService, userService } from './users.service';
 import type { CreateUserDto, UpdateUserDto, UpdateUserStatusDto, UserQueryFilter } from './users.types';
 
 export class UsersController {
   constructor(private readonly service: UserService = userService) {}
 
+  private getService(req: Request): UserService {
+    if (req.database?.prisma) {
+      return new UserService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as unknown as UserQueryFilter;
-      const data = await this.service.listUsers(filter);
+      const service = this.getService(req);
+      const data = await service.listUsers(filter);
 
       res.status(200).json({
         success: true,
@@ -23,7 +31,8 @@ export class UsersController {
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params['id'] as string;
-      const user = await this.service.getUserById(id);
+      const service = this.getService(req);
+      const user = await service.getUserById(id);
 
       res.status(200).json({
         success: true,
@@ -41,7 +50,8 @@ export class UsersController {
       }
 
       const dto = req.body as CreateUserDto;
-      const result = await this.service.createUser(dto, req.user);
+      const service = this.getService(req);
+      const result = await service.createUser(dto, req.user);
 
       res.status(201).json({
         success: true,
@@ -61,7 +71,8 @@ export class UsersController {
 
       const id = req.params['id'] as string;
       const dto = req.body as UpdateUserDto;
-      const user = await this.service.updateUser(id, dto, req.user);
+      const service = this.getService(req);
+      const user = await service.updateUser(id, dto, req.user);
 
       res.status(200).json({
         success: true,
@@ -81,7 +92,8 @@ export class UsersController {
 
       const id = req.params['id'] as string;
       const dto = req.body as UpdateUserStatusDto;
-      const user = await this.service.updateUserStatus(id, dto, req.user);
+      const service = this.getService(req);
+      const user = await service.updateUserStatus(id, dto, req.user);
 
       res.status(200).json({
         success: true,
@@ -100,11 +112,12 @@ export class UsersController {
       }
 
       const id = req.params['id'] as string;
-      const result = await this.service.resetUserPassword(id, req.user);
+      const service = this.getService(req);
+      const result = await service.resetUserPassword(id, req.user);
 
       res.status(200).json({
         success: true,
-        message: 'Temporary password generated successfully.',
+        message: 'User password reset successfully. All active sessions have been revoked.',
         data: result,
       });
     } catch (error) {
