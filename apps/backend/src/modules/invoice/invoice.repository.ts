@@ -1,5 +1,5 @@
-import type { Customer, DiscountType, Invoice, InvoiceItem, Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Customer, DiscountType, Invoice, InvoiceItem, Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { CreateInvoiceItemDto, InvoiceQueryFilter } from './invoice.types';
 
 export type FullInvoice = Invoice & {
@@ -8,8 +8,10 @@ export type FullInvoice = Invoice & {
 };
 
 export class InvoiceRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string, tx?: Prisma.TransactionClient): Promise<FullInvoice | null> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     return client.invoice.findFirst({
       where: { id },
       include: {
@@ -20,7 +22,7 @@ export class InvoiceRepository {
   }
 
   public async findByInvoiceNo(invoiceNo: string, tx?: Prisma.TransactionClient): Promise<FullInvoice | null> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     return client.invoice.findFirst({
       where: { invoiceNo },
       include: {
@@ -31,7 +33,7 @@ export class InvoiceRepository {
   }
 
   public async countTotalForYear(year: number, tx?: Prisma.TransactionClient): Promise<number> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
 
@@ -63,7 +65,7 @@ export class InvoiceRepository {
     },
     tx?: Prisma.TransactionClient,
   ): Promise<FullInvoice> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     return client.invoice.create({
       data: {
         invoiceNo: data.invoiceNo,
@@ -101,7 +103,7 @@ export class InvoiceRepository {
     data: Prisma.InvoiceUpdateInput,
     tx?: Prisma.TransactionClient,
   ): Promise<FullInvoice> {
-    const client = tx || prisma;
+    const client = tx || this.prisma;
     return client.invoice.update({
       where: { id },
       data,
@@ -136,7 +138,7 @@ export class InvoiceRepository {
     };
 
     const [invoices, total] = await Promise.all([
-      prisma.invoice.findMany({
+      this.prisma.invoice.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
@@ -146,7 +148,7 @@ export class InvoiceRepository {
           items: true,
         },
       }),
-      prisma.invoice.count({ where }),
+      this.prisma.invoice.count({ where }),
     ]);
 
     return { invoices, total };

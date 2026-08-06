@@ -1,14 +1,14 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma, PrismaClient } from '@prisma/client';
 import { AppError, BadRequestError } from '../../utils/errors';
-import { customerRepository } from '../customer/customer.repository';
-import { jobRepository } from '../job/job.repository';
-import { documentSequenceService } from '../sequence/document-sequence.service';
+import { CustomerRepository, customerRepository } from '../customer/customer.repository';
+import { JobRepository, jobRepository } from '../job/job.repository';
+import { DocumentSequenceService, documentSequenceService } from '../sequence/document-sequence.service';
 import { DocumentType } from '../sequence/document-sequence.types';
 import {
   invoiceCalculationService,
   type InvoiceCalculationService,
 } from './invoice-calculation.service';
-import { invoiceRepository, type FullInvoice, type InvoiceRepository } from './invoice.repository';
+import { InvoiceRepository, invoiceRepository, type FullInvoice } from './invoice.repository';
 import type {
   CreateInvoiceDto,
   CreateInvoiceItemDto,
@@ -19,10 +19,36 @@ import type {
 } from './invoice.types';
 
 export class InvoiceService {
+  private readonly repo: InvoiceRepository;
+  private readonly customerRepo: CustomerRepository;
+  private readonly jobRepo: JobRepository;
+  private readonly seqService: DocumentSequenceService;
+  private readonly calculationService: InvoiceCalculationService;
+  private readonly prismaClient?: PrismaClient;
+
   constructor(
-    private readonly repo: InvoiceRepository = invoiceRepository,
-    private readonly calculationService: InvoiceCalculationService = invoiceCalculationService,
-  ) {}
+    repoOrPrisma?: InvoiceRepository | PrismaClient,
+    calculationService: InvoiceCalculationService = invoiceCalculationService,
+  ) {
+    this.calculationService = calculationService;
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+      this.customerRepo = customerRepository;
+      this.jobRepo = jobRepository;
+      this.seqService = documentSequenceService;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new InvoiceRepository(this.prismaClient);
+      this.customerRepo = new CustomerRepository(this.prismaClient);
+      this.jobRepo = new JobRepository(this.prismaClient);
+      this.seqService = new DocumentSequenceService(this.prismaClient);
+    } else {
+      this.repo = invoiceRepository;
+      this.customerRepo = customerRepository;
+      this.jobRepo = jobRepository;
+      this.seqService = documentSequenceService;
+    }
+  }
 
   private mapToDto(invoice: FullInvoice): InvoiceResponseDto {
     const items = (invoice.items || []).map((item) => ({
@@ -77,7 +103,7 @@ export class InvoiceService {
   }
 
   public async createInvoice(dto: CreateInvoiceDto): Promise<InvoiceResponseDto> {
-    const customer = await customerRepository.findById(dto.customerId);
+    const customer = await this.customerRepo.findById(dto.customerId);
     if (!customer) {
       throw new BadRequestError('INVALID_CUSTOMER', 'Target customer does not exist.');
     }
@@ -86,7 +112,7 @@ export class InvoiceService {
 
     if (dto.jobIds && dto.jobIds.length > 0) {
       for (const jobId of dto.jobIds) {
-        const job = await jobRepository.findById(jobId);
+        const job = await this.jobRepo.findById(jobId);
         if (!job) {
           throw new BadRequestError('INVALID_JOB', `Job ${jobId} does not exist.`);
         }
@@ -129,7 +155,7 @@ export class InvoiceService {
       );
     }
 
-    const invoiceNo = await documentSequenceService.generateNextNumber(DocumentType.INV, {
+    const invoiceNo = await this.seqService.generateNextNumber(DocumentType.INV, {
       date: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
     });
     const invoice = await this.repo.create({
