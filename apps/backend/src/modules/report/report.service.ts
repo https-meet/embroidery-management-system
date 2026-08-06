@@ -1,5 +1,5 @@
-import type { Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type {
   CustomerReportItemDto,
   InvoiceReportItemDto,
@@ -11,6 +11,8 @@ import type {
 } from './report.types';
 
 export class ReportService {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   private getDateRangeWhere(filter: ReportFilterDto): { gte?: Date; lte?: Date } | undefined {
     if (!filter.startDate && !filter.endDate) return undefined;
 
@@ -51,7 +53,7 @@ export class ReportService {
     };
 
     const [customers, total] = await Promise.all([
-      prisma.customer.findMany({
+      this.prisma.customer.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
@@ -61,7 +63,7 @@ export class ReportService {
           payments: { where: { status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] } } },
         },
       }),
-      prisma.customer.count({ where }),
+      this.prisma.customer.count({ where }),
     ]);
 
     const items: CustomerReportItemDto[] = customers.map((c) => {
@@ -105,7 +107,7 @@ export class ReportService {
     };
 
     const [jobs, total] = await Promise.all([
-      prisma.job.findMany({
+      this.prisma.job.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
@@ -115,7 +117,7 @@ export class ReportService {
           items: true,
         },
       }),
-      prisma.job.count({ where }),
+      this.prisma.job.count({ where }),
     ]);
 
     const items: JobReportItemDto[] = jobs.map((j) => ({
@@ -151,7 +153,7 @@ export class ReportService {
     };
 
     const [jobs, total] = await Promise.all([
-      prisma.job.findMany({
+      this.prisma.job.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
@@ -161,7 +163,7 @@ export class ReportService {
           items: true,
         },
       }),
-      prisma.job.count({ where }),
+      this.prisma.job.count({ where }),
     ]);
 
     const items: ProductionReportItemDto[] = jobs.map((j) => ({
@@ -197,14 +199,14 @@ export class ReportService {
     };
 
     const [invoices, total] = await Promise.all([
-      prisma.invoice.findMany({
+      this.prisma.invoice.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),
-      prisma.invoice.count({ where }),
+      this.prisma.invoice.count({ where }),
     ]);
 
     const items: InvoiceReportItemDto[] = invoices.map((inv) => ({
@@ -242,14 +244,14 @@ export class ReportService {
     };
 
     const [payments, total] = await Promise.all([
-      prisma.payment.findMany({
+      this.prisma.payment.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),
-      prisma.payment.count({ where }),
+      this.prisma.payment.count({ where }),
     ]);
 
     const items: PaymentReportItemDto[] = payments.map((p) => ({
@@ -269,21 +271,21 @@ export class ReportService {
     const dateRange = this.getDateRangeWhere(filter);
 
     const [invoicesAgg, paymentsAgg, paymentsByMethod] = await Promise.all([
-      prisma.invoice.aggregate({
+      this.prisma.invoice.aggregate({
         _sum: { grandTotal: true, outstandingBalance: true },
         where: {
           status: { in: ['ISSUED', 'PARTIALLY_PAID', 'PAID'] },
           ...(dateRange && { createdAt: dateRange }),
         },
       }),
-      prisma.payment.aggregate({
+      this.prisma.payment.aggregate({
         _sum: { amount: true },
         where: {
           status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] },
           ...(dateRange && { createdAt: dateRange }),
         },
       }),
-      prisma.payment.groupBy({
+      this.prisma.payment.groupBy({
         by: ['paymentMethod'],
         _sum: { amount: true },
         where: {
@@ -321,14 +323,14 @@ export class ReportService {
     designs: unknown[];
   }> {
     const [customers, jobs, invoices, payments, designs] = await Promise.all([
-      prisma.customer.findMany({ where: { deletedAt: null } }),
-      prisma.job.findMany({
+      this.prisma.customer.findMany({ where: { deletedAt: null } }),
+      this.prisma.job.findMany({
         where: { deletedAt: null },
         include: { customer: true, items: true },
       }),
-      prisma.invoice.findMany({ include: { customer: true, items: true } }),
-      prisma.payment.findMany({ include: { customer: true } }),
-      prisma.design.findMany({ where: { deletedAt: null } }),
+      this.prisma.invoice.findMany({ include: { customer: true, items: true } }),
+      this.prisma.payment.findMany({ include: { customer: true } }),
+      this.prisma.design.findMany({ where: { deletedAt: null } }),
     ]);
 
     return {

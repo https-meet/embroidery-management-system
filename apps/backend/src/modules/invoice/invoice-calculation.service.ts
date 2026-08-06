@@ -60,8 +60,8 @@ export class InvoiceCalculationService {
     grandTotal: number,
     totalPaid: number,
   ): InvoiceStatus {
-    if (currentStatus === 'CANCELLED') {
-      return 'CANCELLED';
+    if (currentStatus === 'VOID') {
+      return 'VOID';
     }
 
     if (totalPaid >= grandTotal && grandTotal > 0) {

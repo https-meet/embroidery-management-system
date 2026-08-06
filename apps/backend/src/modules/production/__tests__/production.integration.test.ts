@@ -35,7 +35,7 @@ class MockProductionRepository {
     const j = this.jobs.get(jobId);
     if (!j) throw new Error('Job not found');
     const now = new Date();
-    const updatedItems = j.items.map((i) => ({ ...i, productionStatus: 'IN_PRODUCTION' as const }));
+    const updatedItems = j.items.map((i) => ({ ...i, productionStatus: 'EMBROIDERING' as const }));
     const updated: FullJobMock = {
       ...j,
       status: 'IN_PROGRESS',
@@ -51,7 +51,7 @@ class MockProductionRepository {
     const j = this.jobs.get(jobId);
     if (!j) throw new Error('Job not found');
     const now = new Date();
-    const updatedItems = j.items.map((i) => ({ ...i, productionStatus: 'COMPLETED' as const }));
+    const updatedItems = j.items.map((i) => ({ ...i, productionStatus: 'PASSED_QC' as const }));
     const updated: FullJobMock = {
       ...j,
       status: 'COMPLETED',
@@ -289,7 +289,7 @@ describe('Production Workflow Integration Test Suite', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.job.status).toBe('IN_PROGRESS');
-      expect(res.body.data.job.items[0].productionStatus).toBe('IN_PRODUCTION');
+      expect(res.body.data.job.items[0].productionStatus).toBe('EMBROIDERING');
     });
 
     it('should reject start production for non-existent job (404 Not Found)', async () => {
@@ -321,7 +321,7 @@ describe('Production Workflow Integration Test Suite', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.job.status).toBe('COMPLETED');
-      expect(res.body.data.job.items[0].productionStatus).toBe('COMPLETED');
+      expect(res.body.data.job.items[0].productionStatus).toBe('PASSED_QC');
     });
 
     it('should reject completing production on DRAFT job (400 Bad Request)', async () => {

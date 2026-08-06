@@ -381,7 +381,7 @@ describe('Invoicing & Payments Integration Test Suite', () => {
               threadColor: 'Gold',
               dimensions: null,
               remarks: null,
-              productionStatus: 'COMPLETED',
+              productionStatus: 'PASSED_QC',
               createdAt: new Date(),
               updatedAt: new Date(),
             },

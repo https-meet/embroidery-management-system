@@ -26,7 +26,7 @@ export const createMaterialSchema = z.object({
 export const updateMaterialSchema = createMaterialSchema.partial();
 
 export const updateMaterialStatusSchema = z.object({
-  isActive: z.boolean({ required_error: 'isActive boolean status is required.' }),
+  isActive: z.boolean({ message: 'isActive boolean status is required.' }),
 });
 
 export const materialQuerySchema = z.object({

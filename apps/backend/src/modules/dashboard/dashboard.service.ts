@@ -1,4 +1,5 @@
-import { prisma } from '../../lib/prisma';
+import type { PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type {
   DashboardDataDto,
   DashboardSummaryResponseDto,
@@ -9,6 +10,8 @@ import type {
 } from './dashboard.types';
 
 export class DashboardService {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async getDashboardData(): Promise<DashboardDataDto> {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -30,70 +33,70 @@ export class DashboardService {
       recentPayments,
       recentInvoices,
     ] = await Promise.all([
-      prisma.customer.count({ where: { deletedAt: null, isActive: true } }),
-      prisma.job.count({
+      this.prisma.customer.count({ where: { deletedAt: null, isActive: true } }),
+      this.prisma.job.count({
         where: { deletedAt: null, status: { in: ['DRAFT', 'IN_PROGRESS'] } },
       }),
-      prisma.invoice.count({
+      this.prisma.invoice.count({
         where: { status: { in: ['DRAFT', 'ISSUED', 'PARTIALLY_PAID'] } },
       }),
-      prisma.invoice.aggregate({
+      this.prisma.invoice.aggregate({
         _sum: { outstandingBalance: true },
         where: { status: { in: ['DRAFT', 'ISSUED', 'PARTIALLY_PAID'] } },
       }),
-      prisma.job.count({
+      this.prisma.job.count({
         where: {
           deletedAt: null,
           status: { in: ['DRAFT', 'IN_PROGRESS'] },
           expectedDeliveryDate: { gte: startOfDay, lte: endOfDay },
         },
       }),
-      prisma.job.count({
+      this.prisma.job.count({
         where: {
           deletedAt: null,
           status: { in: ['DRAFT', 'IN_PROGRESS'] },
           expectedDeliveryDate: { lt: startOfDay },
         },
       }),
-      prisma.job.count({
+      this.prisma.job.count({
         where: {
           deletedAt: null,
           status: 'COMPLETED',
           qualityCheckedAt: null,
         },
       }),
-      prisma.payment.aggregate({
+      this.prisma.payment.aggregate({
         _sum: { amount: true },
         where: {
           status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] },
           createdAt: { gte: startOfMonth },
         },
       }),
-      prisma.job.findMany({
+      this.prisma.job.findMany({
         where: { deletedAt: null, status: { in: ['DRAFT', 'IN_PROGRESS'] } },
         take: 10,
         orderBy: [{ priority: 'desc' }, { expectedDeliveryDate: 'asc' }],
         include: { customer: true },
       }),
-      prisma.invoice.findMany({
+      this.prisma.invoice.findMany({
         where: { status: { in: ['ISSUED', 'PARTIALLY_PAID'] }, outstandingBalance: { gt: 0 } },
         take: 10,
         orderBy: { dueDate: 'asc' },
         include: { customer: true },
       }),
-      prisma.job.findMany({
+      this.prisma.job.findMany({
         where: { deletedAt: null },
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),
-      prisma.payment.findMany({
+      this.prisma.payment.findMany({
         where: { status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] } },
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),
-      prisma.invoice.findMany({
+      this.prisma.invoice.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
@@ -114,7 +117,7 @@ export class DashboardService {
     const workQueue: WorkQueueItemDto[] = activeJobsList.map((job) => ({
       id: job.id,
       jobNo: job.jobNo,
-      customerName: job.customer.name,
+      customerName: job.customer?.name ?? 'Unknown Customer',
       status: job.status,
       assignedOperator: job.assignedOperator,
       dueDate: job.expectedDeliveryDate,
@@ -124,18 +127,17 @@ export class DashboardService {
     const paymentFollowUp: PaymentFollowUpItemDto[] = pendingInvoicesList.map((inv) => ({
       id: inv.id,
       invoiceNo: inv.invoiceNo,
-      customerName: inv.customer.name,
+      customerName: inv.customer?.name ?? 'Unknown Customer',
       outstandingBalance: inv.outstandingBalance,
       dueDate: inv.dueDate,
     }));
 
-    // Generate deterministic rule-based recommended actions
     const recommendedActions: RecommendedActionDto[] = [];
     if (delayedJobsCount > 0) {
       recommendedActions.push({
         id: 'action-delayed-jobs',
         type: 'DELAYED_JOB',
-        title: 'Delayed Embroidery Orders',
+        title: 'Delayed Jobs Priority',
         description: `${delayedJobsCount} order(s) are past their target delivery date. Inspect production queue immediately.`,
         actionUrl: '/production?status=IN_PROGRESS',
         actionLabel: 'View Delayed Orders',

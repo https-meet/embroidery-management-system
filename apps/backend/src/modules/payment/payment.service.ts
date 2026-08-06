@@ -113,7 +113,7 @@ export class PaymentService {
         );
       }
 
-      if (invoice.status === 'CANCELLED') {
+      if (invoice.status === 'VOID') {
         throw new BadRequestError(
           'CANCELLED_INVOICE',
           `Cannot allocate payment to cancelled invoice ${invoice.invoiceNo}.`,

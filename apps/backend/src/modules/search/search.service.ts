@@ -1,4 +1,5 @@
-import { prisma } from '../../lib/prisma';
+import type { PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 
 export interface SearchResultItemDto {
   id: string;
@@ -21,6 +22,8 @@ export interface GroupedSearchResultsDto {
 }
 
 export class SearchService {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async searchAll(queryStr: string): Promise<GroupedSearchResultsDto> {
     const q = queryStr.trim();
     if (!q || q.length < 1) {
@@ -32,7 +35,7 @@ export class SearchService {
     }
 
     const [customers, jobs, invoices, payments, designs] = await Promise.all([
-      prisma.customer.findMany({
+      this.prisma.customer.findMany({
         where: {
           deletedAt: null,
           OR: [
@@ -45,7 +48,7 @@ export class SearchService {
         take: 5,
         orderBy: { name: 'asc' },
       }),
-      prisma.job.findMany({
+      this.prisma.job.findMany({
         where: {
           deletedAt: null,
           OR: [
@@ -57,7 +60,7 @@ export class SearchService {
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),
-      prisma.invoice.findMany({
+      this.prisma.invoice.findMany({
         where: {
           OR: [
             { invoiceNo: { contains: q, mode: 'insensitive' } },
@@ -68,7 +71,7 @@ export class SearchService {
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),
-      prisma.payment.findMany({
+      this.prisma.payment.findMany({
         where: {
           OR: [
             { paymentNo: { contains: q, mode: 'insensitive' } },
@@ -80,7 +83,7 @@ export class SearchService {
         orderBy: { createdAt: 'desc' },
         include: { customer: true },
       }),
-      prisma.design.findMany({
+      this.prisma.design.findMany({
         where: {
           deletedAt: null,
           OR: [

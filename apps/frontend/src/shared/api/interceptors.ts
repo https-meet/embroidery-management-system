@@ -60,6 +60,14 @@ export function setupAxiosInterceptors() {
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      try {
+        const userCache = localStorage.getItem('ebms_user_cache');
+        if (userCache && userCache.includes('demo@ebms.com') && config.headers) {
+          config.headers['X-Database-Mode'] = 'demo';
+        }
+      } catch {
+        // Ignore storage error
+      }
       return config;
     },
     (error) => Promise.reject(error)
@@ -74,18 +82,18 @@ export function setupAxiosInterceptors() {
       const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
       const url = originalRequest?.url || '';
-      // Auth endpoints (/auth/login, /auth/refresh, /auth/me) must NEVER trigger silent token refresh loops
-      const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/me');
+      // Auth endpoints (/auth/login, /auth/refresh) must NEVER trigger silent token refresh loops
+      const isNoRefreshAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/refresh');
 
-      // If refresh token or auth endpoint itself returned 401, immediately trigger logout flow without retrying
-      if (isAuthEndpoint && error.response?.status === 401) {
+      // If login or refresh endpoint itself returned 401, trigger unauthorized callback
+      if (isNoRefreshAuthEndpoint && error.response?.status === 401) {
         if (onUnauthorized) {
           onUnauthorized();
         }
       }
 
       // Handle 401 Unauthorized & Silent Token Refresh (excluding auth endpoints)
-      if (error.response?.status === 401 && !isAuthEndpoint && originalRequest && !originalRequest._retry) {
+      if (error.response?.status === 401 && !isNoRefreshAuthEndpoint && originalRequest && !originalRequest._retry) {
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject });

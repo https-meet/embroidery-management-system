@@ -6,13 +6,19 @@ import type { ChangePasswordDto, LoginDto, RefreshTokenDto } from './auth.types'
 export class AuthController {
   constructor(private readonly service: AuthService = authService) {}
 
+  private getService(req: Request): AuthService {
+    if (req.database?.prisma) {
+      return new AuthService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as LoginDto;
       const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip;
       const userAgent = req.headers['user-agent'];
-      const activePrisma = req.database?.prisma;
-      const serviceToUse = activePrisma ? new AuthService(activePrisma) : this.service;
+      const serviceToUse = this.getService(req);
       const data = await serviceToUse.login(dto, ipAddress, userAgent);
 
       res.status(200).json({
@@ -33,7 +39,8 @@ export class AuthController {
 
       const dto = req.body as ChangePasswordDto;
       const currentRefreshToken = req.body.refreshToken as string | undefined;
-      await this.service.changePassword(req.user.userId, dto, currentRefreshToken);
+      const serviceToUse = this.getService(req);
+      await serviceToUse.changePassword(req.user.userId, dto, currentRefreshToken);
 
       res.status(200).json({
         success: true,
@@ -48,7 +55,8 @@ export class AuthController {
     try {
       const dto = req.body as RefreshTokenDto;
       const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip;
-      const tokens = await this.service.refreshToken(dto, ipAddress);
+      const serviceToUse = this.getService(req);
+      const tokens = await serviceToUse.refreshToken(dto, ipAddress);
 
       res.status(200).json({
         success: true,
@@ -73,7 +81,8 @@ export class AuthController {
         return;
       }
 
-      const user = await this.service.getUserProfile(req.user.userId);
+      const serviceToUse = this.getService(req);
+      const user = await serviceToUse.getUserProfile(req.user.userId);
       res.status(200).json({
         success: true,
         data: { user },
@@ -86,7 +95,8 @@ export class AuthController {
   public logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as RefreshTokenDto;
-      await this.service.logout(dto);
+      const serviceToUse = this.getService(req);
+      await serviceToUse.logout(dto);
 
       res.status(200).json({
         success: true,

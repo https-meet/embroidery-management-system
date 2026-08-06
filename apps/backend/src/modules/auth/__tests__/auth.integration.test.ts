@@ -67,11 +67,10 @@ class MockAuthRepository {
     return user;
   }
 
-  public async updateLastLoginAt(id: string) {
+  public async updateLastLoginAt(id: string): Promise<void> {
     const user = this.users.get(id);
     if (!user) throw new Error('User not found');
     user.lastLoginAt = new Date();
-    return user;
   }
 
   public async updatePassword(id: string, passwordHash: string, mustChangePassword = false) {

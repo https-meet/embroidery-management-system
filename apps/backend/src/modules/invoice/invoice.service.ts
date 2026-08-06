@@ -284,7 +284,7 @@ export class InvoiceService {
       throw new BadRequestError('INVALID_INVOICE_CANCEL', 'Only DRAFT invoices can be cancelled.');
     }
 
-    const updated = await this.repo.update(id, { status: 'CANCELLED' });
+    const updated = await this.repo.update(id, { status: 'VOID' });
     return this.mapToDto(updated);
   }
 }
