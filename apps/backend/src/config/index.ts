@@ -19,11 +19,17 @@ function validateEnv(): Env {
 
 const rawEnv = validateEnv();
 
+const resolvedProdDbUrl = rawEnv.PRODUCTION_DATABASE_URL || rawEnv.DATABASE_URL || '';
+const resolvedDemoDbUrl = rawEnv.DEMO_DATABASE_URL || rawEnv.DATABASE_URL || '';
+const resolvedDbUrl = rawEnv.DATABASE_URL || resolvedProdDbUrl;
+
 export interface AppConfig {
   port: number;
   nodeEnv: 'development' | 'production' | 'test';
   isDemoMode: boolean;
   databaseUrl: string;
+  productionDatabaseUrl: string;
+  demoDatabaseUrl: string;
   jwt: {
     accessSecret: string;
     refreshSecret: string;
@@ -40,7 +46,9 @@ export const config: AppConfig = {
   port: rawEnv.PORT,
   nodeEnv: rawEnv.NODE_ENV,
   isDemoMode: rawEnv.IS_DEMO_MODE ?? false,
-  databaseUrl: rawEnv.DATABASE_URL,
+  databaseUrl: resolvedDbUrl,
+  productionDatabaseUrl: resolvedProdDbUrl,
+  demoDatabaseUrl: resolvedDemoDbUrl,
   jwt: {
     accessSecret: rawEnv.JWT_ACCESS_SECRET,
     refreshSecret: rawEnv.JWT_REFRESH_SECRET,

@@ -15,7 +15,9 @@ export const envSchema = z
       .optional()
       .transform((val) => val === 'true'),
 
-    DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+    DATABASE_URL: z.string().optional(),
+    PRODUCTION_DATABASE_URL: z.string().optional(),
+    DEMO_DATABASE_URL: z.string().optional(),
 
     JWT_ACCESS_SECRET: z
       .string()
@@ -39,6 +41,13 @@ export const envSchema = z
       .transform((val) => parseInt(val, 10))
       .pipe(z.number().min(4).max(15)),
   })
+  .refine(
+    (data) => Boolean(data.PRODUCTION_DATABASE_URL || data.DATABASE_URL),
+    {
+      message: 'Either PRODUCTION_DATABASE_URL or DATABASE_URL must be provided in environment variables.',
+      path: ['PRODUCTION_DATABASE_URL'],
+    }
+  )
   .refine(
     (data) => {
       if (data.NODE_ENV === 'production' && !data.IS_DEMO_MODE) {

@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client';
 import { AppError, BadRequestError } from '../../utils/errors';
 import { customerRepository } from '../customer/customer.repository';
 import { jobRepository } from '../job/job.repository';
