@@ -1,6 +1,6 @@
-import type { Design } from '@prisma/client';
+import type { Design, PrismaClient } from '@prisma/client';
 import { AppError, ConflictError } from '../../utils/errors';
-import { designRepository, type DesignRepository } from './design.repository';
+import { DesignRepository, designRepository } from './design.repository';
 import type {
   CreateDesignDto,
   DesignQueryFilter,
@@ -10,7 +10,19 @@ import type {
 } from './design.types';
 
 export class DesignService {
-  constructor(private readonly repo: DesignRepository = designRepository) {}
+  private readonly repo: DesignRepository;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: DesignRepository | PrismaClient) {
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new DesignRepository(this.prismaClient);
+    } else {
+      this.repo = designRepository;
+    }
+  }
 
   /**
    * Generates design code format DES-YYYY-NNNNNN (e.g. DES-2026-000001)

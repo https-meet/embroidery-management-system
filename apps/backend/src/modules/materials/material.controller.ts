@@ -1,15 +1,23 @@
 import type { NextFunction, Request, Response } from 'express';
 import { UnauthorizedError } from '../../utils/errors';
-import { materialService, type MaterialService } from './material.service';
+import { MaterialService, materialService } from './material.service';
 import type { CreateMaterialDto, MaterialQueryFilter, UpdateMaterialDto, UpdateMaterialStatusDto } from './material.types';
 
 export class MaterialController {
   constructor(private readonly service: MaterialService = materialService) {}
 
+  private getService(req: Request): MaterialService {
+    if (req.database?.prisma) {
+      return new MaterialService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as MaterialQueryFilter;
-      const data = await this.service.listMaterials(filter);
+      const service = this.getService(req);
+      const data = await service.listMaterials(filter);
 
       res.status(200).json({
         success: true,
@@ -24,7 +32,8 @@ export class MaterialController {
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params.id as string;
-      const material = await this.service.getMaterialById(id);
+      const service = this.getService(req);
+      const material = await service.getMaterialById(id);
 
       res.status(200).json({
         success: true,
@@ -43,7 +52,8 @@ export class MaterialController {
       }
 
       const dto = req.body as CreateMaterialDto;
-      const result = await this.service.createMaterial(dto, req.user);
+      const service = this.getService(req);
+      const result = await service.createMaterial(dto, req.user);
 
       res.status(201).json({
         success: true,
@@ -63,7 +73,8 @@ export class MaterialController {
 
       const id = req.params.id as string;
       const dto = req.body as UpdateMaterialDto;
-      const result = await this.service.updateMaterial(id, dto, req.user);
+      const service = this.getService(req);
+      const result = await service.updateMaterial(id, dto, req.user);
 
       res.status(200).json({
         success: true,
@@ -83,11 +94,12 @@ export class MaterialController {
 
       const id = req.params.id as string;
       const dto = req.body as UpdateMaterialStatusDto;
-      const material = await this.service.updateMaterialStatus(id, dto, req.user);
+      const service = this.getService(req);
+      const material = await service.updateMaterialStatus(id, dto, req.user);
 
       res.status(200).json({
         success: true,
-        message: 'Material status updated successfully.',
+        message: `Material ${dto.isActive ? 'activated' : 'deactivated'} successfully.`,
         data: { material },
       });
     } catch (error) {

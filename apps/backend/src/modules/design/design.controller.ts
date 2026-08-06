@@ -1,14 +1,22 @@
 import type { NextFunction, Request, Response } from 'express';
-import { designService, type DesignService } from './design.service';
+import { DesignService, designService } from './design.service';
 import type { CreateDesignDto, DesignQueryFilter, UpdateDesignDto } from './design.types';
 
 export class DesignController {
   constructor(private readonly service: DesignService = designService) {}
 
+  private getService(req: Request): DesignService {
+    if (req.database?.prisma) {
+      return new DesignService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as CreateDesignDto;
-      const design = await this.service.createDesign(dto);
+      const service = this.getService(req);
+      const design = await service.createDesign(dto);
 
       res.status(201).json({
         success: true,
@@ -23,7 +31,8 @@ export class DesignController {
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params['id'] as string;
-      const design = await this.service.getDesignById(id);
+      const service = this.getService(req);
+      const design = await service.getDesignById(id);
 
       res.status(200).json({
         success: true,
@@ -37,7 +46,8 @@ export class DesignController {
   public list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as unknown as DesignQueryFilter;
-      const result = await this.service.listDesigns(filter);
+      const service = this.getService(req);
+      const result = await service.listDesigns(filter);
 
       res.status(200).json({
         success: true,
@@ -52,7 +62,8 @@ export class DesignController {
     try {
       const id = req.params['id'] as string;
       const dto = req.body as UpdateDesignDto;
-      const design = await this.service.updateDesign(id, dto);
+      const service = this.getService(req);
+      const design = await service.updateDesign(id, dto);
 
       res.status(200).json({
         success: true,
@@ -67,7 +78,8 @@ export class DesignController {
   public archive = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params['id'] as string;
-      await this.service.archiveDesign(id);
+      const service = this.getService(req);
+      await service.archiveDesign(id);
 
       res.status(200).json({
         success: true,

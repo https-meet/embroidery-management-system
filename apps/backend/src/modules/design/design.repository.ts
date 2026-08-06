@@ -1,22 +1,24 @@
-import type { Design, Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Design, Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { CreateDesignDto, DesignQueryFilter, UpdateDesignDto } from './design.types';
 
 export class DesignRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string): Promise<Design | null> {
-    return prisma.design.findFirst({
+    return this.prisma.design.findFirst({
       where: { id, deletedAt: null },
     });
   }
 
   public async findByCode(code: string): Promise<Design | null> {
-    return prisma.design.findFirst({
+    return this.prisma.design.findFirst({
       where: { designCode: code, deletedAt: null },
     });
   }
 
   public async findByName(name: string): Promise<Design | null> {
-    return prisma.design.findFirst({
+    return this.prisma.design.findFirst({
       where: {
         name: { equals: name, mode: 'insensitive' },
         deletedAt: null,
@@ -28,7 +30,7 @@ export class DesignRepository {
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
 
-    return prisma.design.count({
+    return this.prisma.design.count({
       where: {
         createdAt: {
           gte: startDate,
@@ -39,7 +41,7 @@ export class DesignRepository {
   }
 
   public async create(data: CreateDesignDto & { designCode: string }): Promise<Design> {
-    return prisma.design.create({
+    return this.prisma.design.create({
       data: {
         designCode: data.designCode,
         name: data.name,
@@ -58,7 +60,7 @@ export class DesignRepository {
   }
 
   public async update(id: string, data: UpdateDesignDto): Promise<Design> {
-    return prisma.design.update({
+    return this.prisma.design.update({
       where: { id },
       data: {
         ...(data.name && { name: data.name }),
@@ -80,7 +82,7 @@ export class DesignRepository {
   }
 
   public async archive(id: string): Promise<Design> {
-    return prisma.design.update({
+    return this.prisma.design.update({
       where: { id },
       data: {
         deletedAt: new Date(),
@@ -113,13 +115,13 @@ export class DesignRepository {
     };
 
     const [designs, total] = await Promise.all([
-      prisma.design.findMany({
+      this.prisma.design.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
       }),
-      prisma.design.count({ where }),
+      this.prisma.design.count({ where }),
     ]);
 
     return { designs, total };

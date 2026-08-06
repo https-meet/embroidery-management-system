@@ -1,15 +1,23 @@
 import type { NextFunction, Request, Response } from 'express';
 import { UnauthorizedError } from '../../utils/errors';
-import { supplierService, type SupplierService } from './supplier.service';
+import { SupplierService, supplierService } from './supplier.service';
 import type { CreateSupplierDto, SupplierQueryFilter, UpdateSupplierDto, UpdateSupplierStatusDto } from './supplier.types';
 
 export class SupplierController {
   constructor(private readonly service: SupplierService = supplierService) {}
 
+  private getService(req: Request): SupplierService {
+    if (req.database?.prisma) {
+      return new SupplierService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as SupplierQueryFilter;
-      const data = await this.service.listSuppliers(filter);
+      const service = this.getService(req);
+      const data = await service.listSuppliers(filter);
 
       res.status(200).json({
         success: true,
@@ -24,7 +32,8 @@ export class SupplierController {
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params.id as string;
-      const supplier = await this.service.getSupplierById(id);
+      const service = this.getService(req);
+      const supplier = await service.getSupplierById(id);
 
       res.status(200).json({
         success: true,
@@ -43,7 +52,8 @@ export class SupplierController {
       }
 
       const dto = req.body as CreateSupplierDto;
-      const supplier = await this.service.createSupplier(dto, req.user);
+      const service = this.getService(req);
+      const supplier = await service.createSupplier(dto, req.user);
 
       res.status(201).json({
         success: true,
@@ -63,7 +73,8 @@ export class SupplierController {
 
       const id = req.params.id as string;
       const dto = req.body as UpdateSupplierDto;
-      const supplier = await this.service.updateSupplier(id, dto, req.user);
+      const service = this.getService(req);
+      const supplier = await service.updateSupplier(id, dto, req.user);
 
       res.status(200).json({
         success: true,
@@ -83,11 +94,12 @@ export class SupplierController {
 
       const id = req.params.id as string;
       const dto = req.body as UpdateSupplierStatusDto;
-      const supplier = await this.service.updateSupplierStatus(id, dto, req.user);
+      const service = this.getService(req);
+      const supplier = await service.updateSupplierStatus(id, dto, req.user);
 
       res.status(200).json({
         success: true,
-        message: 'Supplier status updated successfully.',
+        message: `Supplier ${dto.isActive ? 'activated' : 'deactivated'} successfully.`,
         data: { supplier },
       });
     } catch (error) {

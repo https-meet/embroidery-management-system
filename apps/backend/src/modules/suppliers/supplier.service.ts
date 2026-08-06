@@ -1,8 +1,8 @@
-import type { Supplier } from '@prisma/client';
+import type { PrismaClient, Supplier } from '@prisma/client';
 import type { AccessTokenPayload } from '../auth/jwt.service';
 import { settingsService } from '../settings/settings.service';
 import { AppError, BadRequestError } from '../../utils/errors';
-import { supplierRepository, type SupplierRepository } from './supplier.repository';
+import { SupplierRepository, supplierRepository } from './supplier.repository';
 import type {
   CreateSupplierDto,
   PaginatedSuppliersResponseDto,
@@ -13,7 +13,19 @@ import type {
 } from './supplier.types';
 
 export class SupplierService {
-  constructor(private readonly repo: SupplierRepository = supplierRepository) {}
+  private readonly repo: SupplierRepository;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: SupplierRepository | PrismaClient) {
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new SupplierRepository(this.prismaClient);
+    } else {
+      this.repo = supplierRepository;
+    }
+  }
 
   public mapToDto(supplier: Supplier): SupplierResponseDto {
     return {
@@ -77,14 +89,17 @@ export class SupplierService {
 
     const created = await this.repo.create(dto);
 
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action: 'SUPPLIER_CREATED',
-      entityType: 'SUPPLIER',
-      entityId: created.id,
-      newValue: JSON.stringify({ name: created.name, phone: created.phone, gstNumber: created.gstNumber, city: created.city }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action: 'SUPPLIER_CREATED',
+        entityType: 'SUPPLIER',
+        entityId: created.id,
+        newValue: JSON.stringify({ name: created.name, phone: created.phone, gstNumber: created.gstNumber, city: created.city }),
+      },
+      this.prismaClient,
+    );
 
     return this.mapToDto(created);
   }
@@ -111,15 +126,18 @@ export class SupplierService {
 
     const updated = await this.repo.update(id, dto);
 
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action: 'SUPPLIER_UPDATED',
-      entityType: 'SUPPLIER',
-      entityId: updated.id,
-      previousValue: JSON.stringify({ name: existing.name, phone: existing.phone, city: existing.city }),
-      newValue: JSON.stringify({ name: updated.name, phone: updated.phone, city: updated.city }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action: 'SUPPLIER_UPDATED',
+        entityType: 'SUPPLIER',
+        entityId: updated.id,
+        previousValue: JSON.stringify({ name: existing.name, phone: existing.phone, city: existing.city }),
+        newValue: JSON.stringify({ name: updated.name, phone: updated.phone, city: updated.city }),
+      },
+      this.prismaClient,
+    );
 
     return this.mapToDto(updated);
   }
@@ -137,15 +155,18 @@ export class SupplierService {
     const updated = await this.repo.updateStatus(id, dto.isActive);
 
     const action = dto.isActive ? 'SUPPLIER_ACTIVATED' : 'SUPPLIER_DEACTIVATED';
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action,
-      entityType: 'SUPPLIER',
-      entityId: updated.id,
-      previousValue: JSON.stringify({ isActive: existing.isActive }),
-      newValue: JSON.stringify({ isActive: updated.isActive }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action,
+        entityType: 'SUPPLIER',
+        entityId: updated.id,
+        previousValue: JSON.stringify({ isActive: existing.isActive }),
+        newValue: JSON.stringify({ isActive: updated.isActive }),
+      },
+      this.prismaClient,
+    );
 
     return this.mapToDto(updated);
   }

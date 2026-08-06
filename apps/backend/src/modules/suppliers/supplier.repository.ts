@@ -1,11 +1,13 @@
-import type { Prisma, Supplier } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Prisma, Supplier, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { CreateSupplierDto, SupplierQueryFilter, UpdateSupplierDto } from './supplier.types';
 
 export class SupplierRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string): Promise<Supplier | null> {
     try {
-      return await prisma.supplier.findUnique({
+      return await this.prisma.supplier.findUnique({
         where: { id },
       });
     } catch {
@@ -15,7 +17,7 @@ export class SupplierRepository {
 
   public async findByName(name: string): Promise<Supplier | null> {
     try {
-      return await prisma.supplier.findFirst({
+      return await this.prisma.supplier.findFirst({
         where: {
           name: { equals: name, mode: 'insensitive' },
         },
@@ -26,7 +28,7 @@ export class SupplierRepository {
   }
 
   public async create(data: CreateSupplierDto): Promise<Supplier> {
-    return prisma.supplier.create({
+    return this.prisma.supplier.create({
       data: {
         name: data.name,
         contactPerson: data.contactPerson ?? null,
@@ -58,14 +60,14 @@ export class SupplierRepository {
     if (data.postalCode !== undefined) updateData.postalCode = data.postalCode;
     if (data.notes !== undefined) updateData.notes = data.notes;
 
-    return prisma.supplier.update({
+    return this.prisma.supplier.update({
       where: { id },
       data: updateData,
     });
   }
 
   public async updateStatus(id: string, isActive: boolean): Promise<Supplier> {
-    return prisma.supplier.update({
+    return this.prisma.supplier.update({
       where: { id },
       data: { isActive },
     });
@@ -106,13 +108,13 @@ export class SupplierRepository {
 
     try {
       const [suppliers, total] = await Promise.all([
-        prisma.supplier.findMany({
+        this.prisma.supplier.findMany({
           where,
           skip,
           take: limit,
           orderBy,
         }),
-        prisma.supplier.count({ where }),
+        this.prisma.supplier.count({ where }),
       ]);
 
       return { suppliers, total };

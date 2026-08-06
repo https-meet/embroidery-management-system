@@ -1,11 +1,13 @@
-import type { Material, Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Material, Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { CreateMaterialDto, MaterialQueryFilter, UpdateMaterialDto } from './material.types';
 
 export class MaterialRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string): Promise<Material | null> {
     try {
-      return await prisma.material.findUnique({
+      return await this.prisma.material.findUnique({
         where: { id },
       });
     } catch {
@@ -15,7 +17,7 @@ export class MaterialRepository {
 
   public async findByName(name: string): Promise<Material | null> {
     try {
-      return await prisma.material.findFirst({
+      return await this.prisma.material.findFirst({
         where: {
           name: { equals: name, mode: 'insensitive' },
         },
@@ -27,7 +29,7 @@ export class MaterialRepository {
 
   public async findBySku(sku: string): Promise<Material | null> {
     try {
-      return await prisma.material.findFirst({
+      return await this.prisma.material.findFirst({
         where: {
           sku: { equals: sku, mode: 'insensitive' },
         },
@@ -38,7 +40,7 @@ export class MaterialRepository {
   }
 
   public async create(data: CreateMaterialDto): Promise<Material> {
-    return prisma.material.create({
+    return this.prisma.material.create({
       data: {
         name: data.name,
         sku: data.sku ?? null,
@@ -72,14 +74,14 @@ export class MaterialRepository {
     if (data.currentStock !== undefined) updateData.currentStock = data.currentStock;
     if (data.description !== undefined) updateData.description = data.description;
 
-    return prisma.material.update({
+    return this.prisma.material.update({
       where: { id },
       data: updateData,
     });
   }
 
   public async updateStatus(id: string, isActive: boolean): Promise<Material> {
-    return prisma.material.update({
+    return this.prisma.material.update({
       where: { id },
       data: { isActive },
     });
@@ -126,13 +128,13 @@ export class MaterialRepository {
 
     try {
       const [materials, total] = await Promise.all([
-        prisma.material.findMany({
+        this.prisma.material.findMany({
           where,
           skip,
           take: limit,
           orderBy,
         }),
-        prisma.material.count({ where }),
+        this.prisma.material.count({ where }),
       ]);
 
       return { materials, total };

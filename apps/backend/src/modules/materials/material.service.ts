@@ -1,7 +1,8 @@
+import type { PrismaClient } from '@prisma/client';
 import type { AccessTokenPayload } from '../auth/jwt.service';
 import { settingsService } from '../settings/settings.service';
 import { AppError, BadRequestError } from '../../utils/errors';
-import { materialRepository, type MaterialRepository } from './material.repository';
+import { MaterialRepository, materialRepository } from './material.repository';
 import type {
   CreateMaterialDto,
   MaterialQueryFilter,
@@ -12,7 +13,19 @@ import type {
 } from './material.types';
 
 export class MaterialService {
-  constructor(private readonly repo: MaterialRepository = materialRepository) {}
+  private readonly repo: MaterialRepository;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: MaterialRepository | PrismaClient) {
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new MaterialRepository(this.prismaClient);
+    } else {
+      this.repo = materialRepository;
+    }
+  }
 
   public mapToDto(material: {
     id: string;
@@ -104,14 +117,17 @@ export class MaterialService {
 
     const created = await this.repo.create(dto);
 
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action: 'MATERIAL_CREATED',
-      entityType: 'MATERIAL',
-      entityId: created.id,
-      newValue: JSON.stringify({ name: created.name, category: created.category, brand: created.brand, purchasePrice: Number(created.purchasePrice) }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action: 'MATERIAL_CREATED',
+        entityType: 'MATERIAL',
+        entityId: created.id,
+        newValue: JSON.stringify({ name: created.name, category: created.category, brand: created.brand, purchasePrice: Number(created.purchasePrice) }),
+      },
+      this.prismaClient,
+    );
 
     return {
       material: this.mapToDto(created),
@@ -149,15 +165,18 @@ export class MaterialService {
 
     const updated = await this.repo.update(id, dto);
 
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action: 'MATERIAL_UPDATED',
-      entityType: 'MATERIAL',
-      entityId: updated.id,
-      previousValue: JSON.stringify({ name: existing.name, purchasePrice: Number(existing.purchasePrice), currentStock: existing.currentStock }),
-      newValue: JSON.stringify({ name: updated.name, purchasePrice: Number(updated.purchasePrice), currentStock: updated.currentStock }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action: 'MATERIAL_UPDATED',
+        entityType: 'MATERIAL',
+        entityId: updated.id,
+        previousValue: JSON.stringify({ name: existing.name, purchasePrice: Number(existing.purchasePrice), currentStock: existing.currentStock }),
+        newValue: JSON.stringify({ name: updated.name, purchasePrice: Number(updated.purchasePrice), currentStock: updated.currentStock }),
+      },
+      this.prismaClient,
+    );
 
     return {
       material: this.mapToDto(updated),
@@ -178,15 +197,18 @@ export class MaterialService {
     const updated = await this.repo.updateStatus(id, dto.isActive);
 
     const action = dto.isActive ? 'MATERIAL_ACTIVATED' : 'MATERIAL_DEACTIVATED';
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action,
-      entityType: 'MATERIAL',
-      entityId: updated.id,
-      previousValue: JSON.stringify({ isActive: existing.isActive }),
-      newValue: JSON.stringify({ isActive: updated.isActive }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action,
+        entityType: 'MATERIAL',
+        entityId: updated.id,
+        previousValue: JSON.stringify({ isActive: existing.isActive }),
+        newValue: JSON.stringify({ isActive: updated.isActive }),
+      },
+      this.prismaClient,
+    );
 
     return this.mapToDto(updated);
   }
