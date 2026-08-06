@@ -1,7 +1,7 @@
-import type { Customer } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Customer, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import { AppError, ConflictError } from '../../utils/errors';
-import { customerRepository, type CustomerRepository } from './customer.repository';
+import { CustomerRepository, customerRepository } from './customer.repository';
 import type {
   CreateCustomerDto,
   CustomerQueryFilter,
@@ -11,7 +11,19 @@ import type {
 } from './customer.types';
 
 export class CustomerService {
-  constructor(private readonly repo: CustomerRepository = customerRepository) {}
+  private readonly repo: CustomerRepository;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: CustomerRepository | PrismaClient) {
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new CustomerRepository(this.prismaClient);
+    } else {
+      this.repo = customerRepository;
+    }
+  }
 
   /**
    * Generates a sequential customer code, e.g. CUS-000001
@@ -72,6 +84,8 @@ export class CustomerService {
       throw new AppError('CUSTOMER_NOT_FOUND', 'Customer not found.', 404);
     }
 
+    const client = this.prismaClient || defaultPrisma;
+
     const [
       jobs,
       invoices,
@@ -79,27 +93,27 @@ export class CustomerService {
       outstandingAggregate,
       revenueAggregate,
     ] = await Promise.all([
-      prisma.job.findMany({
+      client.job.findMany({
         where: { customerId: id, deletedAt: null },
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: { items: true },
       }),
-      prisma.invoice.findMany({
+      client.invoice.findMany({
         where: { customerId: id },
         orderBy: { createdAt: 'desc' },
         take: 20,
       }),
-      prisma.payment.findMany({
+      client.payment.findMany({
         where: { customerId: id, status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] } },
         orderBy: { createdAt: 'desc' },
         take: 20,
       }),
-      prisma.invoice.aggregate({
+      client.invoice.aggregate({
         _sum: { outstandingBalance: true },
         where: { customerId: id, status: { in: ['DRAFT', 'ISSUED', 'PARTIALLY_PAID'] } },
       }),
-      prisma.payment.aggregate({
+      client.payment.aggregate({
         _sum: { amount: true },
         where: { customerId: id, status: { in: ['RECORDED', 'PARTIALLY_ALLOCATED', 'FULLY_ALLOCATED'] } },
       }),

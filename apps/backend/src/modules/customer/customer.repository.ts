@@ -1,22 +1,24 @@
-import type { Customer, Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Customer, Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { CreateCustomerDto, CustomerQueryFilter, UpdateCustomerDto } from './customer.types';
 
 export class CustomerRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string): Promise<Customer | null> {
-    return prisma.customer.findFirst({
+    return this.prisma.customer.findFirst({
       where: { id, deletedAt: null },
     });
   }
 
   public async findByCode(code: string): Promise<Customer | null> {
-    return prisma.customer.findFirst({
+    return this.prisma.customer.findFirst({
       where: { customerCode: code, deletedAt: null },
     });
   }
 
   public async findByNameAndMobile(name: string, mobile: string): Promise<Customer | null> {
-    return prisma.customer.findFirst({
+    return this.prisma.customer.findFirst({
       where: {
         name: { equals: name, mode: 'insensitive' },
         mobile,
@@ -26,11 +28,11 @@ export class CustomerRepository {
   }
 
   public async countTotal(): Promise<number> {
-    return prisma.customer.count();
+    return this.prisma.customer.count();
   }
 
   public async create(data: CreateCustomerDto & { customerCode: string }): Promise<Customer> {
-    return prisma.customer.create({
+    return this.prisma.customer.create({
       data: {
         customerCode: data.customerCode,
         customerType: data.customerType ?? 'INDIVIDUAL',
@@ -46,7 +48,7 @@ export class CustomerRepository {
   }
 
   public async update(id: string, data: UpdateCustomerDto): Promise<Customer> {
-    return prisma.customer.update({
+    return this.prisma.customer.update({
       where: { id },
       data: {
         ...(data.customerType && { customerType: data.customerType }),
@@ -65,7 +67,7 @@ export class CustomerRepository {
   }
 
   public async archive(id: string): Promise<Customer> {
-    return prisma.customer.update({
+    return this.prisma.customer.update({
       where: { id },
       data: {
         deletedAt: new Date(),
@@ -101,13 +103,13 @@ export class CustomerRepository {
     };
 
     const [customers, total] = await Promise.all([
-      prisma.customer.findMany({
+      this.prisma.customer.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
       }),
-      prisma.customer.count({ where }),
+      this.prisma.customer.count({ where }),
     ]);
 
     return { customers, total };
