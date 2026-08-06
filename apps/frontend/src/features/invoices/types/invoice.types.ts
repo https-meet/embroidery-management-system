@@ -63,6 +63,8 @@ export interface UpdateInvoiceDto {
   discountValue?: number;
   notes?: string;
   status?: InvoiceStatus;
+  items?: CreateInvoiceItemDto[];
+  jobIds?: string[];
 }
 
 export interface InvoiceQueryParams extends PaginationParams {

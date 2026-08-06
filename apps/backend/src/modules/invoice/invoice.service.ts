@@ -191,9 +191,18 @@ export class InvoiceService {
       );
     }
 
-    const updatedItems = existing.items.map((i) => ({ quantity: i.quantity, rate: i.rate }));
+    const itemsToProcess = dto.items && dto.items.length > 0
+      ? dto.items
+      : existing.items.map((i) => ({
+          description: i.description,
+          quantity: i.quantity,
+          rate: i.rate,
+          sourceJobId: i.sourceJobId ?? undefined,
+          sourceJobItemRef: i.sourceJobItemRef ?? undefined,
+        }));
+
     const calcResult = this.calculationService.calculate({
-      items: updatedItems,
+      items: itemsToProcess.map((i) => ({ quantity: i.quantity, rate: i.rate })),
       discountType: dto.discountType ?? existing.discountType,
       discountValue: dto.discountValue ?? existing.discountValue,
       totalPaid: existing.totalPaid,
@@ -207,7 +216,7 @@ export class InvoiceService {
           existing.totalPaid,
         );
 
-    const updated = await this.repo.update(id, {
+    const updatePayload: Prisma.InvoiceUpdateInput = {
       ...(dto.dueDate !== undefined && { dueDate: dto.dueDate ? new Date(dto.dueDate) : null }),
       ...(dto.discountType !== undefined && { discountType: dto.discountType }),
       ...(dto.discountValue !== undefined && { discountValue: dto.discountValue }),
@@ -217,7 +226,23 @@ export class InvoiceService {
       outstandingBalance: calcResult.outstandingBalance,
       status: newStatus,
       ...(dto.notes !== undefined && { notes: dto.notes || null }),
-    });
+    };
+
+    if (dto.items && dto.items.length > 0) {
+      updatePayload.items = {
+        deleteMany: {},
+        create: dto.items.map((item) => ({
+          sourceJobId: item.sourceJobId ?? null,
+          sourceJobItemRef: item.sourceJobItemRef ?? null,
+          description: item.description,
+          quantity: item.quantity,
+          rate: item.rate,
+          amount: Math.round(item.quantity * item.rate * 100) / 100,
+        })),
+      };
+    }
+
+    const updated = await this.repo.update(id, updatePayload);
 
     return this.mapToDto(updated);
   }

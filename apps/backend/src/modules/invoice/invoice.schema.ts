@@ -81,6 +81,8 @@ export const updateInvoiceSchema = z.object({
   discountValue: z.coerce.number().nonnegative().optional().nullable(),
   notes: z.string().max(1000).optional().or(z.literal('')).nullable(),
   status: InvoiceStatusSchema,
+  items: z.array(createInvoiceItemSchema).optional(),
+  jobIds: z.array(z.string().uuid()).optional(),
 });
 
 export const invoiceQuerySchema = z.object({

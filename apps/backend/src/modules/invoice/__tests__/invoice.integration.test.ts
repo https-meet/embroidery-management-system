@@ -131,13 +131,37 @@ class MockInvoiceRepository {
     const existing = this.invoices.get(id);
     if (!existing) throw new Error('Invoice not found');
 
+    let updatedItems = existing.items;
+    if (data.items && typeof data.items === 'object' && 'create' in data.items) {
+      const createArray = (data.items as any).create || [];
+      updatedItems = createArray.map((item: any, idx: number) => ({
+        id: `item-${idx + 1}`,
+        invoiceId: id,
+        sourceJobId: item.sourceJobId ?? null,
+        sourceJobItemRef: item.sourceJobItemRef ?? null,
+        description: item.description,
+        quantity: item.quantity,
+        rate: item.rate,
+        amount: item.amount,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+    }
+
     const updated: FullInvoiceMock = {
       ...existing,
       ...(data.status && { status: data.status as InvoiceStatus }),
+      ...(data.discountType !== undefined && { discountType: data.discountType as DiscountType | null }),
+      ...(data.discountValue !== undefined && { discountValue: data.discountValue as number | null }),
+      ...(data.discountAmount !== undefined && { discountAmount: data.discountAmount as number }),
+      ...(data.subtotal !== undefined && { subtotal: data.subtotal as number }),
+      ...(data.grandTotal !== undefined && { grandTotal: data.grandTotal as number }),
       ...(data.totalPaid !== undefined && { totalPaid: data.totalPaid as number }),
       ...(data.outstandingBalance !== undefined && {
         outstandingBalance: data.outstandingBalance as number,
       }),
+      ...(data.notes !== undefined && { notes: (data.notes as string) || null }),
+      items: updatedItems,
       updatedAt: new Date(),
     };
     this.invoices.set(id, updated);

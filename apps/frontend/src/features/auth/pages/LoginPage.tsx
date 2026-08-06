@@ -44,13 +44,13 @@ export const LoginPage: React.FC = () => {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: savedEmail || (import.meta.env.DEV ? 'demo@ebms.local' : ''),
+      email: savedEmail || (import.meta.env.DEV ? 'demo@ebms.com' : ''),
       password: import.meta.env.DEV ? 'Demo@2026!' : '',
     },
   });
 
   const handleDemoFill = () => {
-    setValue('email', 'demo@ebms.local', { shouldValidate: true });
+    setValue('email', 'demo@ebms.com', { shouldValidate: true });
     setValue('password', 'Demo@2026!', { shouldValidate: true });
     toast.info('Loaded demo account credentials into login fields.');
   };
@@ -215,7 +215,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div className="text-right text-[10px] font-mono space-y-0.5 border-l border-amber-500/20 pl-3">
-            <p className="text-muted-foreground"><span className="font-semibold text-foreground">Email:</span> demo@ebms.local</p>
+            <p className="text-muted-foreground"><span className="font-semibold text-foreground">Email:</span> demo@ebms.com</p>
             <p className="text-muted-foreground"><span className="font-semibold text-foreground">Password:</span> Demo@2026!</p>
           </div>
         </div>

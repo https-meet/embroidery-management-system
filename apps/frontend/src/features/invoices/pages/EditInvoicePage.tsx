@@ -27,6 +27,13 @@ export const EditInvoicePage: React.FC = () => {
           discountType: values.discountType,
           discountValue: values.discountValue,
           notes: values.notes?.trim() || undefined,
+          items: (values.items || []).map((item) => ({
+            description: item.description,
+            quantity: Number(item.quantity) || 1,
+            rate: Number(item.rate) || 0,
+            sourceJobId: (item as any).sourceJobId,
+            sourceJobItemRef: (item as any).sourceJobItemRef,
+          })),
         },
       });
 

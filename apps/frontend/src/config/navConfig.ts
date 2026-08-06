@@ -59,26 +59,6 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'INVENTORY & PURCHASING',
-    items: [
-      {
-        title: 'Materials',
-        href: ROUTES.MATERIALS.LIST,
-        icon: Package,
-      },
-      {
-        title: 'Suppliers',
-        href: ROUTES.SUPPLIERS.LIST,
-        icon: Truck,
-      },
-      {
-        title: 'Purchases',
-        href: ROUTES.PURCHASES.LIST,
-        icon: ShoppingCart,
-      },
-    ],
-  },
-  {
     label: 'FINANCE',
     items: [
       {
@@ -95,6 +75,26 @@ export const navGroups: NavGroup[] = [
         title: 'Reports',
         href: ROUTES.REPORTS.ROOT,
         icon: BarChart3,
+      },
+    ],
+  },
+  {
+    label: 'INVENTORY',
+    items: [
+      {
+        title: 'Materials',
+        href: ROUTES.MATERIALS.LIST,
+        icon: Package,
+      },
+      {
+        title: 'Suppliers',
+        href: ROUTES.SUPPLIERS.LIST,
+        icon: Truck,
+      },
+      {
+        title: 'Purchases',
+        href: ROUTES.PURCHASES.LIST,
+        icon: ShoppingCart,
       },
     ],
   },
