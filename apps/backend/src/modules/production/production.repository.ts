@@ -1,11 +1,13 @@
-import type { Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { FullJob } from '../job/job.repository';
 import type { ProductionQueryFilter } from './production.types';
 
 export class ProductionRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findJobById(id: string): Promise<FullJob | null> {
-    return prisma.job.findFirst({
+    return this.prisma.job.findFirst({
       where: { id, deletedAt: null },
       include: {
         customer: true,
@@ -19,7 +21,7 @@ export class ProductionRepository {
   }
 
   public async assignOperator(jobId: string, operator: string): Promise<FullJob> {
-    return prisma.job.update({
+    return this.prisma.job.update({
       where: { id: jobId },
       data: {
         assignedOperator: operator,
@@ -37,12 +39,12 @@ export class ProductionRepository {
 
   public async startProduction(jobId: string): Promise<FullJob> {
     const now = new Date();
-    await prisma.jobItem.updateMany({
+    await this.prisma.jobItem.updateMany({
       where: { jobId },
-      data: { productionStatus: 'IN_PRODUCTION' },
+      data: { productionStatus: 'EMBROIDERING' },
     });
 
-    return prisma.job.update({
+    return this.prisma.job.update({
       where: { id: jobId },
       data: {
         status: 'IN_PROGRESS',
@@ -61,12 +63,12 @@ export class ProductionRepository {
 
   public async completeProduction(jobId: string): Promise<FullJob> {
     const now = new Date();
-    await prisma.jobItem.updateMany({
+    await this.prisma.jobItem.updateMany({
       where: { jobId },
-      data: { productionStatus: 'COMPLETED' },
+      data: { productionStatus: 'CLEANING' },
     });
 
-    return prisma.job.update({
+    return this.prisma.job.update({
       where: { id: jobId },
       data: {
         status: 'COMPLETED',
@@ -90,7 +92,7 @@ export class ProductionRepository {
     notes?: string,
   ): Promise<FullJob> {
     const now = new Date();
-    const existingJob = await prisma.job.findUnique({ where: { id: jobId } });
+    const existingJob = await this.prisma.job.findUnique({ where: { id: jobId } });
     const updatedNotes = notes
       ? (existingJob?.notes ? `${existingJob.notes}\n[QC ${passed ? 'PASSED' : 'DEFECT'}]: ${notes}` : `[QC ${passed ? 'PASSED' : 'DEFECT'}]: ${notes}`)
       : existingJob?.notes;
@@ -98,7 +100,7 @@ export class ProductionRepository {
     const resultTag = passed ? ' (PASSED)' : ' (FAILED)';
     const cleanInspector = inspector.replace(/\s*\((PASSED|FAILED)\)/gi, '');
 
-    return prisma.job.update({
+    return this.prisma.job.update({
       where: { id: jobId },
       data: {
         qualityCheckedAt: now,
@@ -119,7 +121,7 @@ export class ProductionRepository {
 
   public async markReadyForDelivery(jobId: string): Promise<FullJob> {
     const now = new Date();
-    return prisma.job.update({
+    return this.prisma.job.update({
       where: { id: jobId },
       data: {
         status: 'DELIVERED',
@@ -161,7 +163,7 @@ export class ProductionRepository {
     };
 
     const [jobs, total] = await Promise.all([
-      prisma.job.findMany({
+      this.prisma.job.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
@@ -175,7 +177,7 @@ export class ProductionRepository {
           },
         },
       }),
-      prisma.job.count({ where }),
+      this.prisma.job.count({ where }),
     ]);
 
     return { jobs, total };

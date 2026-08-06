@@ -1,15 +1,23 @@
 import type { NextFunction, Request, Response } from 'express';
 import { UnauthorizedError } from '../../utils/errors';
-import { purchaseService, type PurchaseService } from './purchase.service';
+import { PurchaseService, purchaseService } from './purchase.service';
 import type { CreatePurchaseDto, PurchaseQueryFilter, UpdatePurchaseDto } from './purchase.types';
 
 export class PurchaseController {
   constructor(private readonly service: PurchaseService = purchaseService) {}
 
+  private getService(req: Request): PurchaseService {
+    if (req.database?.prisma) {
+      return new PurchaseService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as PurchaseQueryFilter;
-      const data = await this.service.listPurchases(filter);
+      const service = this.getService(req);
+      const data = await service.listPurchases(filter);
 
       res.status(200).json({
         success: true,
@@ -24,7 +32,8 @@ export class PurchaseController {
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params.id as string;
-      const purchase = await this.service.getPurchaseById(id);
+      const service = this.getService(req);
+      const purchase = await service.getPurchaseById(id);
 
       res.status(200).json({
         success: true,
@@ -43,7 +52,8 @@ export class PurchaseController {
       }
 
       const dto = req.body as CreatePurchaseDto;
-      const purchase = await this.service.createPurchase(dto, req.user);
+      const service = this.getService(req);
+      const purchase = await service.createPurchase(dto, req.user);
 
       res.status(201).json({
         success: true,
@@ -63,7 +73,8 @@ export class PurchaseController {
 
       const id = req.params.id as string;
       const dto = req.body as UpdatePurchaseDto;
-      const purchase = await this.service.updatePurchase(id, dto, req.user);
+      const service = this.getService(req);
+      const purchase = await service.updatePurchase(id, dto, req.user);
 
       res.status(200).json({
         success: true,

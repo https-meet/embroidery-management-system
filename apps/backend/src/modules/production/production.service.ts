@@ -1,7 +1,8 @@
+import type { PrismaClient } from '@prisma/client';
 import { AppError, BadRequestError } from '../../utils/errors';
 import type { FullJob } from '../job/job.repository';
 import type { JobResponseDto } from '../job/job.types';
-import { productionRepository, type ProductionRepository } from './production.repository';
+import { ProductionRepository, productionRepository } from './production.repository';
 import type {
   AssignProductionDto,
   CompleteProductionDto,
@@ -13,7 +14,19 @@ import type {
 } from './production.types';
 
 export class ProductionService {
-  constructor(private readonly repo: ProductionRepository = productionRepository) {}
+  private readonly repo: ProductionRepository;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: ProductionRepository | PrismaClient) {
+    if (repoOrPrisma && 'findJobById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new ProductionRepository(this.prismaClient);
+    } else {
+      this.repo = productionRepository;
+    }
+  }
 
   private mapToDto(job: FullJob): JobResponseDto {
     const items = (job.items || []).map((item) => ({

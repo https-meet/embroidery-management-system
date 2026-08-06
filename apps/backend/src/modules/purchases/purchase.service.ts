@@ -1,12 +1,13 @@
+import type { PrismaClient } from '@prisma/client';
 import type { AccessTokenPayload } from '../auth/jwt.service';
-import { prisma } from '../../lib/prisma';
-import { documentSequenceService } from '../sequence/document-sequence.service';
+import { prisma as defaultPrisma } from '../../lib/prisma';
+import { DocumentSequenceService, documentSequenceService } from '../sequence/document-sequence.service';
 import { DocumentType } from '../sequence/document-sequence.types';
 import { settingsService } from '../settings/settings.service';
 import { AppError, BadRequestError } from '../../utils/errors';
-import { materialRepository } from '../materials/material.repository';
-import { supplierRepository } from '../suppliers/supplier.repository';
-import { purchaseRepository, type PurchaseRepository } from './purchase.repository';
+import { MaterialRepository, materialRepository } from '../materials/material.repository';
+import { SupplierRepository, supplierRepository } from '../suppliers/supplier.repository';
+import { PurchaseRepository, purchaseRepository } from './purchase.repository';
 import type {
   CreatePurchaseDto,
   PaginatedPurchasesResponseDto,
@@ -16,7 +17,31 @@ import type {
 } from './purchase.types';
 
 export class PurchaseService {
-  constructor(private readonly repo: PurchaseRepository = purchaseRepository) {}
+  private readonly repo: PurchaseRepository;
+  private readonly supplierRepo: SupplierRepository;
+  private readonly materialRepo: MaterialRepository;
+  private readonly seqService: DocumentSequenceService;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: PurchaseRepository | PrismaClient) {
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+      this.supplierRepo = supplierRepository;
+      this.materialRepo = materialRepository;
+      this.seqService = documentSequenceService;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new PurchaseRepository(this.prismaClient);
+      this.supplierRepo = new SupplierRepository(this.prismaClient);
+      this.materialRepo = new MaterialRepository(this.prismaClient);
+      this.seqService = new DocumentSequenceService(this.prismaClient);
+    } else {
+      this.repo = purchaseRepository;
+      this.supplierRepo = supplierRepository;
+      this.materialRepo = materialRepository;
+      this.seqService = documentSequenceService;
+    }
+  }
 
   public mapToDto(purchase: any): PurchaseResponseDto {
     return {
@@ -80,7 +105,7 @@ export class PurchaseService {
     dto: CreatePurchaseDto,
     adminUser: AccessTokenPayload,
   ): Promise<PurchaseResponseDto> {
-    const supplier = await supplierRepository.findById(dto.supplierId);
+    const supplier = await this.supplierRepo.findById(dto.supplierId);
     if (!supplier) {
       throw new BadRequestError('SUPPLIER_NOT_FOUND', 'Target supplier does not exist.');
     }
@@ -94,7 +119,7 @@ export class PurchaseService {
 
     // Verify materials exist
     for (const item of dto.items) {
-      const mat = await materialRepository.findById(item.materialId);
+      const mat = await this.materialRepo.findById(item.materialId);
       if (!mat) {
         throw new BadRequestError('MATERIAL_NOT_FOUND', `Material ID '${item.materialId}' does not exist.`);
       }
@@ -123,11 +148,12 @@ export class PurchaseService {
     }
 
     const shouldUpdateInventory = Boolean(dto.updateInventory);
+    const client = this.prismaClient || defaultPrisma;
 
     // Execute in a single Prisma transaction
-    const createdPurchase = await prisma.$transaction(async (tx) => {
+    const createdPurchase = await client.$transaction(async (tx) => {
       // 1. Generate sequence PUR-YYYY-XXXXXX
-      const purchaseNumber = await documentSequenceService.generateNextNumber(DocumentType.PUR, { tx });
+      const purchaseNumber = await this.seqService.generateNextNumber(DocumentType.PUR, { tx });
 
       // 2. Create Purchase record
       const p = await tx.purchase.create({
@@ -181,32 +207,38 @@ export class PurchaseService {
     });
 
     // 4. Audit Log entries
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action: 'PURCHASE_CREATED',
-      entityType: 'PURCHASE',
-      entityId: createdPurchase.id,
-      newValue: JSON.stringify({
-        purchaseNumber: createdPurchase.purchaseNumber,
-        supplierId: createdPurchase.supplierId,
-        total: Number(createdPurchase.total),
-        inventoryUpdated: createdPurchase.inventoryUpdated,
-      }),
-    });
-
-    if (shouldUpdateInventory) {
-      await settingsService.logAuditAction({
+    await settingsService.logAuditAction(
+      {
         userId: adminUser.userId,
         userName: adminUser.email,
-        action: 'INVENTORY_UPDATED_FROM_PURCHASE',
+        action: 'PURCHASE_CREATED',
         entityType: 'PURCHASE',
         entityId: createdPurchase.id,
         newValue: JSON.stringify({
           purchaseNumber: createdPurchase.purchaseNumber,
-          itemsUpdated: itemCalculations.length,
+          supplierId: createdPurchase.supplierId,
+          total: Number(createdPurchase.total),
+          inventoryUpdated: createdPurchase.inventoryUpdated,
         }),
-      });
+      },
+      this.prismaClient,
+    );
+
+    if (shouldUpdateInventory) {
+      await settingsService.logAuditAction(
+        {
+          userId: adminUser.userId,
+          userName: adminUser.email,
+          action: 'INVENTORY_UPDATED_FROM_PURCHASE',
+          entityType: 'PURCHASE',
+          entityId: createdPurchase.id,
+          newValue: JSON.stringify({
+            purchaseNumber: createdPurchase.purchaseNumber,
+            itemsUpdated: itemCalculations.length,
+          }),
+        },
+        this.prismaClient,
+      );
     }
 
     return this.mapToDto(createdPurchase);
@@ -223,7 +255,7 @@ export class PurchaseService {
     }
 
     if (dto.supplierId && dto.supplierId !== existing.supplierId) {
-      const supplier = await supplierRepository.findById(dto.supplierId);
+      const supplier = await this.supplierRepo.findById(dto.supplierId);
       if (!supplier) {
         throw new BadRequestError('SUPPLIER_NOT_FOUND', 'Target supplier does not exist.');
       }
@@ -238,7 +270,7 @@ export class PurchaseService {
 
     if (dto.items && dto.items.length > 0) {
       for (const item of dto.items) {
-        const mat = await materialRepository.findById(item.materialId);
+        const mat = await this.materialRepo.findById(item.materialId);
         if (!mat) {
           throw new BadRequestError('MATERIAL_NOT_FOUND', `Material ID '${item.materialId}' does not exist.`);
         }
@@ -262,7 +294,9 @@ export class PurchaseService {
       throw new BadRequestError('INVALID_FINANCIAL_TOTALS', 'Purchase total cannot be negative.');
     }
 
-    const updatedPurchase = await prisma.$transaction(async (tx) => {
+    const client = this.prismaClient || defaultPrisma;
+
+    const updatedPurchase = await client.$transaction(async (tx) => {
       if (dto.items && dto.items.length > 0) {
         await tx.purchaseItem.deleteMany({
           where: { purchaseId: id },
@@ -307,15 +341,18 @@ export class PurchaseService {
       return p;
     });
 
-    await settingsService.logAuditAction({
-      userId: adminUser.userId,
-      userName: adminUser.email,
-      action: 'PURCHASE_UPDATED',
-      entityType: 'PURCHASE',
-      entityId: updatedPurchase.id,
-      previousValue: JSON.stringify({ total: Number(existing.total) }),
-      newValue: JSON.stringify({ total: Number(updatedPurchase.total) }),
-    });
+    await settingsService.logAuditAction(
+      {
+        userId: adminUser.userId,
+        userName: adminUser.email,
+        action: 'PURCHASE_UPDATED',
+        entityType: 'PURCHASE',
+        entityId: updatedPurchase.id,
+        previousValue: JSON.stringify({ total: Number(existing.total) }),
+        newValue: JSON.stringify({ total: Number(updatedPurchase.total) }),
+      },
+      this.prismaClient,
+    );
 
     return this.mapToDto(updatedPurchase);
   }

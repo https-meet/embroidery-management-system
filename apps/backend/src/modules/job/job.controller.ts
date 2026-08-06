@@ -1,15 +1,23 @@
 import type { NextFunction, Request, Response } from 'express';
-import { jobService, type JobService } from './job.service';
+import { JobService, jobService } from './job.service';
 import type { CreateJobDto, JobQueryFilter, UpdateJobDto } from './job.types';
 
 export class JobController {
   constructor(private readonly service: JobService = jobService) {}
 
+  private getService(req: Request): JobService {
+    if (req.database?.prisma) {
+      return new JobService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as CreateJobDto;
       const userEmail = req.user?.email;
-      const job = await this.service.createJob(dto, userEmail);
+      const service = this.getService(req);
+      const job = await service.createJob(dto, userEmail);
 
       res.status(201).json({
         success: true,
@@ -24,7 +32,8 @@ export class JobController {
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params['id'] as string;
-      const job = await this.service.getJobById(id);
+      const service = this.getService(req);
+      const job = await service.getJobById(id);
 
       res.status(200).json({
         success: true,
@@ -38,7 +47,8 @@ export class JobController {
   public list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as unknown as JobQueryFilter;
-      const result = await this.service.listJobs(filter);
+      const service = this.getService(req);
+      const result = await service.listJobs(filter);
 
       res.status(200).json({
         success: true,
@@ -53,7 +63,8 @@ export class JobController {
     try {
       const id = req.params['id'] as string;
       const dto = req.body as UpdateJobDto;
-      const job = await this.service.updateJob(id, dto);
+      const service = this.getService(req);
+      const job = await service.updateJob(id, dto);
 
       res.status(200).json({
         success: true,
@@ -68,7 +79,8 @@ export class JobController {
   public archive = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params['id'] as string;
-      await this.service.archiveJob(id);
+      const service = this.getService(req);
+      await service.archiveJob(id);
 
       res.status(200).json({
         success: true,

@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { productionService, type ProductionService } from './production.service';
+import { ProductionService, productionService } from './production.service';
 import type {
   AssignProductionDto,
   CompleteProductionDto,
@@ -12,10 +12,18 @@ import type {
 export class ProductionController {
   constructor(private readonly service: ProductionService = productionService) {}
 
+  private getService(req: Request): ProductionService {
+    if (req.database?.prisma) {
+      return new ProductionService(req.database.prisma);
+    }
+    return this.service;
+  }
+
   public assign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as AssignProductionDto;
-      const job = await this.service.assignOperator(dto);
+      const service = this.getService(req);
+      const job = await service.assignOperator(dto);
 
       res.status(200).json({
         success: true,
@@ -30,7 +38,8 @@ export class ProductionController {
   public start = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as StartProductionDto;
-      const job = await this.service.startProduction(dto);
+      const service = this.getService(req);
+      const job = await service.startProduction(dto);
 
       res.status(200).json({
         success: true,
@@ -45,7 +54,8 @@ export class ProductionController {
   public complete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as CompleteProductionDto;
-      const job = await this.service.completeProduction(dto);
+      const service = this.getService(req);
+      const job = await service.completeProduction(dto);
 
       res.status(200).json({
         success: true,
@@ -61,7 +71,8 @@ export class ProductionController {
     try {
       const dto = req.body as QualityCheckDto;
       const inspector = req.user?.email;
-      const job = await this.service.recordQualityCheck(dto, inspector);
+      const service = this.getService(req);
+      const job = await service.recordQualityCheck(dto, inspector);
 
       res.status(200).json({
         success: true,
@@ -76,7 +87,8 @@ export class ProductionController {
   public deliver = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as DeliveryReadinessDto;
-      const job = await this.service.markReadyForDelivery(dto);
+      const service = this.getService(req);
+      const job = await service.markReadyForDelivery(dto);
 
       res.status(200).json({
         success: true,
@@ -91,7 +103,8 @@ export class ProductionController {
   public listQueue = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const filter = req.query as unknown as ProductionQueryFilter;
-      const result = await this.service.getProductionQueue(filter);
+      const service = this.getService(req);
+      const result = await service.getProductionQueue(filter);
 
       res.status(200).json({
         success: true,

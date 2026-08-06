@@ -1,9 +1,10 @@
+import type { PrismaClient } from '@prisma/client';
 import { AppError, BadRequestError } from '../../utils/errors';
-import { customerRepository } from '../customer/customer.repository';
-import { designRepository } from '../design/design.repository';
-import { documentSequenceService } from '../sequence/document-sequence.service';
+import { CustomerRepository, customerRepository } from '../customer/customer.repository';
+import { DesignRepository, designRepository } from '../design/design.repository';
+import { DocumentSequenceService, documentSequenceService } from '../sequence/document-sequence.service';
 import { DocumentType } from '../sequence/document-sequence.types';
-import { jobRepository, type FullJob, type JobRepository } from './job.repository';
+import { JobRepository, jobRepository, type FullJob } from './job.repository';
 import type {
   CreateJobDto,
   JobQueryFilter,
@@ -13,7 +14,31 @@ import type {
 } from './job.types';
 
 export class JobService {
-  constructor(private readonly repo: JobRepository = jobRepository) {}
+  private readonly repo: JobRepository;
+  private readonly customerRepo: CustomerRepository;
+  private readonly designRepo: DesignRepository;
+  private readonly seqService: DocumentSequenceService;
+  private readonly prismaClient?: PrismaClient;
+
+  constructor(repoOrPrisma?: JobRepository | PrismaClient) {
+    if (repoOrPrisma && 'findById' in repoOrPrisma) {
+      this.repo = repoOrPrisma;
+      this.customerRepo = customerRepository;
+      this.designRepo = designRepository;
+      this.seqService = documentSequenceService;
+    } else if (repoOrPrisma) {
+      this.prismaClient = repoOrPrisma as PrismaClient;
+      this.repo = new JobRepository(this.prismaClient);
+      this.customerRepo = new CustomerRepository(this.prismaClient);
+      this.designRepo = new DesignRepository(this.prismaClient);
+      this.seqService = new DocumentSequenceService(this.prismaClient);
+    } else {
+      this.repo = jobRepository;
+      this.customerRepo = customerRepository;
+      this.designRepo = designRepository;
+      this.seqService = documentSequenceService;
+    }
+  }
 
   private mapToDto(job: FullJob): JobResponseDto {
     const items = (job.items || []).map((item) => ({
@@ -95,21 +120,21 @@ export class JobService {
   }
 
   public async createJob(dto: CreateJobDto, userEmail?: string): Promise<JobResponseDto> {
-    const customer = await customerRepository.findById(dto.customerId);
+    const customer = await this.customerRepo.findById(dto.customerId);
     if (!customer) {
       throw new BadRequestError('INVALID_CUSTOMER', 'Target customer does not exist.');
     }
 
     for (const item of dto.items) {
       if (item.designId) {
-        const design = await designRepository.findById(item.designId);
+        const design = await this.designRepo.findById(item.designId);
         if (!design) {
           throw new BadRequestError('INVALID_DESIGN', `Design ${item.designId} does not exist.`);
         }
       }
     }
 
-    const jobNo = await documentSequenceService.generateNextNumber(DocumentType.JOB, {
+    const jobNo = await this.seqService.generateNextNumber(DocumentType.JOB, {
       date: dto.jobDate ? new Date(dto.jobDate) : undefined,
     });
     const job = await this.repo.create({ ...dto, jobNo, createdBy: userEmail });

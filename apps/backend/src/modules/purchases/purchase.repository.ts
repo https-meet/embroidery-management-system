@@ -1,11 +1,13 @@
-import type { Prisma, Purchase } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { Prisma, Purchase, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { PurchaseQueryFilter } from './purchase.types';
 
 export class PurchaseRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string) {
     try {
-      return await prisma.purchase.findUnique({
+      return await this.prisma.purchase.findUnique({
         where: { id },
         include: {
           supplier: true,
@@ -23,7 +25,7 @@ export class PurchaseRepository {
 
   public async findByPurchaseNumber(purchaseNumber: string): Promise<Purchase | null> {
     try {
-      return await prisma.purchase.findUnique({
+      return await this.prisma.purchase.findUnique({
         where: { purchaseNumber },
       });
     } catch {
@@ -73,7 +75,7 @@ export class PurchaseRepository {
 
     try {
       const [purchases, total] = await Promise.all([
-        prisma.purchase.findMany({
+        this.prisma.purchase.findMany({
           where,
           skip,
           take: limit,
@@ -87,7 +89,7 @@ export class PurchaseRepository {
             },
           },
         }),
-        prisma.purchase.count({ where }),
+        this.prisma.purchase.count({ where }),
       ]);
 
       return { purchases, total };

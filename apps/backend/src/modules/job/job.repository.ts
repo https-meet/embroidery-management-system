@@ -1,5 +1,5 @@
-import type { CustomerType, Job, JobItemProductionStatus, Prisma } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
+import type { CustomerType, Job, JobItemProductionStatus, Prisma, PrismaClient } from '@prisma/client';
+import { prisma as defaultPrisma } from '../../lib/prisma';
 import type { CreateJobDto, JobQueryFilter, UpdateJobDto } from './job.types';
 
 export type FullJob = Job & {
@@ -54,8 +54,10 @@ export type FullJob = Job & {
 };
 
 export class JobRepository {
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   public async findById(id: string): Promise<FullJob | null> {
-    return prisma.job.findFirst({
+    return this.prisma.job.findFirst({
       where: { id, deletedAt: null },
       include: {
         customer: true,
@@ -69,7 +71,7 @@ export class JobRepository {
   }
 
   public async findByJobNo(jobNo: string): Promise<FullJob | null> {
-    return prisma.job.findFirst({
+    return this.prisma.job.findFirst({
       where: { jobNo, deletedAt: null },
       include: {
         customer: true,
@@ -86,7 +88,7 @@ export class JobRepository {
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
 
-    return prisma.job.count({
+    return this.prisma.job.count({
       where: {
         createdAt: {
           gte: startDate,
@@ -97,7 +99,7 @@ export class JobRepository {
   }
 
   public async create(data: CreateJobDto & { jobNo: string; createdBy?: string }): Promise<FullJob> {
-    return prisma.job.create({
+    return this.prisma.job.create({
       data: {
         jobNo: data.jobNo,
         customerId: data.customerId,
@@ -131,7 +133,7 @@ export class JobRepository {
   }
 
   public async update(id: string, data: UpdateJobDto): Promise<FullJob> {
-    return prisma.job.update({
+    return this.prisma.job.update({
       where: { id },
       data: {
         ...(data.customerId && { customerId: data.customerId }),
@@ -175,7 +177,7 @@ export class JobRepository {
   }
 
   public async archive(id: string): Promise<Job> {
-    return prisma.job.update({
+    return this.prisma.job.update({
       where: { id },
       data: {
         deletedAt: new Date(),
@@ -211,7 +213,7 @@ export class JobRepository {
     };
 
     const [jobs, total] = await Promise.all([
-      prisma.job.findMany({
+      this.prisma.job.findMany({
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
@@ -225,7 +227,7 @@ export class JobRepository {
           },
         },
       }),
-      prisma.job.count({ where }),
+      this.prisma.job.count({ where }),
     ]);
 
     return { jobs, total };
