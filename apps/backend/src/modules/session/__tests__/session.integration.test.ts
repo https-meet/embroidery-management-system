@@ -353,7 +353,7 @@ describe('Milestone 6.0 - Revocable Session Engine Integration Test Suite', () =
       });
       const sid = jwtService.verifyRefreshToken(login.body.data.tokens.refreshToken)!.sid;
 
-      const adminUser = { userId: 'admin-uuid', email: 'admin@ebms.local', role: 'ADMIN' as const, type: 'access' as const };
+      const adminUser = { userId: 'admin-uuid', email: 'admin@ebms.local', role: 'ADMIN' as const, dbMode: 'production' as const, type: 'access' as const };
       await userService.resetUserPassword(mockUser.id, adminUser);
 
       const session = await sessionRepository.findById(sid);
@@ -368,7 +368,7 @@ describe('Milestone 6.0 - Revocable Session Engine Integration Test Suite', () =
       });
       const sid = jwtService.verifyRefreshToken(login.body.data.tokens.refreshToken)!.sid;
 
-      const adminUser = { userId: 'admin-uuid', email: 'admin@ebms.local', role: 'ADMIN' as const, type: 'access' as const };
+      const adminUser = { userId: 'admin-uuid', email: 'admin@ebms.local', role: 'ADMIN' as const, dbMode: 'production' as const, type: 'access' as const };
       await userService.updateUserStatus(mockUser.id, { isActive: false }, adminUser);
 
       const session = await sessionRepository.findById(sid);

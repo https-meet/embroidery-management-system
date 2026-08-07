@@ -18,7 +18,7 @@ import type {
   RefreshTokenDto,
   UserResponseDto,
 } from './auth.types';
-import { jwtService } from './jwt.service';
+import { jwtService, type DatabaseEnvironment } from './jwt.service';
 import { passwordService } from './password.service';
 
 export class AuthService {
@@ -98,6 +98,7 @@ export class AuthService {
     dto: LoginDto,
     ipAddress?: string,
     userAgent?: string,
+    dbMode: DatabaseEnvironment = 'production',
   ): Promise<LoginResponseDto> {
     const user = await this.repo.findByEmail(dto.email);
     if (!user) {
@@ -123,11 +124,11 @@ export class AuthService {
       mustChangePassword: user.mustChangePassword,
     };
 
-    const accessToken = jwtService.generateAccessToken(userPayload);
+    const accessToken = jwtService.generateAccessToken(userPayload, dbMode);
     
     // Create server-side revocable session
     const tempSid = crypto.randomUUID();
-    const initialRefreshToken = jwtService.generateRefreshToken(userPayload, tempSid);
+    const initialRefreshToken = jwtService.generateRefreshToken(userPayload, tempSid, dbMode);
     const session = await this.sessionSvc.createSession(
       user.id,
       user.email,
@@ -137,7 +138,7 @@ export class AuthService {
     );
 
     // Re-sign refreshToken with actual session.id
-    const finalRefreshToken = jwtService.generateRefreshToken(userPayload, session.id);
+    const finalRefreshToken = jwtService.generateRefreshToken(userPayload, session.id, dbMode);
     if (finalRefreshToken !== initialRefreshToken) {
       await this.sessionSvc.verifyAndRotateSession(session.id, initialRefreshToken, finalRefreshToken, ipAddress);
     }
@@ -217,6 +218,8 @@ export class AuthService {
       throw new UnauthorizedError('INVALID_REFRESH_TOKEN', 'Invalid or expired refresh token.');
     }
 
+    const dbMode = payload.dbMode || 'production';
+
     const user = await this.repo.findById(payload.userId);
     if (!user || !user.isActive) {
       throw new UnauthorizedError(
@@ -232,7 +235,7 @@ export class AuthService {
       mustChangePassword: user.mustChangePassword,
     };
 
-    const newRefreshToken = jwtService.generateRefreshToken(userPayload, payload.sid);
+    const newRefreshToken = jwtService.generateRefreshToken(userPayload, payload.sid, dbMode);
 
     // Verify session and rotate refresh token hash
     await sessionService.verifyAndRotateSession(
@@ -242,7 +245,7 @@ export class AuthService {
       ipAddress,
     );
 
-    const accessToken = jwtService.generateAccessToken(userPayload);
+    const accessToken = jwtService.generateAccessToken(userPayload, dbMode);
 
     await settingsService.logAuditAction({
       userId: user.id,

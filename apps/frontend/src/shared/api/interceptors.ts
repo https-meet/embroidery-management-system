@@ -60,14 +60,6 @@ export function setupAxiosInterceptors() {
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      try {
-        const userCache = localStorage.getItem('ebms_user_cache');
-        if (userCache && userCache.includes('demo@ebms.com') && config.headers) {
-          config.headers['X-Database-Mode'] = 'demo';
-        }
-      } catch {
-        // Ignore storage error
-      }
       return config;
     },
     (error) => Promise.reject(error)

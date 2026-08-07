@@ -4,6 +4,8 @@ import type { SignOptions } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config';
 
+export type DatabaseEnvironment = 'production' | 'demo';
+
 export interface UserTokenPayload {
   id: string;
   email: string;
@@ -16,6 +18,7 @@ export interface AccessTokenPayload {
   email: string;
   role: Role;
   mustChangePassword?: boolean;
+  dbMode: DatabaseEnvironment;
   type: 'access';
 }
 
@@ -23,22 +26,28 @@ export interface RefreshTokenPayload {
   userId: string;
   sid: string;
   nonce?: string;
+  dbMode: DatabaseEnvironment;
   type: 'refresh';
 }
 
 export class JwtService {
   /**
-   * Generates a short-lived Access Token for the user.
+   * Generates a short-lived Access Token for the user with target dbMode.
    *
    * @param user User payload containing id, email, role, and mustChangePassword
+   * @param dbMode Database environment context ('production' or 'demo')
    * @returns Signed JWT access token string
    */
-  public generateAccessToken(user: UserTokenPayload): string {
+  public generateAccessToken(
+    user: UserTokenPayload,
+    dbMode: DatabaseEnvironment = 'production',
+  ): string {
     const payload: AccessTokenPayload = {
       userId: user.id,
       email: user.email,
       role: user.role,
       mustChangePassword: user.mustChangePassword ?? false,
+      dbMode,
       type: 'access',
     };
 
@@ -50,17 +59,23 @@ export class JwtService {
   }
 
   /**
-   * Generates a longer-lived Refresh Token containing Session ID (sid) and unique nonce.
+   * Generates a longer-lived Refresh Token containing Session ID (sid) and dbMode.
    *
    * @param user User payload containing id
    * @param sid Session ID UUID
+   * @param dbMode Database environment context ('production' or 'demo')
    * @returns Signed JWT refresh token string
    */
-  public generateRefreshToken(user: Pick<UserTokenPayload, 'id'>, sid?: string): string {
+  public generateRefreshToken(
+    user: Pick<UserTokenPayload, 'id'>,
+    sid?: string,
+    dbMode: DatabaseEnvironment = 'production',
+  ): string {
     const payload: RefreshTokenPayload = {
       userId: user.id,
       sid: sid || user.id,
       nonce: crypto.randomBytes(16).toString('hex'),
+      dbMode,
       type: 'refresh',
     };
 

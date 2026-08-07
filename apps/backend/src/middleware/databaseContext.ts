@@ -7,6 +7,10 @@ import { createDatabaseContext } from '../lib/database/context';
  * Wraps existing prisma singleton as 'production' environment.
  */
 export function databaseContextMiddleware(req: Request, _res: Response, next: NextFunction): void {
-  req.database = createDatabaseContext(req);
+  const ctx = createDatabaseContext(req);
+  req.database = ctx;
+  if (ctx.error) {
+    return next(ctx.error);
+  }
   next();
 }

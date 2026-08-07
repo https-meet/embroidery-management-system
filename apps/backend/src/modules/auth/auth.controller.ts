@@ -18,8 +18,9 @@ export class AuthController {
       const dto = req.body as LoginDto;
       const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip;
       const userAgent = req.headers['user-agent'];
+      const dbMode = req.database?.environment || 'production';
       const serviceToUse = this.getService(req);
-      const data = await serviceToUse.login(dto, ipAddress, userAgent);
+      const data = await serviceToUse.login(dto, ipAddress, userAgent, dbMode);
 
       res.status(200).json({
         success: true,
