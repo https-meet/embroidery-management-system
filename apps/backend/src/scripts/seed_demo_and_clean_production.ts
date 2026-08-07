@@ -97,7 +97,7 @@ async function main() {
       contactPerson: 'Vikram Shah',
       mobile: '9825011223',
       email: 'contact@royalgarments.in',
-      customerType: CustomerType.COMMERCIAL,
+      customerType: CustomerType.COMPANY,
       address: '102 Industrial Estate, Ring Road, Surat',
     },
   });
@@ -109,7 +109,7 @@ async function main() {
       contactPerson: 'Rajesh Patel',
       mobile: '9898033445',
       email: 'info@apexsports.com',
-      customerType: CustomerType.COMMERCIAL,
+      customerType: CustomerType.COMPANY,
       address: 'Stadium Complex, CG Road, Ahmedabad',
     },
   });
