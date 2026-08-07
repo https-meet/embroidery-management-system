@@ -10,34 +10,16 @@ const adminPassword = process.env.PROD_OWNER_PASSWORD || 'Admin@2026!';
 
 const seedUsers = [
   {
-    name: 'EBMS Admin',
-    email: adminEmail,
-    password: adminPassword,
+    name: 'Factory Owner (Admin)',
+    email: 'chauhan@ebms.com',
+    password: process.env.PROD_OWNER_PASSWORD || 'Chauhan@2025',
     role: Role.ADMIN,
   },
   {
-    name: 'EBMS Public Demo User',
-    email: demoEmail,
-    password: demoPassword,
+    name: 'Demo Admin User',
+    email: 'demo@ebms.com',
+    password: process.env.DEMO_PASSWORD || 'Demo@2026!',
     role: Role.ADMIN,
-  },
-  {
-    name: 'EBMS Demo Local',
-    email: 'demo@ebms.local',
-    password: 'Demo@2026!',
-    role: Role.ADMIN,
-  },
-  {
-    name: 'EBMS Manager',
-    email: 'manager@ebms.local',
-    password: 'Manager@2026!',
-    role: Role.MANAGER,
-  },
-  {
-    name: 'EBMS Operator',
-    email: 'operator@ebms.local',
-    password: 'Operator@2026!',
-    role: Role.OPERATOR,
   },
 ];
 
@@ -63,7 +45,7 @@ async function main(): Promise<void> {
     });
   }
 
-  console.log(`✅ Seeded ${seedUsers.length} local development & demo users.`);
+  console.log(`✅ Seeded ${seedUsers.length} deployment users (${seedUsers.map(u => u.email).join(', ')}).`);
 }
 
 main()

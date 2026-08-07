@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @ebms/backend db:generate",
+    "db:push": "pnpm --filter @ebms/backend db:push",
     "db:migrate": "pnpm --filter @ebms/backend db:migrate",
     "db:seed": "pnpm --filter @ebms/backend db:seed",
     "db:studio": "pnpm --filter @ebms/backend db:studio",
