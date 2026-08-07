@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-import { AppError, BadRequestError } from '../../utils/errors';
+import { AppError, BadRequestError, NotFoundError } from '../../utils/errors';
 import type { FullJob } from '../job/job.repository';
 import type { JobResponseDto } from '../job/job.types';
 import { ProductionRepository, productionRepository } from './production.repository';
@@ -110,7 +110,7 @@ export class ProductionService {
   public async assignOperator(dto: AssignProductionDto): Promise<JobResponseDto> {
     const job = await this.repo.findJobById(dto.jobId);
     if (!job) {
-      throw new AppError('JOB_NOT_FOUND', 'Job not found.', 404);
+      throw new NotFoundError('JOB_NOT_FOUND', 'Job not found.');
     }
 
     if (job.status === 'CANCELLED' || job.status === 'DELIVERED') {
@@ -127,7 +127,7 @@ export class ProductionService {
   public async startProduction(dto: StartProductionDto): Promise<JobResponseDto> {
     const job = await this.repo.findJobById(dto.jobId);
     if (!job) {
-      throw new AppError('JOB_NOT_FOUND', 'Job not found.', 404);
+      throw new NotFoundError('JOB_NOT_FOUND', 'Job not found.');
     }
 
     if (job.status === 'CANCELLED' || job.status === 'DELIVERED') {
@@ -144,7 +144,7 @@ export class ProductionService {
   public async completeProduction(dto: CompleteProductionDto): Promise<JobResponseDto> {
     const job = await this.repo.findJobById(dto.jobId);
     if (!job) {
-      throw new AppError('JOB_NOT_FOUND', 'Job not found.', 404);
+      throw new NotFoundError('JOB_NOT_FOUND', 'Job not found.');
     }
 
     if (job.status !== 'IN_PROGRESS') {
@@ -164,7 +164,7 @@ export class ProductionService {
   ): Promise<JobResponseDto> {
     const job = await this.repo.findJobById(dto.jobId);
     if (!job) {
-      throw new AppError('JOB_NOT_FOUND', 'Job not found.', 404);
+      throw new NotFoundError('JOB_NOT_FOUND', 'Job not found.');
     }
 
     if (job.status !== 'COMPLETED' && job.status !== 'IN_PROGRESS') {
@@ -182,7 +182,7 @@ export class ProductionService {
   public async markReadyForDelivery(dto: DeliveryReadinessDto): Promise<JobResponseDto> {
     const job = await this.repo.findJobById(dto.jobId);
     if (!job) {
-      throw new AppError('JOB_NOT_FOUND', 'Job not found.', 404);
+      throw new NotFoundError('JOB_NOT_FOUND', 'Job not found.');
     }
 
     if (job.status !== 'COMPLETED') {

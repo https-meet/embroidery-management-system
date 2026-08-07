@@ -32,3 +32,9 @@ export class ConflictError extends AppError {
     super(code, message, 409);
   }
 }
+
+export class NotFoundError extends AppError {
+  constructor(code: string = 'NOT_FOUND', message: string = 'Resource not found.') {
+    super(code, message, 404);
+  }
+}
