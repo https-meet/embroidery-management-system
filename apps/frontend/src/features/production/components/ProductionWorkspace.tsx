@@ -49,7 +49,7 @@ export const ProductionWorkspace: React.FC<ProductionWorkspaceProps> = ({
 
         {/* Workflow Transition Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          {job.status === 'PENDING_PRODUCTION' && (
+          {(job.status === 'PENDING' || job.status === 'DRAFT') && (
             <Button
               size="sm"
               isLoading={isPendingAction}
@@ -61,7 +61,7 @@ export const ProductionWorkspace: React.FC<ProductionWorkspaceProps> = ({
             </Button>
           )}
 
-          {job.status === 'IN_PRODUCTION' && (
+          {job.status === 'IN_PROGRESS' && (
             <Button
               size="sm"
               isLoading={isPendingAction}

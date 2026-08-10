@@ -117,7 +117,7 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
       align: 'right',
       accessor: (item) => (
         <div className="flex items-center justify-end space-x-1">
-          {item.status === 'PENDING_PRODUCTION' && (
+          {(item.status === 'PENDING' || item.status === 'DRAFT') && (
             <Button
               variant="outline"
               size="icon"
@@ -129,7 +129,7 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
             </Button>
           )}
 
-          {item.status === 'IN_PRODUCTION' && (
+          {item.status === 'IN_PROGRESS' && (
             <Button
               variant="outline"
               size="icon"

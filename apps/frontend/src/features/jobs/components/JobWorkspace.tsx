@@ -166,7 +166,7 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
             </Button>
           )}
 
-          {(job.status === 'IN_PROGRESS' || (job.status as string) === 'IN_PRODUCTION' || (job.status as string) === 'PENDING_PRODUCTION') && (
+          {job.status === 'IN_PROGRESS' && (
             <Button
               size="sm"
               isLoading={isUpdatingStatus}

@@ -4,9 +4,9 @@ import type { DesignDto } from '@/features/designs';
 
 export type JobStatus =
   | 'DRAFT'
-  | 'PENDING_PRODUCTION'
-  | 'IN_PRODUCTION'
+  | 'PENDING'
   | 'IN_PROGRESS'
+  | 'QUALITY_CHECK'
   | 'COMPLETED'
   | 'DELIVERED'
   | 'CANCELLED';
