@@ -5,6 +5,7 @@ import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ErrorState } from '@/shared/components/ErrorState';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { useDisclosure } from '@/shared/hooks/useDisclosure';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { ROUTES } from '@/shared/constants/routes';
 import { useDesign } from '../hooks/useDesigns';
 import { useArchiveDesign } from '../hooks/useDesignMutations';
@@ -17,6 +18,9 @@ export const DesignDetailPage: React.FC = () => {
 
   const { data, isLoading, isError, refetch } = useDesign(id);
   const archiveMutation = useArchiveDesign();
+
+  useSetBreadcrumb(id, data?.design?.designCode || data?.design?.name);
+
 
   const handleConfirmArchive = async () => {
     if (id) {

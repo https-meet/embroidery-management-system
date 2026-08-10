@@ -7,6 +7,7 @@ import { ErrorState } from '@/shared/components/ErrorState';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Button } from '@/shared/components/ui/button';
 import { useDisclosure } from '@/shared/hooks/useDisclosure';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { ROUTES } from '@/shared/constants/routes';
 import { useJob } from '../hooks/useJobs';
 import { useArchiveJob, useUpdateJob } from '../hooks/useJobMutations';
@@ -21,6 +22,9 @@ export const JobDetailPage: React.FC = () => {
   const { data, isLoading, isError, refetch } = useJob(id);
   const updateMutation = useUpdateJob();
   const archiveMutation = useArchiveJob();
+
+  useSetBreadcrumb(id, data?.job?.jobNo);
+
 
   const handleStatusChange = async (newStatus: JobStatus) => {
     if (id) {

@@ -7,6 +7,7 @@ import { ErrorState } from '@/shared/components/ErrorState';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Button } from '@/shared/components/ui/button';
 import { useDisclosure } from '@/shared/hooks/useDisclosure';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { ROUTES } from '@/shared/constants/routes';
 import { useInvoice } from '../hooks/useInvoices';
 import { useCancelInvoice } from '../hooks/useInvoiceMutations';
@@ -19,6 +20,9 @@ export const InvoiceDetailPage: React.FC = () => {
 
   const { data, isLoading, isError, refetch } = useInvoice(id);
   const cancelMutation = useCancelInvoice();
+
+  useSetBreadcrumb(id, data?.invoice?.invoiceNo);
+
 
   const handleConfirmCancel = async () => {
     if (id) {

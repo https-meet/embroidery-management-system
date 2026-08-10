@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, FileText, User, Printer } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/shared/components/ui/button';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { ROUTES } from '@/shared/constants/routes';
 import { purchasesApi } from '../api/purchasesApi';
 import type { Purchase } from '../types/purchases.types';
@@ -13,6 +14,9 @@ export const PurchaseDetailPage: React.FC = () => {
 
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useSetBreadcrumb(id, purchase?.purchaseNumber);
+
 
   useEffect(() => {
     const fetchDetail = async () => {

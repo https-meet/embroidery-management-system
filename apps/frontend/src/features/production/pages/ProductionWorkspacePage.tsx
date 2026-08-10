@@ -4,6 +4,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ErrorState } from '@/shared/components/ErrorState';
 import { useDisclosure } from '@/shared/hooks/useDisclosure';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { useJob } from '@/features/jobs';
 import {
   useAssignOperator,
@@ -23,6 +24,9 @@ export const ProductionWorkspacePage: React.FC = () => {
   const qcModal = useDisclosure();
 
   const { data, isLoading, isError, refetch } = useJob(id);
+
+  useSetBreadcrumb(id, data?.job?.jobNo);
+
 
   const startMutation = useStartProduction();
   const completeMutation = useCompleteProduction();

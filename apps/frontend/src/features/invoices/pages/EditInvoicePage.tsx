@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ErrorState } from '@/shared/components/ErrorState';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { ROUTES } from '@/shared/constants/routes';
 import { isApiBusinessError, isApiValidationError } from '@/shared/types/api.types';
 import { toast } from 'sonner';
@@ -17,6 +18,9 @@ export const EditInvoicePage: React.FC = () => {
 
   const { data, isLoading, isError, refetch } = useInvoice(id);
   const updateMutation = useUpdateInvoice();
+
+  useSetBreadcrumb(id, data?.invoice?.invoiceNo);
+
 
   const handleSubmit = async (values: CreateInvoiceFormValues) => {
     try {

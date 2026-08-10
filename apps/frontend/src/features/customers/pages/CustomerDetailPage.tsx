@@ -7,6 +7,7 @@ import { ErrorState } from '@/shared/components/ErrorState';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { Button } from '@/shared/components/ui/button';
 import { useDisclosure } from '@/shared/hooks/useDisclosure';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { ROUTES } from '@/shared/constants/routes';
 import { useCustomer360 } from '../hooks/useCustomer360';
 import { useArchiveCustomer } from '../hooks/useCustomerMutations';
@@ -19,6 +20,9 @@ export const CustomerDetailPage: React.FC = () => {
 
   const { data, isLoading, isError, refetch } = useCustomer360(id);
   const archiveMutation = useArchiveCustomer();
+
+  useSetBreadcrumb(id, data?.customer?.name);
+
 
   const handleConfirmArchive = async () => {
     if (id) {

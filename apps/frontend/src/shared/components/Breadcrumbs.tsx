@@ -2,9 +2,23 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { ROUTES } from '@/shared/constants/routes';
+import { useBreadcrumbContext } from '@/shared/context/BreadcrumbContext';
+
+const fallbackMap: Record<string, string> = {
+  customers: 'Customer Details',
+  jobs: 'Job Details',
+  designs: 'Design Details',
+  invoices: 'Invoice Details',
+  payments: 'Payment Details',
+  purchases: 'Purchase Details',
+  production: 'Production Workspace',
+  materials: 'Material Details',
+  suppliers: 'Supplier Details',
+};
 
 export const Breadcrumbs: React.FC = () => {
   const location = useLocation();
+  const { labels } = useBreadcrumbContext();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   if (pathnames.length === 0 || (pathnames.length === 1 && pathnames[0] === 'dashboard')) {
@@ -27,9 +41,16 @@ export const Breadcrumbs: React.FC = () => {
           const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
           const isLast = index === pathnames.length - 1;
           const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(name);
-          const displayName = isUuid
-            ? name
-            : name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' ');
+
+          let displayName: string;
+          if (labels[name]) {
+            displayName = labels[name];
+          } else if (isUuid) {
+            const parentSegment = index > 0 ? (pathnames[index - 1] ?? '').toLowerCase() : '';
+            displayName = fallbackMap[parentSegment] || 'Details';
+          } else {
+            displayName = name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' ');
+          }
 
           return (
             <li key={routeTo} className="flex items-center space-x-1.5">
@@ -51,3 +72,4 @@ export const Breadcrumbs: React.FC = () => {
     </nav>
   );
 };
+

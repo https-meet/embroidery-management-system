@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Printer, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/shared/components/ui/button';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { ROUTES } from '@/shared/constants/routes';
 import { purchasesApi } from '@/features/purchases';
 import { axiosClient } from '@/shared/api';
@@ -14,6 +15,9 @@ export const PurchasePrintPage: React.FC = () => {
   const [purchase, setPurchase] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useSetBreadcrumb(id, purchase?.purchaseNumber);
+
 
   useEffect(() => {
     const loadData = async () => {

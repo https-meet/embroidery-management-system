@@ -3,12 +3,16 @@ import { useParams } from 'react-router-dom';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
 import { ErrorState } from '@/shared/components/ErrorState';
+import { useSetBreadcrumb } from '@/shared/context/BreadcrumbContext';
 import { usePayment } from '../hooks/usePayments';
 import { PaymentWorkspace } from '../components/PaymentWorkspace';
 
 export const PaymentDetailPage: React.FC = () => {
   const { id = '' } = useParams<{ id: string }>();
   const { data, isLoading, isError, refetch } = usePayment(id);
+
+  useSetBreadcrumb(id, data?.payment?.paymentNo);
+
 
   if (isLoading) {
     return <PageSkeleton />;
