@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Play, CheckCircle2, UserPlus, ShieldCheck, Eye } from 'lucide-react';
+import { Play, CheckCircle2, UserPlus, ShieldCheck, Eye, RotateCcw } from 'lucide-react';
 import { DataTable, type Column } from '@/shared/components/DataTable';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/shared/components/ui/button';
@@ -84,7 +84,17 @@ export const ProductionQueueTable: React.FC<ProductionQueueTableProps> = ({
     {
       key: 'status',
       header: 'Production Status',
-      accessor: (item) => <StatusBadge status={item.status} />,
+      accessor: (item) => (
+        <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
+          <StatusBadge status={item.status} />
+          {item.status === 'IN_PROGRESS' && item.qualityCheckedBy?.includes('(FAILED)') && (
+            <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300">
+              <RotateCcw className="mr-1 h-3 w-3" />
+              Rework
+            </span>
+          )}
+        </div>
+      ),
     },
     {
       key: 'assignedOperator',
