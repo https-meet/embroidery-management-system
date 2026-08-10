@@ -52,7 +52,7 @@ export const DesignWorkspace: React.FC<DesignWorkspaceProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <h2 className="text-xl font-bold tracking-tight text-foreground">{design.name}</h2>
-              <StatusBadge status={design.isActive ? 'COMPLETED' : 'CANCELLED'} />
+              <StatusBadge status={design.isActive ? 'ACTIVE' : 'INACTIVE'} />
             </div>
             <p className="font-mono text-xs text-muted-foreground">
               {design.designCode} • {design.category || 'Uncategorized'}

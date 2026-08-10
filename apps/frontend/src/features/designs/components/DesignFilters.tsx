@@ -54,7 +54,7 @@ export const DesignFilters: React.FC<DesignFiltersProps> = ({
             className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="active">Active Only</option>
-            <option value="archived">Archived Only</option>
+            <option value="archived">Inactive Only</option>
             <option value="all">All Statuses</option>
           </select>
         </div>

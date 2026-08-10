@@ -132,7 +132,7 @@ export const DesignTable: React.FC<DesignTableProps> = ({
       key: 'isActive',
       header: 'Status',
       accessor: (item) => (
-        <StatusBadge status={item.isActive ? 'COMPLETED' : 'CANCELLED'} />
+        <StatusBadge status={item.isActive ? 'ACTIVE' : 'INACTIVE'} />
       ),
     },
     {
