@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Route, Navigate, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { AppLayout } from '@/layouts/AppLayout';
 import { PageSkeleton } from '@/shared/components/LoadingSkeleton';
@@ -148,80 +148,85 @@ const NotFoundPage = safeLazy(() =>
   import('@/shared/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
 );
 
+const routes = createRoutesFromElements(
+  <Route>
+    {/* Public Routes */}
+    <Route element={<PublicRoute />}>
+      <Route element={<AuthLayout />}>
+        <Route path={ROUTES.AUTH.LOGIN} element={<LoginPage />} />
+      </Route>
+    </Route>
+
+    {/* Protected Application Shell Routes */}
+    <Route element={<ProtectedRoute />}>
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+        {/* Dashboard Module */}
+        <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+
+        {/* Customers Module */}
+        <Route path={ROUTES.CUSTOMERS.LIST} element={<CustomersListPage />} />
+        <Route path={ROUTES.CUSTOMERS.CREATE} element={<CreateCustomerPage />} />
+        <Route path="/customers/:id" element={<CustomerDetailPage />} />
+        <Route path="/customers/:id/edit" element={<EditCustomerPage />} />
+
+        {/* Designs Module */}
+        <Route path={ROUTES.DESIGNS.LIST} element={<DesignsListPage />} />
+        <Route path={ROUTES.DESIGNS.CREATE} element={<CreateDesignPage />} />
+        <Route path="/designs/:id" element={<DesignDetailPage />} />
+        <Route path="/designs/:id/edit" element={<EditDesignPage />} />
+
+        {/* Jobs Module */}
+        <Route path={ROUTES.JOBS.LIST} element={<JobsListPage />} />
+        <Route path={ROUTES.JOBS.CREATE} element={<CreateJobPage />} />
+        <Route path="/jobs/:id" element={<JobDetailPage />} />
+        <Route path="/jobs/:id/edit" element={<EditJobPage />} />
+        <Route path="/jobs/:id/print" element={<JobCardPrintPage />} />
+        <Route path="/jobs/:id/challan" element={<DeliveryChallanPrintPage />} />
+
+        {/* Production Module */}
+        <Route path={ROUTES.PRODUCTION.LIST} element={<ProductionQueuePage />} />
+        <Route path="/production/:id" element={<ProductionWorkspacePage />} />
+
+        {/* Inventory & Purchasing Modules */}
+        <Route path={ROUTES.MATERIALS.LIST} element={<MaterialsListPage />} />
+        <Route path={ROUTES.SUPPLIERS.LIST} element={<SuppliersListPage />} />
+        <Route path={ROUTES.PURCHASES.LIST} element={<PurchasesListPage />} />
+        <Route path={ROUTES.PURCHASES.CREATE} element={<CreatePurchasePage />} />
+        <Route path="/purchases/:id" element={<PurchaseDetailPage />} />
+        <Route path="/purchases/:id/print" element={<PurchasePrintPage />} />
+
+        {/* Invoices Module */}
+        <Route path={ROUTES.INVOICES.LIST} element={<InvoicesListPage />} />
+        <Route path={ROUTES.INVOICES.CREATE} element={<CreateInvoicePage />} />
+        <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
+        <Route path="/invoices/:id/edit" element={<EditInvoicePage />} />
+        <Route path="/invoices/:id/print" element={<GstInvoicePrintPage />} />
+
+        {/* Payments Module */}
+        <Route path={ROUTES.PAYMENTS.LIST} element={<PaymentsListPage />} />
+        <Route path={ROUTES.PAYMENTS.CREATE} element={<CreatePaymentPage />} />
+        <Route path="/payments/:id" element={<PaymentDetailPage />} />
+
+        {/* Reports Module */}
+        <Route path={`${ROUTES.REPORTS.ROOT}/*`} element={<ReportsPage />} />
+
+        {/* Settings Module */}
+        <Route path={`${ROUTES.SETTINGS}/*`} element={<SettingsPage />} />
+
+        {/* Global Not Found */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Route>
+  </Route>
+);
+
+export const router = createBrowserRouter(routes);
+
 export const AppRoutes: React.FC = () => {
   return (
     <Suspense fallback={<PageSkeleton />}>
-      <Routes>
-        {/* Public Routes */}
-        <Route element={<PublicRoute />}>
-          <Route element={<AuthLayout />}>
-            <Route path={ROUTES.AUTH.LOGIN} element={<LoginPage />} />
-          </Route>
-        </Route>
-
-        {/* Protected Application Shell Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-            
-            {/* Dashboard Module */}
-            <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
-
-            {/* Customers Module */}
-            <Route path={ROUTES.CUSTOMERS.LIST} element={<CustomersListPage />} />
-            <Route path={ROUTES.CUSTOMERS.CREATE} element={<CreateCustomerPage />} />
-            <Route path="/customers/:id" element={<CustomerDetailPage />} />
-            <Route path="/customers/:id/edit" element={<EditCustomerPage />} />
-
-            {/* Designs Module */}
-            <Route path={ROUTES.DESIGNS.LIST} element={<DesignsListPage />} />
-            <Route path={ROUTES.DESIGNS.CREATE} element={<CreateDesignPage />} />
-            <Route path="/designs/:id" element={<DesignDetailPage />} />
-            <Route path="/designs/:id/edit" element={<EditDesignPage />} />
-
-            {/* Jobs Module */}
-            <Route path={ROUTES.JOBS.LIST} element={<JobsListPage />} />
-            <Route path={ROUTES.JOBS.CREATE} element={<CreateJobPage />} />
-            <Route path="/jobs/:id" element={<JobDetailPage />} />
-            <Route path="/jobs/:id/edit" element={<EditJobPage />} />
-            <Route path="/jobs/:id/print" element={<JobCardPrintPage />} />
-            <Route path="/jobs/:id/challan" element={<DeliveryChallanPrintPage />} />
-
-            {/* Production Module */}
-            <Route path={ROUTES.PRODUCTION.LIST} element={<ProductionQueuePage />} />
-            <Route path="/production/:id" element={<ProductionWorkspacePage />} />
-
-            {/* Inventory & Purchasing Modules */}
-            <Route path={ROUTES.MATERIALS.LIST} element={<MaterialsListPage />} />
-            <Route path={ROUTES.SUPPLIERS.LIST} element={<SuppliersListPage />} />
-            <Route path={ROUTES.PURCHASES.LIST} element={<PurchasesListPage />} />
-            <Route path={ROUTES.PURCHASES.CREATE} element={<CreatePurchasePage />} />
-            <Route path="/purchases/:id" element={<PurchaseDetailPage />} />
-            <Route path="/purchases/:id/print" element={<PurchasePrintPage />} />
-
-            {/* Invoices Module */}
-            <Route path={ROUTES.INVOICES.LIST} element={<InvoicesListPage />} />
-            <Route path={ROUTES.INVOICES.CREATE} element={<CreateInvoicePage />} />
-            <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
-            <Route path="/invoices/:id/edit" element={<EditInvoicePage />} />
-            <Route path="/invoices/:id/print" element={<GstInvoicePrintPage />} />
-
-            {/* Payments Module */}
-            <Route path={ROUTES.PAYMENTS.LIST} element={<PaymentsListPage />} />
-            <Route path={ROUTES.PAYMENTS.CREATE} element={<CreatePaymentPage />} />
-            <Route path="/payments/:id" element={<PaymentDetailPage />} />
-
-            {/* Reports Module */}
-            <Route path={`${ROUTES.REPORTS.ROOT}/*`} element={<ReportsPage />} />
-
-            {/* Settings Module */}
-            <Route path={`${ROUTES.SETTINGS}/*`} element={<SettingsPage />} />
-
-            {/* Global Not Found */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Route>
-      </Routes>
+      <RouterProvider router={router} />
     </Suspense>
   );
 };

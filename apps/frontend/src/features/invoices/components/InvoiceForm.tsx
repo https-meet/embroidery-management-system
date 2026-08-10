@@ -5,6 +5,8 @@ import { Plus, Trash2, Sparkles } from 'lucide-react';
 import { FormField } from '@/shared/components/FormField';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { useCustomers } from '@/features/customers';
 import { useJobs } from '@/features/jobs';
@@ -35,7 +37,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
     control,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CreateInvoiceFormValues>({
     resolver: zodResolver(createInvoiceSchema),
     defaultValues: {
@@ -113,6 +115,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
     }
   };
 
+  const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
+
   const handleFormSubmit = (values: CreateInvoiceFormValues) => {
     setPendingValues(values);
     setIsSummaryOpen(true);
@@ -121,6 +125,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
   const handleConfirmInvoice = async () => {
     if (pendingValues) {
       await onSubmit(pendingValues);
+      reset(pendingValues);
       setIsSummaryOpen(false);
     }
   };
@@ -417,6 +422,17 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
         isLoading={isLoading}
         onConfirm={handleConfirmInvoice}
         onCancel={() => setIsSummaryOpen(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={isBlocked}
+        title="Unsaved Changes"
+        description="You have unsaved changes. Are you sure you want to leave?"
+        confirmText="Leave Page"
+        cancelText="Stay"
+        isDestructive
+        onConfirm={proceed}
+        onCancel={cancelBlock}
       />
     </>
   );

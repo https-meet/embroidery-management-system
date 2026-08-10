@@ -5,6 +5,8 @@ import { FileUp, Image as ImageIcon, Sparkles, CheckCircle2 } from 'lucide-react
 import { FormField } from '@/shared/components/FormField';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { designSchema, type DesignFormValues } from '../schemas/design.schema';
 import { parseDstFile } from '../utils/dstParser';
 
@@ -40,7 +42,7 @@ export const DesignForm: React.FC<DesignFormProps> = ({
     setValue,
     watch,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<DesignFormValues>({
     resolver: zodResolver(designSchema),
     defaultValues: {
@@ -146,18 +148,7 @@ export const DesignForm: React.FC<DesignFormProps> = ({
     }
   };
 
-  const handleFormSubmit = async (values: DesignFormValues) => {
-    const finalWidthMm = calculateMm(inputWidth, dimUnit);
-    const finalHeightMm = calculateMm(inputHeight, dimUnit);
 
-    const payload: DesignFormValues = {
-      ...values,
-      widthMm: finalWidthMm,
-      heightMm: finalHeightMm,
-    };
-
-    await onSubmit(payload);
-  };
 
   useEffect(() => {
     if (initialValues) {
@@ -187,8 +178,32 @@ export const DesignForm: React.FC<DesignFormProps> = ({
 
   const isEditing = Boolean(initialValues?.name);
 
+  const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
+
+  const handleFormSubmit = async (values: DesignFormValues) => {
+    const finalWidthMm = calculateMm(inputWidth, dimUnit);
+    const finalHeightMm = calculateMm(inputHeight, dimUnit);
+
+    const payload: DesignFormValues = {
+      ...values,
+      widthMm: finalWidthMm,
+      heightMm: finalHeightMm,
+    };
+
+    await onSubmit(payload);
+    reset(payload);
+  };
+
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <>
+      <ConfirmDialog
+        isOpen={isBlocked}
+        title="Unsaved Changes"
+        description="You have unsaved changes. Are you sure you want to leave?"
+        onConfirm={proceed}
+        onCancel={cancelBlock}
+      />
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Tajima .DST File Reader Upload Box */}
       <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4 transition-all hover:bg-primary/10">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -484,6 +499,7 @@ export const DesignForm: React.FC<DesignFormProps> = ({
         </Button>
       </div>
     </form>
+  </>
   );
 };
 

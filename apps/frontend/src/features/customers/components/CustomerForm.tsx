@@ -5,6 +5,8 @@ import { AlertCircle } from 'lucide-react';
 import { FormField } from '@/shared/components/FormField';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { customerSchema, type CustomerFormValues } from '../schemas/customer.schema';
 import { useDuplicateCustomerCheck } from '../hooks/useDuplicateCustomerCheck';
 
@@ -26,7 +28,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
     handleSubmit,
     control,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
     defaultValues: {
@@ -69,8 +71,16 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
     isEditing ? '' : watchedMobile
   );
 
+  const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
+
+  const handleFormSubmit = async (values: CustomerFormValues) => {
+    await onSubmit(values);
+    reset(values);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <>
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Duplicate Warning Banner (BR-005: Non-blocking warning) */}
       {duplicate && (
         <div className="flex items-start space-x-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
@@ -221,5 +231,17 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
         </Button>
       </div>
     </form>
+
+    <ConfirmDialog
+      isOpen={isBlocked}
+      title="Unsaved Changes"
+      description="You have unsaved changes. Are you sure you want to leave?"
+      confirmText="Leave Page"
+      cancelText="Stay"
+      isDestructive
+      onConfirm={proceed}
+      onCancel={cancelBlock}
+    />
+  </>
   );
 };

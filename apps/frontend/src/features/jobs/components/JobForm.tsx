@@ -5,6 +5,8 @@ import { Plus, Trash2 } from 'lucide-react';
 import { FormField } from '@/shared/components/FormField';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { useCustomers } from '@/features/customers';
 import { useDesigns } from '@/features/designs';
@@ -31,7 +33,7 @@ export const JobForm: React.FC<JobFormProps> = ({
     handleSubmit,
     control,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CreateJobFormValues>({
     resolver: zodResolver(createJobSchema),
     defaultValues: {
@@ -95,8 +97,16 @@ export const JobForm: React.FC<JobFormProps> = ({
     return acc + qty * rate;
   }, 0);
 
+  const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
+
+  const handleFormSubmit = async (values: CreateJobFormValues) => {
+    await onSubmit(values);
+    reset(values);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <>
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Primary Order Information */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {/* Customer Select */}
@@ -329,5 +339,17 @@ export const JobForm: React.FC<JobFormProps> = ({
         </Button>
       </div>
     </form>
+
+    <ConfirmDialog
+      isOpen={isBlocked}
+      title="Unsaved Changes"
+      description="You have unsaved changes. Are you sure you want to leave?"
+      confirmText="Leave Page"
+      cancelText="Stay"
+      isDestructive
+      onConfirm={proceed}
+      onCancel={cancelBlock}
+    />
+  </>
   );
 };

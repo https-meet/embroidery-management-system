@@ -4,6 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormField } from '@/shared/components/FormField';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { useCustomers } from '@/features/customers';
 import { useInvoices } from '@/features/invoices';
@@ -30,7 +32,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     control,
     setValue,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CreatePaymentFormValues>({
     resolver: zodResolver(createPaymentSchema),
     defaultValues: {
@@ -75,8 +77,16 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     }
   };
 
+  const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
+
+  const handleFormSubmit = async (values: CreatePaymentFormValues) => {
+    await onSubmit(values);
+    reset(values);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <>
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {/* Customer Select */}
         <FormField
@@ -241,5 +251,17 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
         </Button>
       </div>
     </form>
+
+    <ConfirmDialog
+      isOpen={isBlocked}
+      title="Unsaved Changes"
+      description="You have unsaved changes. Are you sure you want to leave?"
+      confirmText="Leave Page"
+      cancelText="Stay"
+      isDestructive
+      onConfirm={proceed}
+      onCancel={cancelBlock}
+    />
+  </>
   );
 };

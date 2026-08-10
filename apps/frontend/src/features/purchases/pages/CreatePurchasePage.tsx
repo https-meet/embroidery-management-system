@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/shared/components/ui/button';
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { ROUTES } from '@/shared/constants/routes';
 import { suppliersApi, type Supplier } from '@/features/suppliers';
 import { materialsApi, type Material } from '@/features/materials';
@@ -40,6 +42,9 @@ export const CreatePurchasePage: React.FC = () => {
   const [inputQty, setInputQty] = useState<number>(1);
   const [inputPrice, setInputPrice] = useState<number>(0);
 
+  const isDirty = Boolean(supplierId || invoiceNumber || items.length > 0 || notes);
+  const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
+
   useEffect(() => {
     const loadMasterData = async () => {
       try {
@@ -51,7 +56,7 @@ export const CreatePurchasePage: React.FC = () => {
         setSuppliers(supRes.suppliers);
         setMaterials(matRes.materials);
       } catch {
-        toast.error('Failed to load master suppliers/materials.');
+        toast.error('Failed to load supplier/material directory.');
       } finally {
         setIsLoadingMasterData(false);
       }
@@ -418,6 +423,17 @@ export const CreatePurchasePage: React.FC = () => {
           </Button>
         </div>
       </form>
+
+      <ConfirmDialog
+        isOpen={isBlocked}
+        title="Unsaved Changes"
+        description="You have unsaved changes. Are you sure you want to leave?"
+        confirmText="Leave Page"
+        cancelText="Stay"
+        isDestructive
+        onConfirm={proceed}
+        onCancel={cancelBlock}
+      />
     </div>
   );
 };
