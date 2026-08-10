@@ -87,10 +87,10 @@ export const JobTable: React.FC<JobTableProps> = ({
     },
     {
       key: 'expectedDeliveryDate',
-      header: 'Due Date',
+      header: 'Target Due Date',
       accessor: (item) => (
         <span className="font-mono text-xs text-muted-foreground tabular-nums">
-          {formatDate(item.expectedDeliveryDate || item.jobDate)}
+          {formatDate(item.expectedDeliveryDate)}
         </span>
       ),
     },

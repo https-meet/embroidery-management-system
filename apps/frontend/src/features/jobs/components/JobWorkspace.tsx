@@ -337,7 +337,7 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
               <div className="flex items-center justify-between border-t border-border pt-2">
                 <span className="text-muted-foreground">Target Due Date</span>
                 <span className="font-mono tabular-nums font-semibold text-foreground">
-                  {formatDate(job.expectedDeliveryDate || job.jobDate)}
+                  {formatDate(job.expectedDeliveryDate)}
                 </span>
               </div>
               {job.startedAt && (

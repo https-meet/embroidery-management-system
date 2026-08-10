@@ -91,7 +91,7 @@ export const JobCardPrintPage: React.FC = () => {
             <div>
               <div className="text-lg font-mono font-bold text-slate-900">{job.jobNo}</div>
               <div className="text-xs font-bold uppercase text-amber-700">Priority: {job.priority || 'NORMAL'}</div>
-              <div className="text-xs text-slate-600">Due Date: <span className="font-bold text-slate-900">{job.deliveryDate ? new Date(job.deliveryDate).toLocaleDateString() : 'ASAP'}</span></div>
+              <div className="text-xs text-slate-600">Target Due Date: <span className="font-bold text-slate-900">{job.expectedDeliveryDate ? new Date(job.expectedDeliveryDate).toLocaleDateString() : 'ASAP'}</span></div>
             </div>
           </div>
         </div>

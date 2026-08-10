@@ -149,9 +149,9 @@ export const JobForm: React.FC<JobFormProps> = ({
           </select>
         </FormField>
 
-        {/* Target Delivery Date */}
+        {/* Target Due Date */}
         <FormField
-          label="Target Delivery Date (optional)"
+          label="Target Due Date (optional)"
           htmlFor="expectedDeliveryDate"
           error={errors.expectedDeliveryDate?.message}
         >
