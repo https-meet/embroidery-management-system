@@ -132,12 +132,12 @@ export const JobsListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Confirm Archive / Cancel Dialog */}
+      {/* Confirm Archive Dialog */}
       <ConfirmDialog
         isOpen={archiveDialog.isOpen}
-        title="Cancel Job Order?"
-        description={`Are you sure you want to cancel or archive job '${selectedJob?.jobNo}'? Historical financial records will be preserved.`}
-        confirmText="Cancel Order"
+        title="Archive Job Order?"
+        description={`This will remove job '${selectedJob?.jobNo}' from the active job list. The job will remain stored as an archived record.`}
+        confirmText="Archive Job"
         cancelText="Keep Job"
         isDestructive
         isLoading={archiveMutation.isPending}

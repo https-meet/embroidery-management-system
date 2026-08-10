@@ -85,12 +85,12 @@ export const JobDetailPage: React.FC = () => {
         isUpdatingStatus={updateMutation.isPending}
       />
 
-      {/* Confirm Archive / Cancel Dialog */}
+      {/* Confirm Archive Dialog */}
       <ConfirmDialog
         isOpen={archiveDialog.isOpen}
-        title="Cancel Job Order?"
-        description={`Are you sure you want to cancel job '${data.job.jobNo}'?`}
-        confirmText="Cancel Order"
+        title="Archive Job Order?"
+        description={`This will remove job '${data.job.jobNo}' from the active job list. The job will remain stored as an archived record.`}
+        confirmText="Archive Job"
         cancelText="Keep Job"
         isDestructive
         isLoading={archiveMutation.isPending}

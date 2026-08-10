@@ -199,11 +199,13 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
               onChange={(e) => onStatusChange(e.target.value as JobStatus)}
               className="bg-transparent font-semibold text-foreground focus:outline-none cursor-pointer text-xs"
             >
-              <option value="DRAFT">DRAFT</option>
-              <option value="IN_PROGRESS">IN_PROGRESS</option>
-              <option value="COMPLETED">COMPLETED</option>
-              <option value="DELIVERED">DELIVERED</option>
-              <option value="CANCELLED">CANCELLED</option>
+              <option value="DRAFT">Draft</option>
+              <option value="PENDING">Pending</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="QUALITY_CHECK">Quality Check</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="DELIVERED">Delivered</option>
+              <option value="CANCELLED">Cancelled</option>
             </select>
           </div>
 
@@ -220,9 +222,10 @@ export const JobWorkspace: React.FC<JobWorkspaceProps> = ({
               size="sm"
               onClick={onArchiveClick}
               className="flex items-center space-x-1.5 h-8 text-xs text-destructive border-destructive/20 hover:bg-destructive/10"
+              title="Archive Job"
             >
               <Archive className="h-3.5 w-3.5" />
-              <span>Cancel Job</span>
+              <span>Archive Job</span>
             </Button>
           )}
         </div>

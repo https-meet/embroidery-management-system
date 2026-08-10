@@ -41,9 +41,11 @@ export const JobFilters: React.FC<JobFiltersProps> = ({
           >
             <option value="">All Statuses</option>
             <option value="DRAFT">Draft</option>
-            <option value="PENDING_PRODUCTION">Pending Production</option>
-            <option value="IN_PRODUCTION">In Production</option>
+            <option value="PENDING">Pending</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="QUALITY_CHECK">Quality Check</option>
             <option value="COMPLETED">Completed</option>
+            <option value="DELIVERED">Delivered</option>
             <option value="CANCELLED">Cancelled</option>
           </select>
         </div>

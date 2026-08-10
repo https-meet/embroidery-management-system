@@ -124,7 +124,7 @@ export const JobTable: React.FC<JobTableProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              title="Archive/Cancel Job"
+              title="Archive Job"
               className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={() => onArchiveClick(item)}
             >
