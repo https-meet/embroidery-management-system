@@ -49,7 +49,7 @@ export const CustomerFilters: React.FC<CustomerFiltersProps> = ({
         <div className="flex items-center space-x-2 text-xs">
           <span className="font-medium text-muted-foreground">Status:</span>
           <select
-            value={isActive === undefined ? 'all' : isActive ? 'active' : 'archived'}
+            value={isActive === undefined ? 'all' : isActive ? 'active' : 'inactive'}
             onChange={(e) => {
               const val = e.target.value;
               if (val === 'all') onStatusChange(undefined);
@@ -59,7 +59,7 @@ export const CustomerFilters: React.FC<CustomerFiltersProps> = ({
             className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="active">Active Only</option>
-            <option value="archived">Archived Only</option>
+            <option value="inactive">Inactive Only</option>
             <option value="all">All Statuses</option>
           </select>
         </div>

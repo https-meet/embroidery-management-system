@@ -48,7 +48,7 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <h2 className="text-xl font-semibold tracking-tight text-foreground">{customer.name}</h2>
-              <StatusBadge status={customer.isActive ? 'COMPLETED' : 'CANCELLED'} />
+              <StatusBadge status={customer.isActive ? 'ACTIVE' : 'INACTIVE'} />
             </div>
             <p className="font-mono text-xs text-muted-foreground mt-0.5">
               {customer.customerCode} • {customer.customerType}
