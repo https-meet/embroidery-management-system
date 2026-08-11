@@ -107,14 +107,14 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
               <Eye className="h-4 w-4" />
             </Button>
           </Link>
-          {item.status !== 'PAID' && item.status !== 'CANCELLED' && (
+          {item.status !== 'PAID' && item.status !== 'VOID' && (
             <Link to={`${ROUTES.INVOICES.DETAIL(item.id)}/edit`}>
               <Button variant="ghost" size="icon" title="Edit Invoice" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                 <Edit2 className="h-4 w-4" />
               </Button>
             </Link>
           )}
-          {item.status !== 'CANCELLED' && (
+          {item.status !== 'VOID' && item.status !== 'PAID' && (
             <Button
               variant="ghost"
               size="icon"

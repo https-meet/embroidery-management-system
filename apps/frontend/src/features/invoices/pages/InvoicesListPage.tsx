@@ -127,7 +127,7 @@ export const InvoicesListPage: React.FC = () => {
       <ConfirmDialog
         isOpen={cancelDialog.isOpen}
         title="Cancel Invoice?"
-        description={`Are you sure you want to cancel invoice '${selectedInvoice?.invoiceNo}'? This action will mark the invoice as CANCELLED.`}
+        description={`Are you sure you want to cancel invoice '${selectedInvoice?.invoiceNo}'? This action will mark the invoice as VOID.`}
         confirmText="Cancel Invoice"
         cancelText="Keep Active"
         isDestructive

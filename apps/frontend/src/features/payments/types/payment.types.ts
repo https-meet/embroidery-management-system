@@ -2,7 +2,7 @@ import type { PaginationParams } from '@/shared/types/api.types';
 import type { CustomerDto } from '@/features/customers';
 
 export type PaymentMethod = 'CASH' | 'UPI' | 'BANK_TRANSFER' | 'CHEQUE' | 'OTHER';
-export type PaymentStatus = 'RECORDED' | 'CANCELLED';
+export type PaymentStatus = 'DRAFT' | 'RECORDED' | 'PARTIALLY_ALLOCATED' | 'FULLY_ALLOCATED' | 'VOID';
 
 export interface PaymentAllocationDto {
   id: string;

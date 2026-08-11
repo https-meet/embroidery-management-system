@@ -38,7 +38,8 @@ export const InvoiceFilters: React.FC<InvoiceFiltersProps> = ({
           <option value="ISSUED">Issued / Unpaid</option>
           <option value="PARTIALLY_PAID">Partially Paid</option>
           <option value="PAID">Paid</option>
-          <option value="CANCELLED">Cancelled</option>
+          <option value="VOID">Voided</option>
+          <option value="OVERDUE">Overdue</option>
         </select>
       </div>
     </div>

@@ -53,7 +53,7 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
             <span>Print GST Invoice</span>
           </Button>
 
-          {invoice.outstandingBalance > 0 && invoice.status !== 'CANCELLED' && (
+          {invoice.outstandingBalance > 0 && invoice.status !== 'VOID' && (
             <Link to={ROUTES.PAYMENTS.CREATE}>
               <Button size="sm" className="flex items-center space-x-1.5 h-8 text-xs font-semibold">
                 <DollarSign className="h-3.5 w-3.5" />
@@ -62,7 +62,7 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
             </Link>
           )}
 
-          {invoice.status !== 'CANCELLED' && (
+          {invoice.status !== 'VOID' && invoice.status !== 'PAID' && (
             <Button
               variant="outline"
               size="sm"

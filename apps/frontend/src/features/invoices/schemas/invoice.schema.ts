@@ -23,7 +23,7 @@ export const updateInvoiceSchema = z.object({
   dueDate: z.string().optional().or(z.literal('')),
   discountType: z.enum(['PERCENTAGE', 'FIXED', 'FIXED_AMOUNT']).optional(),
   discountValue: z.number().min(0, 'Discount value must be non-negative').optional(),
-  status: z.enum(['DRAFT', 'ISSUED', 'PARTIALLY_PAID', 'PAID', 'CANCELLED']).optional(),
+  status: z.enum(['DRAFT', 'ISSUED', 'PARTIALLY_PAID', 'PAID', 'VOID', 'OVERDUE']).optional(),
   notes: z.string().max(500).optional().or(z.literal('')),
 });
 

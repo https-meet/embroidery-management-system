@@ -123,7 +123,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
           >
             <option value="">Select invoice to allocate...</option>
             {(invoiceData?.invoices || [])
-              .filter((inv) => inv.status !== 'CANCELLED' && inv.status !== 'PAID')
+              .filter((inv) => inv.status !== 'VOID' && inv.status !== 'PAID')
               .map((inv) => (
                 <option key={inv.id} value={inv.id}>
                   {inv.invoiceNo} — Outstanding: {formatCurrency(inv.outstandingBalance)}

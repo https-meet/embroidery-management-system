@@ -59,8 +59,11 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
             className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="">All Statuses</option>
+            <option value="DRAFT">Draft</option>
             <option value="RECORDED">Recorded</option>
-            <option value="CANCELLED">Cancelled</option>
+            <option value="PARTIALLY_ALLOCATED">Partially Allocated</option>
+            <option value="FULLY_ALLOCATED">Fully Allocated</option>
+            <option value="VOID">Voided</option>
           </select>
         </div>
       </div>

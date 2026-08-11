@@ -1,7 +1,7 @@
 import type { PaginationParams } from '@/shared/types/api.types';
 import type { CustomerDto } from '@/features/customers';
 
-export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIALLY_PAID' | 'PAID' | 'CANCELLED';
+export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIALLY_PAID' | 'PAID' | 'VOID' | 'OVERDUE';
 export type DiscountType = 'PERCENTAGE' | 'FIXED' | 'FIXED_AMOUNT';
 
 export interface InvoiceItemDto {
