@@ -190,8 +190,8 @@ export const DesignForm: React.FC<DesignFormProps> = ({
       heightMm: finalHeightMm,
     };
 
-    await onSubmit(payload);
     reset(payload);
+    await onSubmit(payload);
   };
 
   return (

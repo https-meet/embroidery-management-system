@@ -164,6 +164,10 @@ export const CreatePurchasePage: React.FC = () => {
       });
 
       toast.success(`Purchase '${purchase.purchaseNumber}' created successfully.`);
+      setSupplierId('');
+      setInvoiceNumber('');
+      setItems([]);
+      setNotes('');
       navigate(ROUTES.PURCHASES.LIST);
     } catch (err: any) {
       const errMsg = err?.error?.message || err?.message || 'Failed to record purchase.';

@@ -74,8 +74,8 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
   const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
 
   const handleFormSubmit = async (values: CustomerFormValues) => {
-    await onSubmit(values);
     reset(values);
+    await onSubmit(values);
   };
 
   return (

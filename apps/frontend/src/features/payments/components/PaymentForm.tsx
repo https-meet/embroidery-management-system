@@ -80,8 +80,8 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
   const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
 
   const handleFormSubmit = async (values: CreatePaymentFormValues) => {
-    await onSubmit(values);
     reset(values);
+    await onSubmit(values);
   };
 
   return (

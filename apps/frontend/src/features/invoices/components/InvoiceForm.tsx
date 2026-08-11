@@ -124,8 +124,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
   const handleConfirmInvoice = async () => {
     if (pendingValues) {
-      await onSubmit(pendingValues);
       reset(pendingValues);
+      await onSubmit(pendingValues);
       setIsSummaryOpen(false);
     }
   };

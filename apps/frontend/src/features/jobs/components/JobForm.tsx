@@ -100,8 +100,8 @@ export const JobForm: React.FC<JobFormProps> = ({
   const { isBlocked, proceed, reset: cancelBlock } = useUnsavedChanges(isDirty);
 
   const handleFormSubmit = async (values: CreateJobFormValues) => {
-    await onSubmit(values);
     reset(values);
+    await onSubmit(values);
   };
 
   return (
