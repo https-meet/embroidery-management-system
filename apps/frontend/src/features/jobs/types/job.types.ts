@@ -11,7 +11,14 @@ export type JobStatus =
   | 'DELIVERED'
   | 'CANCELLED';
 export type JobPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
-export type JobItemProductionStatus = 'PENDING' | 'IN_PRODUCTION' | 'COMPLETED' | 'CANCELLED';
+export type JobItemProductionStatus =
+  | 'DRAFT'
+  | 'QUEUED'
+  | 'EMBROIDERING'
+  | 'CLEANING'
+  | 'PASSED_QC'
+  | 'REJECTED_QC'
+  | 'REWORK';
 
 export interface JobItemDto {
   id: string;

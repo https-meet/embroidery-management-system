@@ -19,9 +19,9 @@ export const StatusDistributionChart: React.FC<StatusDistributionChartProps> = (
   const totalItems = workQueue.length || 1;
 
   const statuses = [
-    { label: 'In Progress', key: 'IN_PROGRESS', color: 'bg-blue-500' },
-    { label: 'In Production', key: 'IN_PRODUCTION', color: 'bg-indigo-500' },
-    { label: 'Pending Production', key: 'PENDING_PRODUCTION', color: 'bg-amber-500' },
+    { label: 'Pending', key: 'PENDING', color: 'bg-indigo-500' },
+    { label: 'In Progress', key: 'IN_PROGRESS', color: 'bg-amber-500' },
+    { label: 'Quality Check', key: 'QUALITY_CHECK', color: 'bg-sky-500' },
     { label: 'Completed', key: 'COMPLETED', color: 'bg-emerald-500' },
   ];
 
