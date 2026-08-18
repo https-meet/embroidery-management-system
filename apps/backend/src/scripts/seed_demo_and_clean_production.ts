@@ -1,6 +1,3 @@
-process.env.PRODUCTION_DATABASE_URL = 'postgresql://postgres:postgres123@localhost:5432/ebms_production?schema=public';
-process.env.DEMO_DATABASE_URL = 'postgresql://postgres:postgres123@localhost:5432/ebms_demo?schema=public';
-
 import { productionPrisma, demoPrisma } from '../lib/database';
 import { passwordService } from '../modules/auth/password.service';
 import { CustomerType, Priority, JobStatus, JobItemProductionStatus, InvoiceStatus, PaymentStatus, PaymentMethod, MaterialCategory, MaterialUnit, Role } from '@prisma/client';
@@ -28,6 +25,7 @@ async function main() {
   await productionPrisma.material.deleteMany();
   await productionPrisma.supplier.deleteMany();
   await productionPrisma.customer.deleteMany();
+  await productionPrisma.documentCounter.deleteMany();
   await productionPrisma.session.deleteMany();
   await productionPrisma.user.deleteMany();
 
