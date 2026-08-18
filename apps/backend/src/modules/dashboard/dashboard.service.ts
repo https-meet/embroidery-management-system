@@ -18,6 +18,7 @@ export class DashboardService {
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+    // Batch 1: Metrics, Counts, and Aggregates
     const [
       totalCustomers,
       activeJobsCount,
@@ -27,11 +28,6 @@ export class DashboardService {
       delayedJobsCount,
       jobsAwaitingQcCount,
       monthPayments,
-      activeJobsList,
-      pendingInvoicesList,
-      recentJobs,
-      recentPayments,
-      recentInvoices,
     ] = await Promise.all([
       this.prisma.customer.count({ where: { deletedAt: null, isActive: true } }),
       this.prisma.job.count({
@@ -72,6 +68,16 @@ export class DashboardService {
           createdAt: { gte: startOfMonth },
         },
       }),
+    ]);
+
+    // Batch 2: Work Queue, Payment Followup, and Recent Activity Lists
+    const [
+      activeJobsList,
+      pendingInvoicesList,
+      recentJobs,
+      recentPayments,
+      recentInvoices,
+    ] = await Promise.all([
       this.prisma.job.findMany({
         where: { deletedAt: null, status: { in: ['DRAFT', 'IN_PROGRESS'] } },
         take: 10,
