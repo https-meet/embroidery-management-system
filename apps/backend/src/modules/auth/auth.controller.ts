@@ -93,6 +93,43 @@ export class AuthController {
     }
   };
 
+  public updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Authentication token required.',
+          },
+        });
+        return;
+      }
+
+      const { name } = req.body;
+      if (!name || typeof name !== 'string' || name.trim().length < 2) {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Name must be at least 2 characters.',
+          },
+        });
+        return;
+      }
+
+      const serviceToUse = this.getService(req);
+      const user = await serviceToUse.updateUserProfile(req.user.userId, { name });
+      res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully.',
+        data: { user },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dto = req.body as RefreshTokenDto;

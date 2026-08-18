@@ -282,6 +282,39 @@ export class AuthService {
     };
   }
 
+  public async updateUserProfile(userId: string, data: { name: string }): Promise<UserResponseDto> {
+    const user = await this.repo.findById(userId);
+    if (!user || !user.isActive) {
+      throw new UnauthorizedError('UNAUTHORIZED', 'User account is inactive or not found.');
+    }
+
+    const updatedUser = await this.repo.updateName(userId, data.name.trim());
+    await settingsService.logAuditAction(
+      {
+        userId: user.id,
+        userName: user.email,
+        action: 'UPDATE_PROFILE',
+        entityType: 'USER',
+        entityId: user.id,
+        reason: `User updated profile name to "${data.name.trim()}".`,
+      },
+      this.prismaClient,
+    );
+
+    return {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      isActive: updatedUser.isActive,
+      mustChangePassword: updatedUser.mustChangePassword,
+      createdBy: updatedUser.createdBy,
+      lastLoginAt: updatedUser.lastLoginAt,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+    };
+  }
+
   public async logout(dto?: RefreshTokenDto): Promise<void> {
     if (dto?.refreshToken) {
       const payload = jwtService.verifyRefreshToken(dto.refreshToken);

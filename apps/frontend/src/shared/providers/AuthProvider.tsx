@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { setupAuthInterceptors } from '@/shared/api';
 import { queryClient } from '@/shared/lib/queryClient';
-import { getCurrentUserApi, loginApi, logoutApi, refreshTokenApi } from '@/features/auth/api/auth.api';
+import { getCurrentUserApi, loginApi, logoutApi, refreshTokenApi, updateProfileApi } from '@/features/auth/api/auth.api';
 import type { AuthUser, LoginDto } from '@/features/auth/types/auth.types';
 
 const REFRESH_TOKEN_KEY = 'ebms_refresh_token';
@@ -16,6 +16,7 @@ export interface AuthContextType {
   login: (dto: LoginDto) => Promise<void>;
   logout: () => void;
   refreshSession: () => Promise<string | null>;
+  updateProfile: (data: { name: string }) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -190,6 +191,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, [setAccessToken, setUser, logout]);
 
+  const updateProfile = useCallback(async (data: { name: string }) => {
+    const res = await updateProfileApi(data);
+    setUser(res.user);
+  }, [setUser]);
+
   const value = useMemo(
     () => ({
       user,
@@ -199,8 +205,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       login,
       logout,
       refreshSession,
+      updateProfile,
     }),
-    [user, accessToken, isLoading, login, logout, refreshSession]
+    [user, accessToken, isLoading, login, logout, refreshSession, updateProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

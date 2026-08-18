@@ -27,6 +27,11 @@ export async function getCurrentUserApi(): Promise<UserProfileResponseData> {
   return response.data;
 }
 
+export async function updateProfileApi(data: { name: string }): Promise<UserProfileResponseData> {
+  const response = (await axiosClient.put('/auth/me', data)) as unknown as ApiSuccessResponse<UserProfileResponseData>;
+  return response.data;
+}
+
 export async function logoutApi(): Promise<void> {
   await axiosClient.post('/auth/logout');
 }
