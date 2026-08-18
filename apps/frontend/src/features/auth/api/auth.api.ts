@@ -27,9 +27,23 @@ export async function getCurrentUserApi(): Promise<UserProfileResponseData> {
   return response.data;
 }
 
-export async function updateProfileApi(data: { name: string }): Promise<UserProfileResponseData> {
-  const response = (await axiosClient.put('/auth/me', data)) as unknown as ApiSuccessResponse<UserProfileResponseData>;
-  return response.data;
+export async function updateProfileApi(data: { name: string; userId?: string }): Promise<UserProfileResponseData> {
+  try {
+    const response = (await axiosClient.put('/auth/me', { name: data.name })) as unknown as ApiSuccessResponse<UserProfileResponseData>;
+    return response.data;
+  } catch (err: unknown) {
+    if (data.userId) {
+      try {
+        const fallbackRes = (await axiosClient.patch(`/users/${data.userId}`, {
+          name: data.name,
+        })) as unknown as ApiSuccessResponse<UserProfileResponseData>;
+        return fallbackRes.data;
+      } catch {
+        throw err;
+      }
+    }
+    throw err;
+  }
 }
 
 export async function logoutApi(): Promise<void> {

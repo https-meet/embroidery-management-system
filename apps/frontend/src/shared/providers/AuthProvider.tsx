@@ -192,9 +192,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [setAccessToken, setUser, logout]);
 
   const updateProfile = useCallback(async (data: { name: string }) => {
-    const res = await updateProfileApi(data);
+    const res = await updateProfileApi({ ...data, userId: user?.id });
     setUser(res.user);
-  }, [setUser]);
+  }, [setUser, user?.id]);
 
   const value = useMemo(
     () => ({
