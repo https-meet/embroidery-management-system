@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, DollarSign, ArrowRight, ShieldCheck, Activity } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ArrowRight, ShieldCheck, Activity } from 'lucide-react';
+import { RupeeIcon } from '@/shared/components/icons/RupeeIcon';
 import { Button } from '@/shared/components/ui/button';
 import type { DashboardSummaryResponseDto, RecommendedActionDto } from '../types/dashboard.types';
 
@@ -35,7 +36,7 @@ export const RecommendedNextSteps: React.FC<RecommendedNextStepsProps> = ({
       case 'AWAITING_QC':
         return <CheckCircle2 className="h-4 w-4 text-amber-600 dark:text-amber-400" />;
       case 'OVERDUE_PAYMENT':
-        return <DollarSign className="h-4 w-4 text-purple-600 dark:text-purple-400" />;
+        return <RupeeIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />;
       default:
         return <Activity className="h-4 w-4 text-blue-600 dark:text-blue-400" />;
     }

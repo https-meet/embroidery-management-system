@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Printer, Archive, DollarSign } from 'lucide-react';
+import { FileText, Printer, Archive } from 'lucide-react';
+import { RupeeIcon } from '@/shared/components/icons/RupeeIcon';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { StatusBadge } from '@/shared/components/StatusBadge';
@@ -56,7 +57,7 @@ export const InvoiceWorkspace: React.FC<InvoiceWorkspaceProps> = ({
           {invoice.outstandingBalance > 0 && invoice.status !== 'VOID' && (
             <Link to={ROUTES.PAYMENTS.CREATE}>
               <Button size="sm" className="flex items-center space-x-1.5 h-8 text-xs font-semibold">
-                <DollarSign className="h-3.5 w-3.5" />
+                <RupeeIcon className="h-3.5 w-3.5" />
                 <span>Record Payment</span>
               </Button>
             </Link>

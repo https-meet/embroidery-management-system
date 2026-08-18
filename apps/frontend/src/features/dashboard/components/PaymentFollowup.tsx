@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CreditCard, ArrowRight, DollarSign } from 'lucide-react';
+import { CreditCard, ArrowRight } from 'lucide-react';
+import { RupeeIcon } from '@/shared/components/icons/RupeeIcon';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { formatDate } from '@/shared/utils/formatDate';
 import { EmptyState } from '@/shared/components/EmptyState';
@@ -79,7 +80,7 @@ export const PaymentFollowup: React.FC<PaymentFollowupProps> = ({ items }) => {
                         variant="outline"
                         className="h-8 text-xs flex items-center space-x-1"
                       >
-                        <DollarSign className="h-3.5 w-3.5" />
+                        <RupeeIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>Collect</span>
                       </Button>
                     </Link>

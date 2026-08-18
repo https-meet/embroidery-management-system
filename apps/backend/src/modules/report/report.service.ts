@@ -123,7 +123,7 @@ export class ReportService {
     const items: JobReportItemDto[] = jobs.map((j) => ({
       jobId: j.id,
       jobNo: j.jobNo,
-      customerName: j.customer.name,
+      customerName: j.customer?.name || 'Customer',
       jobDate: j.jobDate,
       status: j.status,
       priority: j.priority,
@@ -169,7 +169,7 @@ export class ReportService {
     const items: ProductionReportItemDto[] = jobs.map((j) => ({
       jobId: j.id,
       jobNo: j.jobNo,
-      customerName: j.customer.name,
+      customerName: j.customer?.name || 'Customer',
       assignedOperator: j.assignedOperator,
       status: j.status,
       startedAt: j.startedAt,
@@ -212,7 +212,7 @@ export class ReportService {
     const items: InvoiceReportItemDto[] = invoices.map((inv) => ({
       invoiceId: inv.id,
       invoiceNo: inv.invoiceNo,
-      customerName: inv.customer.name,
+      customerName: inv.customer?.name || 'Customer',
       invoiceDate: inv.invoiceDate,
       status: inv.status,
       subtotal: inv.subtotal,
@@ -257,7 +257,7 @@ export class ReportService {
     const items: PaymentReportItemDto[] = payments.map((p) => ({
       paymentId: p.id,
       paymentNo: p.paymentNo,
-      customerName: p.customer.name,
+      customerName: p.customer?.name || 'Customer',
       paymentDate: p.paymentDate,
       paymentMethod: p.paymentMethod,
       referenceNo: p.referenceNo,

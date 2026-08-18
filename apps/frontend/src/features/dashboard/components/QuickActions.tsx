@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { UserPlus, PlusCircle, FileSpreadsheet, DollarSign } from 'lucide-react';
+import { UserPlus, PlusCircle, FileSpreadsheet } from 'lucide-react';
+import { RupeeIcon } from '@/shared/components/icons/RupeeIcon';
 import { ROUTES } from '@/shared/constants/routes';
 
 export const QuickActions: React.FC = () => {
@@ -27,7 +28,7 @@ export const QuickActions: React.FC = () => {
       title: 'Record Payment',
       description: 'Receive & allocate payment',
       href: ROUTES.PAYMENTS.CREATE,
-      icon: DollarSign,
+      icon: RupeeIcon,
     },
   ];
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import { DollarSign, FileText, Percent, AlertCircle } from 'lucide-react';
+import { FileText, Percent, AlertCircle } from 'lucide-react';
+import { RupeeIcon } from '@/shared/components/icons/RupeeIcon';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import type { RevenueReportDto } from '../types/reports.types';
 
@@ -35,7 +36,7 @@ export const RevenueSummaryCards: React.FC<RevenueSummaryCardsProps> = ({ data }
         <div className="flex items-center justify-between text-muted-foreground">
           <span className="text-xs font-semibold">Total Revenue Collected</span>
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <DollarSign className="h-4 w-4" />
+            <RupeeIcon className="h-4 w-4" />
           </div>
         </div>
         <p className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">

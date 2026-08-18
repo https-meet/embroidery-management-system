@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sliders, Sun, Moon, Globe, DollarSign } from 'lucide-react';
+import { Sliders, Sun, Moon, Globe } from 'lucide-react';
+import { RupeeIcon } from '@/shared/components/icons/RupeeIcon';
 import { Button } from '@/shared/components/ui/button';
 
 export const AppPreferencesCard: React.FC = () => {
@@ -57,7 +58,7 @@ export const AppPreferencesCard: React.FC = () => {
         {/* Currency Formatting */}
         <div className="flex items-center justify-between border-b pb-4">
           <div className="flex items-center space-x-2">
-            <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <RupeeIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             <div>
               <span className="font-semibold text-foreground block">Default Currency</span>
               <p className="text-muted-foreground">Indian Rupee (INR)</p>

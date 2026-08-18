@@ -11,12 +11,12 @@ import {
   Archive,
   Briefcase,
   CreditCard,
-  DollarSign,
   TrendingUp,
   Clock,
   History,
   Plus,
 } from 'lucide-react';
+import { RupeeIcon } from '@/shared/components/icons/RupeeIcon';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { StatusBadge } from '@/shared/components/StatusBadge';
@@ -72,7 +72,7 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
           </Link>
           <Link to={ROUTES.PAYMENTS.CREATE}>
             <Button variant="outline" size="sm" className="flex items-center space-x-1.5 h-8 text-xs">
-              <DollarSign className="h-3.5 w-3.5" />
+              <RupeeIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Record Payment</span>
             </Button>
           </Link>

@@ -109,7 +109,7 @@ export class SearchService {
       id: j.id,
       category: 'JOB',
       title: `Job ${j.jobNo}`,
-      subtitle: `Customer: ${j.customer.name} • Priority: ${j.priority}`,
+      subtitle: `Customer: ${j.customer?.name || 'Customer'} • Priority: ${j.priority}`,
       url: `/jobs/${j.id}`,
     }));
 
@@ -117,7 +117,7 @@ export class SearchService {
       id: i.id,
       category: 'INVOICE',
       title: `Invoice ${i.invoiceNo}`,
-      subtitle: `Customer: ${i.customer.name} • Total: ₹${i.grandTotal.toLocaleString('en-IN')}`,
+      subtitle: `Customer: ${i.customer?.name || 'Customer'} • Total: ₹${i.grandTotal.toLocaleString('en-IN')}`,
       url: `/invoices/${i.id}`,
     }));
 
@@ -125,7 +125,7 @@ export class SearchService {
       id: p.id,
       category: 'PAYMENT',
       title: `Payment ${p.paymentNo}`,
-      subtitle: `Customer: ${p.customer.name} • ₹${p.amount.toLocaleString('en-IN')} (${p.paymentMethod})`,
+      subtitle: `Customer: ${p.customer?.name || 'Customer'} • ₹${p.amount.toLocaleString('en-IN')} (${p.paymentMethod})`,
       url: `/payments`,
     }));
 
